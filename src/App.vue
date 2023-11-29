@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { Chart } from 'highcharts-vue'
 import latex_to_js from './composables/latex_to_js.js'
-import { evaluate, derivative, abs, parse, simplify, subtract } from 'mathjs'
+import { evaluate } from 'mathjs'
 
 
 
@@ -13,36 +13,39 @@ const logicalQubits = ref("");
 const hardwareSlowdown = ref(6);
 const projectedQubits = ref("");
 
-const problems = ref([]);
 const hardwares = ref([]);
 
+const problems = ref([
+  {
+    name: "Search",
+    classicalRuntime: "n",
+    quantumRuntime: "\\sqrt{n}",
+  },
+  {
+    name: "N squared",
+    classicalRuntime: "n^2",
+    quantumRuntime: "n*log(n)",
+  },
+  {
+    name: "Exponential",
+    classicalRuntime: "2^n",
+    quantumRuntime: "n^2",
+  }
+]);
 
-const addProblem = () => {
-  console.log("addProblem");
-  problems.value.push({
-    classicalRuntime: classicalRuntime.value,
-    quantumRuntime: quantumRuntime.value,
-  });
-  classicalRuntime.value = "";
-  quantumRuntime.value = "";
-};
+const selectedProblem = ref(problems.value[0]);
 
-const addHardware = () => {
-  hardwares.value.push({
-    logicalQubits: logicalQubits.value,
-    hardwareSlowdown: hardwareSlowdown.value,
-    projectedQubits: projectedQubits.value,
-  });
-  logicalQubits.value = "";
-  hardwareSlowdown.value = "";
-  projectedQubits.value = "";
-};
+watch(selectedProblem, () => {
+  console.log(selectedProblem.value)
+  classicalRuntime.value = selectedProblem.value.classicalRuntime;
+  quantumRuntime.value = selectedProblem.value.quantumRuntime;
+})
 
 const quantumIsFaster = computed(() => {
   const f = (n) => evaluate(`(10^${hardwareSlowdown.value}) * (${latex_to_js(quantumRuntime.value)})`, { n: n });
   const g = (n) => evaluate(latex_to_js(classicalRuntime.value), { n: n });
-  // return findN(f, g)
-  return bisectionMethod(0.1, 10 ** 300, (n) => f(n) - g(n), 0.01)
+  return findN(f, g)
+  return bisectionMethod(0.1, 10 ** 300, (n) => g(n) - f(n), 0.01)
 })
 
 
@@ -51,41 +54,71 @@ const quantumPoints = computed(() => {
   let points = [];
   let quantumFunction = (n) => evaluate(`(10^${hardwareSlowdown.value}) * (${latex_to_js(quantumRuntime.value)})`, { n: n });
   const nValues = [
+    1,
     Math.sqrt(quantumIsFaster.value),
     quantumIsFaster.value * 1,
-    quantumIsFaster.value * quantumIsFaster.value,
-  ]
 
-  console.log(nValues)
+    quantumIsFaster.value * quantumIsFaster.value,
+    ]
+
   for (let i of nValues) {
-    points.push({ y: quantumFunction(i), x: Math.log10(i) });
+    points.push({ y: quantumFunction(i), x: i });
   }
-  return [{ y: 0, x: 0 }, ...points.map((point) => ({ y: Math.log10(point.y), x: point.x }))]
+  return [...points.map((point) => ({
+    y: point.y === 0 ? 0 : Math.log10(point.y),
+    x: point.x === 0 ? 0 : Math.log10(point.x)
+  }))]
 })
 
 const classicalPoints = computed(() => {
   let points = [];
   let classicalFunction = (n) => evaluate(latex_to_js(classicalRuntime.value), { n: n });
+  if (quantumIsFaster.value === Infinity) {
+
+  }
   const nValues = [
+    1,
     Math.sqrt(quantumIsFaster.value),
     quantumIsFaster.value * 1,
+    quantumIsFaster.value * Math.sqrt(quantumIsFaster.value),
     quantumIsFaster.value * quantumIsFaster.value,
   ]
   for (let i of nValues) {
-    points.push({ y: classicalFunction(i), x: Math.log10(i) });
+    points.push({ y: classicalFunction(i), x: i });
   }
   // log(points);
-  return [{ y: 0, x: 0 }, ...points.map((point) => ({ y: point.y == Infinity ? 25 : Math.log10(point.y), x: point.x }))]
-})
+  return [...points.map((point) => ({
+    y: point.y === 0 ? 0 : Math.log10(point.y),
+    x: point.x === 0 ? 0 : Math.log10(point.x)
+  }))]})
 
 
+function findN(f, g, start = 0, end = 10 ** 300, tolerance = 0.1) {
+  let mid = (start + end) / 2;
+  while (true) {
 
+    if (mid >= 10 ** 300) {
+      return Infinity
+    }
+    let fresult = f(mid);
+    let gresult = g(mid);
+    if (Math.abs(fresult - gresult) <= tolerance) {
+      return mid
+    }
+    if (fresult > gresult) {
+      start = mid;
+    } else {
+      end = mid;
+    }
+    mid = (start + end) / 2;
+  }
+}
 
 function bisectionMethod(a, b, f, tol) {
   var c = a;
-  if (f(a) * f(b) >= 0) {
+  if (f(a) * f(b) > 0) {
     console.log("You have not assumed right a and b\n");
-    return;
+    return Infinity
   }
   while ((b - a) >= tol) {
     // Find middle point
@@ -117,7 +150,7 @@ const chartOptions = ref({
     plotLines: [{
       color: '#FF0000', // Red
       width: 2,
-      value: Math.round(Math.log10(quantumIsFaster.value)),
+      value: Math.round(quantumIsFaster.value === 0 ? 0 : Math.log10(quantumIsFaster.value)),
       label: {
         useHTML: true,
         text: `N* = 10<sup>${Math.log10(quantumIsFaster.value).toFixed(2)}</sup>`,
@@ -144,7 +177,7 @@ const chartOptions = ref({
     useHTML: true,
     formatter: function () {
       return `<b>${this.series.name}</b><br>
-      # of Steps: 10<sup>${this.series.name === 'Quantum' ? this.y - 6 : this.y}</sup> <br>Problem Size: 10<sup>${this.x}</sup>`
+      # of Steps: 10<sup>${this.y.toFixed(2)}</sup> <br>Problem Size: 10<sup>${this.x.toFixed(2)}</sup>`
     }
   },
   yAxis: [
@@ -161,23 +194,7 @@ const chartOptions = ref({
         }
       },
     },
-    {
-      title: {
-        text: '# quantum steps'
-      },
-      min: -hardwareSlowdown.value,
-      max: Math.log10(quantumIsFaster.value * quantumIsFaster.value),
-   
-
-      labels: {
-        useHTML: true,
-        formatter: function () {
-          if (this.value >= 0) {
-            return `10<sup>${this.value}</sup>`
-          }
-        }
-      },
-    },],
+   ],
   series: [{
     name: 'Quantum',
     yAxis: 0,
@@ -203,13 +220,14 @@ const chartOptions = ref({
 const key = ref(0);
 
 watch([quantumRuntime, classicalRuntime, hardwareSlowdown], () => {
-  chartOptions.value.yAxis[1].min = -hardwareSlowdown.value;
-  chartOptions.value.yAxis[1].max = Math.log10(quantumIsFaster.value * quantumIsFaster.value);
   chartOptions.value.series[0].data = quantumPoints.value;
   chartOptions.value.series[1].data = classicalPoints.value;
-  chartOptions.value.xAxis.plotLines[0].value = Math.round(Math.log10(quantumIsFaster.value))
+  chartOptions.value.xAxis.plotLines[0].value = Math.round(quantumIsFaster.value === 0 ? 0 : (Math.log10(quantumIsFaster.value) * 100)) /100
   chartOptions.value.xAxis.plotLines[0].label.text = `N* = 10<sup>${Math.log10(quantumIsFaster.value).toFixed(2)}</sup>`
   key.value += 1;
+
+  console.log(quantumIsFaster.value)
+  console.log(quantumPoints.value)
   console.log(classicalPoints.value)
 })
 
@@ -218,10 +236,13 @@ watch([quantumRuntime, classicalRuntime, hardwareSlowdown], () => {
 
 <template>
   <div>
-    {{ quantumIsFaster }}
     <div class="bg-slate-100 flex gap-8 p-8">
-      <form class="w-64 flex flex-col gap-2 items-start" @submit.prevent="addProblem">
+      <form class="w-64 flex flex-col gap-2 items-start">
         <h2 class="text-2xl font-bold text-slate-900">Problem</h2>
+        <label for="problem"></label>
+        <select class="border-2 border-gray-500 rounded-md p-2" name="problem" id="problem" v-model="selectedProblem">
+          <option v-for="problem in problems" :key="problem.name" :value="problem">{{ problem.name }}</option>
+        </select>
         <label class=" font-bold text-slate-900" for="classicalRuntime">Classical Runtime:
         </label>
         <input class="border-2 border-gray-500 rounded-md p-2" type="text" id="classicalRuntime" name="classicalRuntime"
@@ -233,7 +254,7 @@ watch([quantumRuntime, classicalRuntime, hardwareSlowdown], () => {
 
         <!-- <input class="border-2 border-gray-500 rounded-md p-2" type="submit" value="Add Problem"> -->
       </form>
-      <form class="w-64 flex flex-col gap-2 items-start" @submit.prevent="addHardware">
+      <form class="w-64 flex flex-col gap-2 items-start">
         <h2 class="text-2xl font-bold text-slate-900">Hardware</h2>
         <label class=" font-bold text-slate-900" for="logicalQubits">Logical Qubits:
         </label>
@@ -253,43 +274,7 @@ watch([quantumRuntime, classicalRuntime, hardwareSlowdown], () => {
         <!-- <input class="border-2 border-gray-500 rounded-md p-2" type="submit" value="Add Hardware"> -->
       </form>
     </div>
-    <div class="bg-slate-100 flex gap-8 p-8">
 
-      <div class="w-64">
-        <h2 class="text-2xl font-bold text-slate-900">Problems</h2>
-        <ul class="flex flex-col gap-2">
-          <li v-for="problem in problems" :key="problem.classicalRuntime">
-            <div class="flex gap-2">
-              <span class="font-bold text-slate-900">Classical Runtime:</span>
-              <span class="text-slate-900">{{ problem.classicalRuntime }}</span>
-            </div>
-            <div class="flex gap-2">
-              <span class="font-bold text-slate-900">Quantum Runtime:</span>
-              <span class="text-slate-900">{{ problem.quantumRuntime }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div class="w-64">
-        <h2 class="text-2xl font-bold text-slate-900">Hardware</h2>
-        <ul class="flex flex-col gap-2">
-          <li v-for="hardware in hardwares" :key="hardware.logicalQubits">
-            <div class="flex gap-2">
-              <span class="font-bold text-slate-900">Logical Qubits:</span>
-              <span class="text-slate-900">{{ hardware.logicalQubits }}</span>
-            </div>
-            <div class="flex gap-2">
-              <span class="font-bold text-slate-900">Hardware Slowdown:</span>
-              <span class="text-slate-900">{{ hardware.hardwareSlowdown }}</span>
-            </div>
-            <div class="flex gap-2">
-              <span class="font-bold text-slate-900">Projected Qubits:</span>
-              <span class="text-slate-900">{{ hardware.projectedQubits }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
     <Chart :key="key" :options="chartOptions" />
 
   </div>
