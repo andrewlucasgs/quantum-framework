@@ -50,10 +50,15 @@ const quantumIsFaster = computed(() => {
 const quantumPoints = computed(() => {
   let points = [];
   let quantumFunction = (n) => evaluate(`(10^${hardwareSlowdown.value}) * (${latex_to_js(quantumRuntime.value)})`, { n: n });
-  
+  const nValues = [
+    Math.sqrt(quantumIsFaster.value),
+    quantumIsFaster.value * 1,
+    quantumIsFaster.value * quantumIsFaster.value,
+  ]
 
-  for (let i = 1; i <= 24; i += 1) {
-    points.push({ y: quantumFunction(10 ** i), x: i });
+  console.log(nValues)
+  for (let i of nValues) {
+    points.push({ y: quantumFunction(i), x: Math.log10(i) });
   }
   return [{ y: 0, x: 0 }, ...points.map((point) => ({ y: Math.log10(point.y), x: point.x }))]
 })
@@ -61,10 +66,13 @@ const quantumPoints = computed(() => {
 const classicalPoints = computed(() => {
   let points = [];
   let classicalFunction = (n) => evaluate(latex_to_js(classicalRuntime.value), { n: n });
-
-  for (let i = 1; i <= 24; i += 1) {
-    points.push({ y: classicalFunction(10 ** i), x: i });
-
+  const nValues = [
+    Math.sqrt(quantumIsFaster.value),
+    quantumIsFaster.value * 1,
+    quantumIsFaster.value * quantumIsFaster.value,
+  ]
+  for (let i of nValues) {
+    points.push({ y: classicalFunction(i), x: Math.log10(i) });
   }
   // log(points);
   return [{ y: 0, x: 0 }, ...points.map((point) => ({ y: point.y == Infinity ? 25 : Math.log10(point.y), x: point.x }))]
@@ -96,31 +104,6 @@ function bisectionMethod(a, b, f, tol) {
   return c;
 }
 
-
-function findN(f, g, start = 0, end = 10 ** 300, tolerance = 100) {
-  let mid = (start + end) / 2;
-  while (true) {
-    // change tolerance based on the estimated value of N if N < 1000 decrease tolerance
-    if (mid < 1000) {
-      tolerance = 0.1;
-    }
-
-    if (mid >= 10 ** 300) {
-      return Infinity
-    }
-    let fresult = f(mid);
-    let gresult = g(mid);
-    if (Math.abs(fresult - gresult) <= tolerance) {
-      return mid
-    }
-    if (fresult > gresult) {
-      start = mid;
-    } else {
-      end = mid;
-    }
-    mid = (start + end) / 2;
-  }
-}
 const chartOptions = ref({
   chart: {
   },
@@ -134,7 +117,7 @@ const chartOptions = ref({
     plotLines: [{
       color: '#FF0000', // Red
       width: 2,
-      value: Math.log10(quantumIsFaster.value),
+      value: Math.round(Math.log10(quantumIsFaster.value)),
       label: {
         useHTML: true,
         text: `N* = 10<sup>${Math.log10(quantumIsFaster.value).toFixed(2)}</sup>`,
@@ -148,6 +131,7 @@ const chartOptions = ref({
       }
 
     }],
+
 
     labels: {
       useHTML: true,
@@ -169,9 +153,7 @@ const chartOptions = ref({
       title: {
         text: '# classical steps'
       },
-      tickInterval: 3,
 
-      max: 24,
       labels: {
         useHTML: true,
         formatter: function () {
@@ -183,9 +165,9 @@ const chartOptions = ref({
       title: {
         text: '# quantum steps'
       },
-      tickInterval: 3,
       min: -hardwareSlowdown.value,
-      max: 24 - hardwareSlowdown.value,
+      max: Math.log10(quantumIsFaster.value * quantumIsFaster.value),
+   
 
       labels: {
         useHTML: true,
@@ -214,7 +196,7 @@ const chartOptions = ref({
     marker: {
       enabled: false
     },
-  },
+  }
   ]
 })
 
@@ -222,9 +204,10 @@ const key = ref(0);
 
 watch([quantumRuntime, classicalRuntime, hardwareSlowdown], () => {
   chartOptions.value.yAxis[1].min = -hardwareSlowdown.value;
+  chartOptions.value.yAxis[1].max = Math.log10(quantumIsFaster.value * quantumIsFaster.value);
   chartOptions.value.series[0].data = quantumPoints.value;
   chartOptions.value.series[1].data = classicalPoints.value;
-  chartOptions.value.xAxis.plotLines[0].value = Math.log10(quantumIsFaster.value)
+  chartOptions.value.xAxis.plotLines[0].value = Math.round(Math.log10(quantumIsFaster.value))
   chartOptions.value.xAxis.plotLines[0].label.text = `N* = 10<sup>${Math.log10(quantumIsFaster.value).toFixed(2)}</sup>`
   key.value += 1;
   console.log(classicalPoints.value)
