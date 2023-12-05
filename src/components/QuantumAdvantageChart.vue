@@ -8,7 +8,7 @@ import { useStateStore } from '../store/state';
 
 const store = useStateStore();
 
-
+//The values on the x axis for runtime graph
 const nValues = computed(() => {
     console.log(store.nStar)
     if (store.nStar === 'No solution' || store.nStar <= 1) {
@@ -16,11 +16,13 @@ const nValues = computed(() => {
     }
     return [
         1,
-        Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(store.nStar)))),
-        Math.sqrt(Math.sqrt(Math.sqrt(store.nStar))),
-        Math.sqrt(Math.sqrt(store.nStar)),
-        Math.sqrt(store.nStar),
+        Math.pow(store.nStar, .25),
+        Math.pow(store.nStar, .5),
+        Math.pow(store.nStar, .75),
         store.nStar,
+        Math.pow(store.nStar, 1.25),
+        Math.pow(store.nStar, 1.5),
+        Math.pow(store.nStar, 1.75),
         Math.pow(store.nStar, 2),
     ]
 })
@@ -31,14 +33,13 @@ const classicalPoints = computed(() => {
     for (let i = 0; i < nValues.value.length; i++) {
         const n = nValues.value[i];
         const time = nerdamer(store.classicalRuntime).evaluate({ n });
+        const yValue = Number(time.text('decimals'));
         points.push({
             x: n,
-            y: Number(time.text('decimals')) <= 0 ? 1 : Number(time.text('decimals'))
+            y: yValue <= 0 ? 1 : yValue
         })
     }
     return points;
-
-
 });
 
 
@@ -47,14 +48,26 @@ const quantumPoints = computed(() => {
     for (let i = 0; i < nValues.value.length; i++) {
         const n = nValues.value[i];
         const time = nerdamer(`(${store.quantumRuntime} * (10^${store.hardwareSlowdown}))`).evaluate({ n });
+        const yValue = Number(time.text('decimals'));
         points.push({
             x: n,
-            y: Number(time.text('decimals')) <= 0 ? 1 : Number(time.text('decimals'))
+            y: yValue <= 0 ? 1 : yValue
         })
     }
     return points;
 
 });
+
+const key = ref(0);
+
+watch([store], () => {
+    chartOptions.series[0].data = classicalPoints.value;
+    chartOptions.series[1].data = quantumPoints.value;
+    chartOptions.xAxis.plotLines[0].value = store.nStar ? store.nStar : 1;
+    chartOptions.xAxis.plotLines[0].label.text = `N* = ${toBase10HTML(store.nStar)}`;
+
+    key.value += 1;
+})
 
 function toBase10HTML(number) {
     // Calculate the base 10 logarithm of the number.
@@ -65,7 +78,6 @@ function toBase10HTML(number) {
 
 
     return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
-
 }
 
 const chartOptions = {
@@ -73,7 +85,7 @@ const chartOptions = {
         type: 'spline'
     },
     title: {
-        text: 'Big O'
+        text: 'Time Complexities with Hardware Slowdown'
     },
     tooltip: {
         useHTML: true,
@@ -83,13 +95,13 @@ const chartOptions = {
     },
     xAxis: {
         title: {
-            text: 'n',
+            text: 'Problem Size',
         },
         type: 'logarithmic',
         plotLines: [{
             color: 'red',
             width: 2,
-            value: store.nStar ? store.nStar : 1,
+            value: store.nStar ? store.nStar : 1, //??? when is this not true
 
             label: {
                 y: -15,
@@ -119,7 +131,7 @@ const chartOptions = {
     },
     yAxis: {
         title: {
-            text: 'Time'
+            text: 'Classical Time Steps'
         },
         type: 'logarithmic',
         labels: {
@@ -141,19 +153,6 @@ const chartOptions = {
     }]
 
 }
-
-const key = ref(0);
-
-watch([store], () => {
-    chartOptions.series[0].data = classicalPoints.value;
-    chartOptions.series[1].data = quantumPoints.value;
-    chartOptions.xAxis.plotLines[0].value = store.nStar ? store.nStar : 1;
-    chartOptions.xAxis.plotLines[0].label.text = `N* = ${toBase10HTML(store.nStar)}`;
-
-    key.value += 1;
-})
-
-
 
 </script>
 

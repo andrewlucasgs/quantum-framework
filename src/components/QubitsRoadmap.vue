@@ -8,6 +8,8 @@ import { useStateStore } from '../store/state';
 
 const store = useStateStore();
 
+//??? this file could probably be refactored since it shares much code with the other file
+
 const roadmaps = {
     'IBM': [
         {

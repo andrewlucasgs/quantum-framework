@@ -16,14 +16,14 @@ export const useStateStore = defineStore('state', () => {
     const quantumTime = nerdamer(quantumRuntime.value).evaluate();
     const hw = nerdamer(hardwareSlowdown.value).evaluate();
 
-    const roots = nerdamer.solveEquations((`${classicalTime} - (${quantumTime} * (10^${hw}))`), 'n')
+    const roots = nerdamer.solveEquations((`(${classicalTime}) - ((10^${hw}) * (${quantumTime}) )`), 'n')
     console.log('roots', roots)
     if (roots.length === 0) {
       return 'No solution'
     }
     //    return first solution bigger than 0
     for (let i = 0; i < roots.length; i++) {
-      if (roots[i] > 1.1) {
+      if (roots[i] > 1) { //??? Why 1.1? Wouldn't greater than 1 work?
         return Math.round(Number(roots[i].text('decimals')))
       }
     }

@@ -97,16 +97,14 @@ function estimateQubits(organization, targetYear) {
 
 const years = Array.from({ length: 31 }, (_, i) => i + 2020);
 
-function toBase10HTML(number) {
+function toBase10HTML(number) { //??? if this exact function exists elsewhere, it may be best to call them both from a single place
     // Calculate the base 10 logarithm of the number.
     var exponent = Math.log10(number);
     if (exponent === -Infinity) {
         return '10<sup>0</sup>';
     }
 
-
     return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
-
 }
 
 const chartOptions = {
