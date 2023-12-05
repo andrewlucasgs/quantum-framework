@@ -12,6 +12,8 @@
     "@vueuse/core": "^10.6.1",
     "highcharts-vue": "^1.4.3",
     "mathjs": "^12.1.0",
+    "nerdamer": "^1.1.13",
+    "pinia": "^2.1.7",
     "vue": "^3.3.8"
   },
   "devDependencies": {
