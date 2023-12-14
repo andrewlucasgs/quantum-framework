@@ -1,8 +1,8 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { useStateStore } from '../store/state.js'
+import { useInputStore } from '../store/input.js'
 
-const store = useStateStore();
+const inputStore = useInputStore();
 
 
 
@@ -37,8 +37,8 @@ const problems = ref([
 const selectedProblem = ref(problems.value[0]);
 
 watch(selectedProblem, () => {
-    store.classicalRuntime = selectedProblem.value.classicalRuntime;
-    store.quantumRuntime = selectedProblem.value.quantumRuntime;
+    inputStore.classicalRuntime = selectedProblem.value.classicalRuntime;
+    inputStore.quantumRuntime = selectedProblem.value.quantumRuntime;
 })
 
 const hardwares = ref([
@@ -77,12 +77,12 @@ const selectedHardware = ref(hardwares.value[0]);
             <div class="flex flex-col">
                 <label class="font-medium" for="classical">Classical</label>
                 <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="text" id="classical"
-                    name="classical" v-model="store.classicalRuntime" />
+                    name="classical" v-model="inputStore.classicalRuntime" />
             </div>
             <div class="flex flex-col">
                 <label class="font-medium" for="quantum">Quantum</label>
                 <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="text" id="quantum"
-                    name="quantum" v-model="store.quantumRuntime" />
+                    name="quantum" v-model="inputStore.quantumRuntime" />
             </div>
 
         </div>
@@ -95,10 +95,10 @@ const selectedHardware = ref(hardwares.value[0]);
                 </select>
             </div>
             <div class="flex flex-col">
-                <label class="font-medium" for="harwareSlowdown">Hardware Slowdown 10<sup>{{ store.hardwareSlowdown
+                <label class="font-medium" for="harwareSlowdown">Hardware Slowdown 10<sup>{{ inputStore.hardwareSlowdown
                 }}</sup></label>
                 <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0" max="50" id="harwareSlowdown" name="harwareSlowdown"
-                    v-model="store.hardwareSlowdown" />
+                    v-model="inputStore.hardwareSlowdown" />
             </div>
 
 

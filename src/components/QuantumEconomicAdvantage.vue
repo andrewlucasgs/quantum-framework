@@ -1,101 +1,153 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
-import nerdamer from 'nerdamer';
-import 'nerdamer/Solve';
-
+import { inject, ref, watch } from 'vue';
+import Highcharts from 'highcharts'
+import highchartsMore from 'highcharts/highcharts-more';
+highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
-import { useStateStore } from '../store/state';
 
-const store = useStateStore();
 
-const roadmaps = {
-    'IBM': [
-        {
-            year: 2021,
-            qubits: 127,
-        },
-        {
-            year: 2022,
-            qubits: 433,
-        },
-        {
-            year: 2023,
-            qubits: 1121,
-        },
-        {
-            year: 2025,
-            qubits: 4158,
-        },
-    ],
-    'Intel': [
-        {
-            year: 2017,
-            qubits: 17,
-        },
-        {
-            year: 2023,
-            qubits: 49,
-        },
-    ],
-    'IQM': [
-        {
-            year: 2021,
-            qubits: 5,
-        },
-        {
-            year: 2023,
-            qubits: 20,
-        },
-        {
-            year: 2024,
-            qubits: 54,
-        },
-        {
-            year: 2025,
-            qubits: 150,
-        },
-    ],
+import { useGraphStore } from '../store/graph.js';
+
+const graphStore = useGraphStore();
+
+function drawDashLine(chart, point, dashLine) {
+    const xAxis = chart.xAxis[0]
+    const yAxis = chart.yAxis[0]
+
+    const x = Math.round(xAxis.toPixels(point[0]))
+    const y = Math.round(yAxis.toPixels(point[1]))
+    const d = ['M', xAxis.left, y, 'L', x, y, 'L', x, yAxis.top + yAxis.height]
+
+    return dashLine
+        ? dashLine.attr({ d })
+        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'red', 'stroke-width': 2, zIndex: 1 }).add()
 }
 
-function estimateQubits(organization, targetYear) {
-    if (!roadmaps[organization]) {
-        return `No data available for ${organization}`;
-    }
-
-    const data = roadmaps[organization];
-    const sortedData = data.sort((a, b) => a.year - b.year); // Ensure data is sorted by year
-    const lastDataPoint = sortedData[sortedData.length - 1];
-
-    if (targetYear > lastDataPoint.year) {
-        // Doubling the qubits for each year beyond the last known year
-        const yearsDifference = targetYear - lastDataPoint.year;
-        return lastDataPoint.qubits * Math.pow(2, yearsDifference);
-    }
-
-    // Find the two closest years for interpolation
-    let before = null;
-    let after = null;
-    for (const entry of sortedData) {
-        if (entry.year === targetYear) {
-            return entry.qubits; // Exact year match
-        } else if (entry.year < targetYear) {
-            before = entry;
-        } else if (entry.year > targetYear && !after) {
-            after = entry;
+const chartOptions = {
+    chart: {
+        type: 'spline',
+        events: {
+            load: function () {
+                this.dashLines = [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]].map(point => drawDashLine(this, point))
+            },
+            redraw: function () {
+                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]][i], line))
+            }
         }
-    }
+    },
+    title: {
+        text: 'Economic Advantage of Quantum Computing'
+    },
+    tooltip: {
+        useHTML: true,
+        formatter: function () {
+            return `<b>${this.series.name}</b><br/>${this.x}: ${this.y}`
+        }
+    },
+    xAxis: {
+        title: {
+            text: 'Year'
+        },
+        type: 'logarithmic',
+        labels: {
 
-    // Linear interpolation if both before and after are found
-    if (before && after) {
-        const slope = (after.qubits - before.qubits) / (after.year - before.year);
-        return Math.round(before.qubits + slope * (targetYear - before.year));
-    }
+            useHTML: true,
+            formatter: function () {
+                return this.value.toFixed(0);
+            }
+        },
+        startOnTick: true,
+        min: 2023,
+    },
+    yAxis: {
+        title: {
+            text: 'Economic Advantage'
+        },
+        type: 'logarithmic',
+        labels: {
 
-    // Return the closest known data if only one point is found
-    return before ? before.qubits : after.qubits;
+            useHTML: true,
+            formatter: function () {
+                return toBase10HTML(this.value);
+            }
+        },
+        min: 1,
+        max: 10**20,
+    },
+    series: [
+
+        {
+            name: 'Classical',
+            data: [],
+            color: 'green',
+            marker: {
+                symbol: 'circle'
+            }
+        },
+        {
+            name: 'Quantum',
+            data: [],
+            color: 'red',
+            marker: {
+                symbol: 'circle'
+            }
+        }
+    ],
+
+
+
 }
 
-const years = Array.from({ length: 31 }, (_, i) => i + 2020);
+watch(() => graphStore.quantumEconomicAdvantage, async () => {
+    await updateGraphData();
+    key.value += 1;
+
+}, {
+    immediate: true
+
+})
+
+async function updateGraphData() {
+    const xMax = 2023 + (graphStore.quantumEconomicAdvantage.tStar - 2023) * 2;
+    const yMax = graphStore.quantumEconomicAdvantage.quantumFeasible[graphStore.quantumEconomicAdvantage.quantumFeasible.length - 1][1]
+    console.log(xMax, yMax)
+    chartOptions.series = [
+        {
+            name: 'Classical',
+            data: graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[1] <= yMax),
+            color: 'green',
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            }
+        },
+        {
+            name: 'Quantum',
+            data: graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[1] <= yMax),
+            color: 'blue',
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            }
+        },
+        {
+            name: 'Quantum Advantage',
+            data: [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]],
+            color: 'red',
+            type: 'scatter',
+            maxPointWidth: 1,
+            marker: {
+                enabled: true,
+                symbol: 'circle'
+            },
+        },
+
+
+    ]
+    
+   
+
+}
 
 function toBase10HTML(number) { //??? if this exact function exists elsewhere, it may be best to call them both from a single place
     // Calculate the base 10 logarithm of the number.
@@ -107,108 +159,11 @@ function toBase10HTML(number) { //??? if this exact function exists elsewhere, i
     return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
 }
 
-const chartOptions = {
-    chart: {
-        type: 'spline',
-        zoomType: 'xy'
-    },
-    title: {
-        text: 'Quantum Economic Advantage'
-    },
-    tooltip: {
-        useHTML: true,
-        formatter: function () {
-            return `Problem Size: ${toBase10HTML(this.y)}<br>Year: ${this.x}`;
-        }
-    },
-    xAxis: {
-        title: {
-            text: 'Year',
-        },
 
-    },
-    yAxis: {
-        title: {
-            text: 'Problem Size'
-        },
-        plotLines: [{
-            color: 'red',
-            width: 2,
-            value: store.nStar ? store.nStar : 1,
-
-            label: {
-                y: -15,
-                useHTML: true,
-
-                rotation: 0,
-                text: `N* = ${toBase10HTML(store.nStar)}`,
-                align: 'left',
-                verticalAlign: 'bottom',
-                orientation: 'horizontal',
-                style: {
-                    color: 'red'
-                }
-            },
-            zIndex: 5
-        }],
-        type: 'logarithmic',
-        labels: {
-
-            useHTML: true,
-            formatter: function () {
-                return toBase10HTML(this.value);
-            }
-        },
-        min: 1,
-        max: store.nStar ? store.nStar * store.nStar : 1000000
-
-    },
-    series: [
-
-        {
-            name: 'IBM',
-            data: years.map(year => [year, Math.pow(2,estimateQubits('IBM', year)/1000)]),
-            zoneAxis: 'x',
-            zones: [{
-                value: 2023
-            }, {
-                dashStyle: 'dash'
-            }]
-        },
-        {
-            name: 'Intel',
-            data: years.map(year => [year, Math.pow(2,estimateQubits('Intel', year)/1000)]),
-
-            zoneAxis: 'x',
-            zones: [{
-                value: 2023
-            }, {
-                dashStyle: 'dash'
-            }]
-        },
-        {
-            name: 'IQM',
-            data: years.map(year => [year, Math.pow(2,estimateQubits('IQM', year)/1000)]),
-            zoneAxis: 'x',
-            zones: [{
-                value: 2023
-            }, {
-                dashStyle: 'dash'
-            }]
-        },
-    ],
-
-}
 
 const key = ref(0);
 
-watch([store], () => {
-    chartOptions.yAxis.plotLines[0].value = store.nStar ? store.nStar : 1;
-    chartOptions.yAxis.plotLines[0].label.text = `N* = ${toBase10HTML(store.nStar)}`;
-    chartOptions.yAxis.max = store.nStar ? store.nStar * store.nStar : 1000000;
-    key.value += 1;
 
-})
 
 </script>
 

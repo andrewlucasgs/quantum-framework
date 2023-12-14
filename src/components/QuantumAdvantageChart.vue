@@ -1,88 +1,37 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
-import nerdamer from 'nerdamer';
-import 'nerdamer/Solve';
-
+import { computed, inject, ref, watch } from 'vue';
 import { Chart } from 'highcharts-vue'
-import { useStateStore } from '../store/state';
+import { useGraphStore } from '../store/graph.js';
 
-const store = useStateStore();
-
-//The values on the x axis for runtime graph
-const nValues = computed(() => {
-    console.log(store.nStar)
-    if (store.nStar === 'No solution' || store.nStar <= 1) {
-        return [1, 10 ** 6, 10 ** 12, 10 ** 18]
-    }
-    return [
-        1,
-        Math.pow(store.nStar, .25),
-        Math.pow(store.nStar, .5),
-        Math.pow(store.nStar, .75),
-        store.nStar,
-        Math.pow(store.nStar, 1.25),
-        Math.pow(store.nStar, 1.5),
-        Math.pow(store.nStar, 1.75),
-        Math.pow(store.nStar, 2),
-    ]
-})
-
-// calculate point for each n
-const classicalPoints = computed(() => {
-    const points = [];
-    for (let i = 0; i < nValues.value.length; i++) {
-        const n = nValues.value[i];
-        const time = nerdamer(store.classicalRuntime).evaluate({ n });
-        const yValue = Number(time.text('decimals'));
-        points.push({
-            x: n,
-            y: yValue <= 0 ? 1 : yValue
-        })
-    }
-    return points;
-});
-
-
-const quantumPoints = computed(() => {
-    const points = [];
-    for (let i = 0; i < nValues.value.length; i++) {
-        const n = nValues.value[i];
-        const time = nerdamer(`(${store.quantumRuntime} * (10^${store.hardwareSlowdown}))`).evaluate({ n });
-        const yValue = Number(time.text('decimals'));
-        points.push({
-            x: n,
-            y: yValue <= 0 ? 1 : yValue
-        })
-    }
-    return points;
-
-});
+const graphStore = useGraphStore();
 
 const key = ref(0);
 
-watch([store], () => {
-    chartOptions.series[0].data = classicalPoints.value;
-    chartOptions.series[1].data = quantumPoints.value;
-    chartOptions.xAxis.plotLines[0].value = store.nStar ? store.nStar : 1;
-    chartOptions.xAxis.plotLines[0].label.text = `N* = ${toBase10HTML(store.nStar)}`;
+function drawDashLine(chart, point, dashLine) {
+    const xAxis = chart.xAxis[0]
+    const yAxis = chart.yAxis[0]
 
-    key.value += 1;
-})
+    const x = Math.round(xAxis.toPixels(point[0]))
+    const y = Math.round(yAxis.toPixels(point[1]))
+    const d = ['M', xAxis.left, y, 'L', x, y, 'L', x, yAxis.top + yAxis.height]
 
-function toBase10HTML(number) {
-    // Calculate the base 10 logarithm of the number.
-    var exponent = Math.log10(number);
-    if (exponent === -Infinity) {
-        return '10<sup>0</sup>';
-    }
-
-
-    return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
+    return dashLine
+        ? dashLine.attr({ d })
+        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'red', 'stroke-width': 2, zIndex: 1 }).add()
 }
+
 
 const chartOptions = {
     chart: {
-        type: 'spline'
+        type: 'spline',
+        events: {
+            load: function () {
+                this.dashLines = [[graphStore.quantumAdvantage.nStar, graphStore.quantumAdvantage.stepStar]].map(point => drawDashLine(this, point))
+            },
+            redraw: function () {
+                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumAdvantage.nStar, graphStore.quantumAdvantage.stepStar]][i], line))
+            }
+        }
     },
     title: {
         text: 'Time Complexities with Hardware Slowdown'
@@ -98,36 +47,13 @@ const chartOptions = {
             text: 'Problem Size',
         },
         type: 'logarithmic',
-        plotLines: [{
-            color: 'red',
-            width: 2,
-            value: store.nStar ? store.nStar : 1, //??? when is this not true
-
-            label: {
-                y: -15,
-                useHTML: true,
-
-                rotation: 0,
-                text: `N* = ${toBase10HTML(store.nStar)}`,
-                align: 'left',
-                verticalAlign: 'bottom',
-                orientation: 'horizontal',
-                style: {
-                    color: 'red'
-                }
-            },
-            zIndex: 5
-        }],
         min: 1,
-
         labels: {
-
             useHTML: true,
             formatter: function () {
                 return toBase10HTML(this.value);
             }
         }
-
     },
     yAxis: {
         title: {
@@ -142,17 +68,59 @@ const chartOptions = {
             }
         },
         min: 1,
-
     },
-    series: [{
-        name: 'Classical',
-        data: classicalPoints.value
-    }, {
-        name: 'Quantum',
-        data: quantumPoints.value
-    }]
+    series: []
 
 }
+
+watch(() => graphStore.quantumAdvantage, async () => {
+    updateGraphData();
+
+
+    key.value += 1;
+}, { immediate: true })
+
+function updateGraphData() {
+   
+    chartOptions.series = [
+        {
+            name: 'Classical',
+            data: graphStore.quantumAdvantage.classicalSteps,
+            color: 'green',
+            marker: {
+                symbol: 'circle'
+            }
+        },
+        {
+            name: 'Quantum',
+            data: graphStore.quantumAdvantage.quantumSteps,
+            color: 'blue',
+            marker: {
+                symbol: 'circle'
+            }
+        },
+        {
+            name: 'Quantum Advantage',
+            data: [[graphStore.quantumAdvantage.nStar, graphStore.quantumAdvantage.stepStar]],
+            color: 'red',
+            type: 'scatter',
+            dashStyle: 'dash',
+        }
+    ]
+}
+
+
+function toBase10HTML(number) {
+    // Calculate the base 10 logarithm of the number.
+    var exponent = Math.log10(number);
+    if (exponent === -Infinity) {
+        return '10<sup>0</sup>';
+    }
+
+
+    return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
+}
+
 
 </script>
 

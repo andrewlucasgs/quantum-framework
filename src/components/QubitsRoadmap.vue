@@ -4,9 +4,7 @@ import nerdamer from 'nerdamer';
 import 'nerdamer/Solve';
 
 import { Chart } from 'highcharts-vue'
-import { useStateStore } from '../store/state';
 
-const store = useStateStore();
 
 //??? this file could probably be refactored since it shares much code with the other file
 
