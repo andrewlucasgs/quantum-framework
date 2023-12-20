@@ -12,20 +12,20 @@ const problems = ref([
         classicalRuntime: "n",
         quantumRuntime: "sqrt(n)",
     },
-    {
-        name: "Sorting",
-        classicalRuntime: "n*log(n)",
-        quantumRuntime: "n",
-    },
-    {
-        name: "Integer Factorization",
-        classicalRuntime: "exp(n^(1/3) * (log(n))^(2/3))",
-        quantumRuntime: "exp(n^(1/3) * (log(n))^(1/3))",
-    },
+    // {
+    //     name: "Sorting",
+    //     classicalRuntime: "n*log(n)",
+    //     quantumRuntime: "n",
+    // },
+    // {
+    //     name: "Integer Factorization",
+    //     classicalRuntime: "exp(n^(1/3) * (log(n))^(2/3))",
+    //     quantumRuntime: "exp(n^(1/3) * (log(n))^(1/3))",
+    // },
     {
         name: "Linear Algebra",
         classicalRuntime: "n^3",
-        quantumRuntime: "n^2.373",
+        quantumRuntime: "n^{2.373}",
     },
     {
         name: "Machine Learning",
@@ -54,13 +54,11 @@ const hardwares = ref([
         name: "IQM",
         slowdown: 100,
     },
-    {
-        name: "Google",
-        slowdown: 1000,
-    },
+    // {
+    //     name: "Google",
+    //     slowdown: 1000,
+    // },
 ]);
-
-const selectedHardware = ref(hardwares.value[0]);
 
 </script>
 
@@ -89,7 +87,7 @@ const selectedHardware = ref(hardwares.value[0]);
         <div class="flex flex-col gap-2 flex-1">
             <div class="flex flex-col">
                 <label class="font-medium" for="hardwares">Hardware</label>
-                <select class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " name="hardwares" id="hardwares" v-model="selectedHardware">
+                <select class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " name="hardwares" id="hardwares" v-model="store.selectedHardwares" multiple>
                     <option v-for="hardware in hardwares" :key="hardware.name" :value="hardware">{{ hardware.name }}
                     </option>
                 </select>

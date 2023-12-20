@@ -29,7 +29,9 @@ const nValues = computed(() => {
 
 // calculate point for each n
 const classicalPoints = computed(() => {
+    // console.log("should be second")
     const points = [];
+    // console.log("should b second")
     for (let i = 0; i < nValues.value.length; i++) {
         const n = nValues.value[i];
         const time = nerdamer(store.classicalRuntime).evaluate({ n });
@@ -39,6 +41,7 @@ const classicalPoints = computed(() => {
             y: yValue <= 0 ? 1 : yValue
         })
     }
+    // console.log("third?")
     return points;
 });
 
@@ -61,6 +64,7 @@ const quantumPoints = computed(() => {
 const key = ref(0);
 
 watch([store], () => {
+    // console.log("something")
     chartOptions.series[0].data = classicalPoints.value;
     chartOptions.series[1].data = quantumPoints.value;
     chartOptions.xAxis.plotLines[0].value = store.nStar ? store.nStar : 1;
@@ -85,7 +89,7 @@ const chartOptions = {
         type: 'spline'
     },
     title: {
-        text: 'Time Complexities with Hardware Slowdown'
+        text: 'Minimum Problem Size for Quantum Algorithmic Advantage'
     },
     tooltip: {
         useHTML: true,
@@ -150,7 +154,15 @@ const chartOptions = {
     }, {
         name: 'Quantum',
         data: quantumPoints.value
-    }]
+    }],
+
+    plotOptions: {
+        series: {
+            marker: {
+                enabled: false
+            }
+        }
+    }
 
 }
 

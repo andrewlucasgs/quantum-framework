@@ -16,7 +16,7 @@ export const useStateStore = defineStore('state', () => {
     const quantumTime = nerdamer(quantumRuntime.value).evaluate();
     const hw = nerdamer(hardwareSlowdown.value).evaluate();
 
-    const roots = nerdamer.solveEquations((`(${classicalTime}) - ((10^${hw}) * (${quantumTime}) )`), 'n')
+    const roots = nerdamer.solveEquations((`(${classicalTime}) - ((10^(${hw})) * (${quantumTime}) )`), 'n')
     console.log('roots', roots)
     if (roots.length === 0) {
       return 'No solution'
@@ -33,7 +33,11 @@ export const useStateStore = defineStore('state', () => {
 
   });
 
+  const selectedHardwares = ref([{
+    name: "IBM",
+    slowdown: 0,
+}]);
 
 
-  return { classicalRuntime, quantumRuntime, hardwareSlowdown, nStar }
+  return { classicalRuntime, quantumRuntime, hardwareSlowdown, nStar, selectedHardwares}
 })
