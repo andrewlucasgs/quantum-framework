@@ -41,14 +41,14 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `<b>${this.series.name}</b><br/>${this.x}: ${this.y}`
+            return `<b>${this.series.name}</b><br/>Year: ${round(this.x)}<br/>Problem Size: 10<sup>${round(this.y)}</sup>`
         }
     },
     xAxis: {
         title: {
             text: 'Year'
         },
-        type: 'logarithmic',
+        type: 'linear',
         labels: {
 
             useHTML: true,
@@ -61,18 +61,19 @@ const chartOptions = {
     },
     yAxis: {
         title: {
-            text: 'Economic Advantage'
+            text: 'Problem Size'
         },
-        type: 'logarithmic',
+        type: 'linear',
         labels: {
 
             useHTML: true,
             formatter: function () {
-                return toBase10HTML(this.value);
+                // return toBase10HTML(this.value);
+                return `10<sup>${this.value}</sup>`;
             }
         },
         min: 1,
-        max: 10**20,
+        // max: 10**20,
     },
     series: [
 
@@ -110,7 +111,7 @@ watch(() => graphStore.quantumEconomicAdvantage, async () => {
 async function updateGraphData() {
     const xMax = 2023 + (graphStore.quantumEconomicAdvantage.tStar - 2023) * 2;
     const yMax = graphStore.quantumEconomicAdvantage.quantumFeasible[graphStore.quantumEconomicAdvantage.quantumFeasible.length - 1][1]
-    console.log(xMax, yMax)
+    // console.log(xMax, yMax)
     chartOptions.series = [
         {
             name: 'Classical',
@@ -132,7 +133,7 @@ async function updateGraphData() {
         },
         {
             name: 'Quantum Advantage',
-            data: [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]],
+            data: [[graphStore.quantumEconomicAdvantage.tStar, Math.log10(graphStore.quantumEconomicAdvantage.nStar)]],
             color: 'red',
             type: 'scatter',
             maxPointWidth: 1,
@@ -143,10 +144,16 @@ async function updateGraphData() {
         },
 
 
+
     ]
     
-   
+   chartOptions.yAxis.max = Math.log10(graphStore.quantumEconomicAdvantage.nStar) * 2;
 
+}
+
+// rounds input value to two decimal digits
+function round(number) {
+    return Math.round(number * 100) / 100;
 }
 
 function toBase10HTML(number) { //??? if this exact function exists elsewhere, it may be best to call them both from a single place

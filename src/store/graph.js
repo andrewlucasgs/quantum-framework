@@ -29,7 +29,7 @@ export const useGraphStore = defineStore('graph', () => {
         console.log('Updating graphs')
         await pyodide(`[
             get_quantum_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}"),
-            get_quantum_economic_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}")
+            get_quantum_economic_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}", ${inputs.selectedHardware.newest_year}, ${inputs.improvementRate}, ${inputs.selectedHardware.physical_logical_ratio}, ${inputs.selectedHardware.newest_qubits})
         ]`).then(({ result }) => {
             console.log('result', result)
             quantumAdvantage.value = {
@@ -45,6 +45,11 @@ export const useGraphStore = defineStore('graph', () => {
                 quantumAdvantage: result[1].get('quantum_advantage')
             }
             loading.value = false
+            // console.log("printing feasible")
+            // console.log(result[1].get("quantum_feasible"))
+            // console.log("printing advantage")
+            // console.log(result[1].get("quantum_advantage"))
+            
 
         }).catch((error) => {
             console.log('error', error)

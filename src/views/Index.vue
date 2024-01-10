@@ -35,7 +35,7 @@ const graphStore = useGraphStore();
         <div class="max-w-7xl mx-auto px-2">
         </div>
         <div class="max-w-7xl mx-auto px-2">
-            <!-- <QubitsRoadmap /> -->
+            <QubitsRoadmap />
         </div>
     </div>
 </template>

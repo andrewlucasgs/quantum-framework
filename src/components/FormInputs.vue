@@ -44,23 +44,40 @@ watch(selectedProblem, () => {
 const hardwares = ref([
     {
         name: "IBM",
-        slowdown: 0,
+        // slowdown: 6,
+        // quantum_improvement_rate: 2,
+        physical_logical_ratio: 1000,
+        newest_year: 2023,
+        newest_qubits: 4158
+
     },
     {
         name: "Intel",
-        slowdown: 10,
+        // slowdown: 6,
+        // quantum_improvement_rate: 2,
+        physical_logical_ratio: 1000,
+        newest_year: 2023,
+        newest_qubits: 4158
     },
     {
         name: "IQM",
-        slowdown: 100,
+        // slowdown: 6,
+        // quantum_improvement_rate: 2,
+        physical_logical_ratio: 1000,
+        newest_year: 2023,
+        newest_qubits: 4158
     },
     {
         name: "Google",
-        slowdown: 1000,
+        // slowdown: 6,
+        // quantum_improvement_rate: 2,
+        physical_logical_ratio: 1000,
+        newest_year: 2023,
+        newest_qubits: 4158
     },
 ]);
 
-const selectedHardware = ref(hardwares.value[0]);
+// const selectedHardware = ref(hardwares.value[0]);
 
 </script>
 
@@ -89,16 +106,22 @@ const selectedHardware = ref(hardwares.value[0]);
         <div class="flex flex-col gap-2 flex-1">
             <div class="flex flex-col">
                 <label class="font-medium" for="hardwares">Hardware</label>
-                <select class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " name="hardwares" id="hardwares" v-model="selectedHardware">
+                <select class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " name="hardwares" id="hardwares" v-model="inputStore.selectedHardware">
                     <option v-for="hardware in hardwares" :key="hardware.name" :value="hardware">{{ hardware.name }}
                     </option>
                 </select>
             </div>
             <div class="flex flex-col">
-                <label class="font-medium" for="harwareSlowdown">Hardware Slowdown 10<sup>{{ inputStore.hardwareSlowdown
+                <label class="font-medium" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{ inputStore.hardwareSlowdown
                 }}</sup></label>
                 <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0" max="50" id="harwareSlowdown" name="harwareSlowdown"
                     v-model="inputStore.hardwareSlowdown" />
+            </div>
+            <div class="flex flex-col">
+                <label class="font-medium" for="improvementRate">Quantum Improvement Rate: {{ inputStore.improvementRate }}%
+                </label>
+                <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0" max="99" id="improvementRate" name="improvementRate"
+                    v-model="inputStore.improvementRate" />
             </div>
 
 
