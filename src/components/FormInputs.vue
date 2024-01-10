@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useInputStore } from '../store/input.js'
+import Multiselect from 'vue-multiselect'
+
 
 const inputStore = useInputStore();
 
@@ -64,8 +66,101 @@ const selectedHardware = ref(hardwares.value[0]);
 
 </script>
 
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+<style lang="css" scoped>
+.custom-multiselect>>>.multiselect__tags .multiselect__tag {
+    background-color: #002D9D;
+}
+
+.custom-multiselect>>>.multiselect__option {
+    background-color: white;
+    color: #002D9D;
+    border-radius: 4px;
+    padding: 0.25rem;
+    margin: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    height: 1.5rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+
+.custom-multiselect>>>.multiselect__content-wrapper {
+
+    z-index: 999 !important;
+}
+
+.custom-multiselect>>>.multiselect__option--highlight {
+    background-color: #002D9D;
+    color: white;
+    border-radius: 4px;
+    padding: 0.25rem;
+    margin: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    height: 1.5rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+</style>
+
 <template>
-    <form @submit.prevent class="flex justify-around my-8 gap-8 px-16">
+    <div class="flex gap-8">
+        <div class="flex-1">
+            <h2 class="text-xl font-bold text-[#002D9D]">1. Select a problem</h2>
+            <div>
+                <multiselect class="custom-multiselect" track-by="name" label="name" v-model="selectedProblem"
+                    :options="problems" :searchable="true" :close-on-select="true" :show-labels="false"
+                    placeholder="Pick a value"></multiselect>
+            </div>
+            <div class="mt-4 flex gap-4">
+                <div class="flex flex-col">
+                    <label class="font-medium" for="classical">Classical runtime</label>
+                    <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="text" id="classical"
+                        name="classical" v-model="inputStore.classicalRuntime" />
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium" for="quantum">Quantum runtime</label>
+                    <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="text" id="quantum"
+                        name="quantum" v-model="inputStore.quantumRuntime" />
+
+                </div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <h2 class="text-xl font-bold text-[#002D9D]">2. Select a hardware</h2>
+            <div>
+                <multiselect class="custom-multiselect" track-by="name" label="name" v-model="selectedHardware"
+                    :options="hardwares" :searchable="true" :multiple="true" :close-on-select="true" :show-labels="false"
+                    placeholder="Pick a value">
+                </multiselect>
+
+            </div>
+            <div class="mt-4 flex gap-4">
+                <div class="flex-1">
+                    <label class="font-medium block" for="harwareSlowdown">Hardware Slowdown <br>10<sup>{{ inputStore.hardwareSlowdown
+                    }}</sup></label>
+                    <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0" max="50"
+                        id="harwareSlowdown" name="harwareSlowdown" v-model="inputStore.hardwareSlowdown" />
+                </div>
+                <div class="flex-1">
+                    <label class="font-medium block" for="physicalToLogicalRatio">Physical to logical qubits <br>{{ inputStore.physicalToLogicalRatio
+                    }} : 1</label>
+                    <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="1" max="10000" step="100"
+                        id="physicalToLogicalRatio" name="physicalToLogicalRatio" v-model="inputStore.physicalToLogicalRatio" />
+                </div>
+                <div class="flex-1">
+                    <label class="font-medium block" for="harwareSlowdown"># qubits growth ratio <br> x{{ inputStore.numberOfQubitsGrowthRatio }} each year</label>
+                    <input class="border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0" max="4" step="0.1"
+                        id="harwareSlowdown" name="harwareSlowdown" v-model="inputStore.numberOfQubitsGrowthRatio" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <form @submit.prevent class="flex justify-around my-8 gap-8">
         <div class="flex flex-col gap-2 flex-1">
             <div class="flex flex-col">
                 <label class="font-medium" for="problems">Problem</label>
@@ -103,4 +198,5 @@ const selectedHardware = ref(hardwares.value[0]);
 
 
     </div>
-</form></template>
+</form> -->
+</template>
