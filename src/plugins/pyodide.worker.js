@@ -53,7 +53,7 @@ async function loadPyodideAndPackages() {
         points = []
         n = sp.symbols('n')
         
-        current_year = 2023
+        current_year = 2024
         if midPoint < current_year:
             print("tStar less than current year?!")
     
@@ -126,7 +126,7 @@ async function loadPyodideAndPackages() {
             "quantum_steps": quantum_points
         }
     
-    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, current_year=2023, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, current_physical_qubits=4158):
+    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, newest_qubits=4158, newest_year=2023, current_year=2024):
         print("we made it this far")
         n = sp.Symbol('n')
     
@@ -137,8 +137,8 @@ async function loadPyodideAndPackages() {
         quantum_improvement_rate = 1 / (1 - quantum_improvement_rate / 100)
     
         #quantum feasible in the form f(year) = problem size
-        quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {current_physical_qubits} * 2 ^ (n - {current_year})) / {physical_logical_qubits_ratio}')
-        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , 2))/({current_physical_qubits}) , 2) + ({current_year})')
+        quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
+        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , 2))/({newest_qubits}) , 2) + ({newest_year})')
         quantum_feasible = sp.simplify(quantum_feasible)
     
         #getting nStar value again could probably be a function
@@ -152,6 +152,7 @@ async function loadPyodideAndPackages() {
         if len(solutions) > 0:
             staticNStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
         staticTStar = sp.sympify(quantum_feasible).subs(n, staticNStar)
+    
     
         if quantum_improvement_rate == 1: 
             feasible_points = get_points_feasible(quantum_feasible_log, staticTStar)
@@ -168,6 +169,7 @@ async function loadPyodideAndPackages() {
     
         intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 2)
         # intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 1000000)
+        # intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, staticNStar)
         t = quantum_feasible.subs(n, intersection).evalf()
     
         

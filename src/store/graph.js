@@ -3,8 +3,8 @@ import { ref, computed, inject, watch } from 'vue'
 
 import { useInputStore } from './input'
 
-const valuesCached = {
-    'n_sqrt(n)_IBM_6': {
+let valuesCached = {
+    'n_sqrt(n)_IBM_6_50': {
         quantumAdvantage: {
             "nStar": 1000000000000,
             "stepStar": 1000000000000,
@@ -3224,6 +3224,8 @@ const valuesCached = {
     }
 }
 
+valuesCached = {}
+
 export const useGraphStore = defineStore('graph', () => {
     const quantumAdvantage = ref(
         {
@@ -3246,7 +3248,7 @@ export const useGraphStore = defineStore('graph', () => {
     const pyodide = inject('pyodide')
 
     watch(inputStore, async (inputs) => {
-        const cachedValue = valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_IBM_${inputs.hardwareSlowdown}`]
+        const cachedValue = valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`]
         if (cachedValue) {
             quantumAdvantage.value = cachedValue.quantumAdvantage
             quantumEconomicAdvantage.value = cachedValue.quantumEconomicAdvantage
@@ -3257,7 +3259,7 @@ export const useGraphStore = defineStore('graph', () => {
         console.log('Updating graphs')
         await pyodide(`[
             get_quantum_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}"),
-            get_quantum_economic_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}", ${inputs.selectedHardware.newest_year}, ${inputs.improvementRate}, ${inputs.selectedHardware.physical_logical_ratio}, ${inputs.selectedHardware.newest_qubits})
+            get_quantum_economic_advantage_data("${inputs.classicalRuntime}", "${inputs.quantumRuntime}", "10^${inputs.hardwareSlowdown}", ${inputs.improvementRate}, ${inputs.selectedHardware.physical_logical_ratio}, ${inputs.selectedHardware.newest_qubits}, ${inputs.selectedHardware.newest_year})
         ]`).then(({ result }) => {
             console.log('result', result)
             quantumAdvantage.value = {
@@ -3274,7 +3276,7 @@ export const useGraphStore = defineStore('graph', () => {
             }
             console.log('quantumAdvantage', quantumAdvantage.value)
             console.log('quantumEconomicAdvantage', quantumEconomicAdvantage.value)
-            valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_IBM_${inputs.hardwareSlowdown}`] = {
+            valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`] = {
                 quantumAdvantage: quantumAdvantage.value,
                 quantumEconomicAdvantage: quantumEconomicAdvantage.value
             }

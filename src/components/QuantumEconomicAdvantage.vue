@@ -57,7 +57,7 @@ const chartOptions = {
             }
         },
         startOnTick: true,
-        min: 2023,
+        min: 2024,
     },
     yAxis: {
         title: {
@@ -109,7 +109,7 @@ watch(() => graphStore.quantumEconomicAdvantage, async () => {
 })
 
 async function updateGraphData() {
-    const xMax = 2023 + (graphStore.quantumEconomicAdvantage.tStar - 2023) * 2;
+    const xMax = 2024 + (graphStore.quantumEconomicAdvantage.tStar - 2024) * 2;
     const yMax = graphStore.quantumEconomicAdvantage.quantumFeasible[graphStore.quantumEconomicAdvantage.quantumFeasible.length - 1][1]
     // console.log(xMax, yMax)
     chartOptions.series = [

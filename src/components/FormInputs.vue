@@ -49,7 +49,7 @@ const hardwares = ref([
         // slowdown: 6,
         // quantum_improvement_rate: 2,
         physical_logical_ratio: 1000,
-        newest_year: 2023,
+        newest_year: 2025,
         newest_qubits: 4158
 
     },
@@ -59,24 +59,24 @@ const hardwares = ref([
         // quantum_improvement_rate: 2,
         physical_logical_ratio: 1000,
         newest_year: 2023,
-        newest_qubits: 4158
+        newest_qubits: 49
     },
     {
         name: "IQM",
         // slowdown: 6,
         // quantum_improvement_rate: 2,
         physical_logical_ratio: 1000,
-        newest_year: 2023,
-        newest_qubits: 4158
+        newest_year: 2025,
+        newest_qubits: 150
     },
-    {
-        name: "Google",
-        // slowdown: 6,
-        // quantum_improvement_rate: 2,
-        physical_logical_ratio: 1000,
-        newest_year: 2023,
-        newest_qubits: 4158
-    },
+    // {
+    //     name: "Google",
+    //     // slowdown: 6,
+    //     // quantum_improvement_rate: 2,
+    //     physical_logical_ratio: 1000,
+    //     newest_year: 2023,
+    //     newest_qubits: 4158
+    // },
 ]);
 
 // const selectedHardware = ref(hardwares.value[0]);
