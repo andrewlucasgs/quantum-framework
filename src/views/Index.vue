@@ -29,7 +29,7 @@ const graphStore = useGraphStore();
         </div>
         <div class="relative min-h-[300px] max-w-screen-2xl mx-auto flex mt-16">
             <div v-if="graphStore.loading"
-                class="absolute bg-slate-800 h-full w-full z-50 flex justify-center items-center opacity-30">
+                class="absolute bg-slate-800 h-full w-full z-10 flex justify-center items-center opacity-30">
                 <div class="text-5xl text-white">
                     Processing...
                 </div>
@@ -41,7 +41,7 @@ const graphStore = useGraphStore();
         <div class="max-w-7xl mx-auto px-2">
         </div>
         <div class="max-w-7xl mx-auto px-2">
-            <QubitsRoadmap />
+            <!-- <QubitsRoadmap /> -->
         </div>
     </div>
 </template>

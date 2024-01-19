@@ -20,7 +20,7 @@ export const useInputStore = defineStore('input', () => {
   const selectedHardware = {
     name: "IBM",
     physical_logical_ratio: 1000,
-    newest_year: 2023,
+    newest_year: 2025,
     newest_qubits: 4158
     // slowdown: 6,
     // improvement_rate: 2,

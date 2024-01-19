@@ -128,6 +128,8 @@ async function loadPyodideAndPackages() {
     
     def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, newest_qubits=4158, newest_year=2023, current_year=2024):
         print("we made it this far")
+        print(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate, physical_logical_qubits_ratio, newest_qubits, newest_year, current_year)
+
         n = sp.Symbol('n')
     
         #below calculations require a rate that the slowdown will be divided by, but the input rate
@@ -167,8 +169,8 @@ async function loadPyodideAndPackages() {
         quantum_advantage = sp.simplify(quantum_advantage)
     
     
-        intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 2)
-        # intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 1000000)
+        # intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 2)
+        intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, 1000000)
         # intersection = sp.nsolve(quantum_feasible - quantum_advantage, n, staticNStar)
         t = quantum_feasible.subs(n, intersection).evalf()
     
@@ -184,6 +186,31 @@ async function loadPyodideAndPackages() {
             # "quantum_advantage": log10(get_points(quantum_advantage, intersection, start=1, inverted=True))
         }
     
+    def get_quantum_economic_advantage_data_2(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate, hardwares, current_year=2024):
+        staticNStar = get_nstar(classical_runtime, quantum_runtime, hardware_slowdown)
+        if staticNStar is None:
+            print("could not find static n star")
+    
+        #below calculations require a rate that the slowdown will be divided by, but the input rate
+        #   is one which would be multiplied instead, so the below conversion is used
+        # example, input quantum_improvement rate is 50 signifying that it should decrease by 50% each year,
+        #   a new rate is calculated such that you could divide by 2
+        quantum_improvement_rate = 1 / (1 - quantum_improvement_rate / 100)
+        
+    
+    
+    def get_nstar(classical_runtime, quantum_runtime, hardware_slowdown):
+        validation = [is_valid(classical_runtime), is_valid(
+        quantum_runtime), is_valid(hardware_slowdown)]
+        if False in validation:
+            return None
+        solutions = solve(classical_runtime, quantum_runtime, hardware_slowdown)
+        staticNStar = 1
+        if len(solutions) > 0:
+            staticNStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
+            return staticNStar
+        else:
+            return False    
     
 
 

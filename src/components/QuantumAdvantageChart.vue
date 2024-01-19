@@ -34,7 +34,7 @@ const chartOptions = {
         }
     },
     title: {
-        text: 'Time Complexities with Hardware Slowdown'
+        text: 'Minimum Problem Size for Quantum Algorithmic Advantage'
     },
     tooltip: {
         useHTML: true,

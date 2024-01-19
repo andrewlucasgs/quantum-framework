@@ -114,7 +114,7 @@ async function updateGraphData() {
     // console.log(xMax, yMax)
     chartOptions.series = [
         {
-            name: 'Classical',
+            name: 'Feasibility',
             data: graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'green',
             marker: {
@@ -123,7 +123,7 @@ async function updateGraphData() {
             }
         },
         {
-            name: 'Quantum',
+            name: 'Quantum Advantage',
             data: graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'blue',
             marker: {
@@ -132,7 +132,7 @@ async function updateGraphData() {
             }
         },
         {
-            name: 'Quantum Advantage',
+            name: 'Intersection',
             data: [[graphStore.quantumEconomicAdvantage.tStar, Math.log10(graphStore.quantumEconomicAdvantage.nStar)]],
             color: 'red',
             type: 'scatter',

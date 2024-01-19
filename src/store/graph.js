@@ -3248,13 +3248,13 @@ export const useGraphStore = defineStore('graph', () => {
     const pyodide = inject('pyodide')
 
     watch(inputStore, async (inputs) => {
-        const cachedValue = valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`]
-        if (cachedValue) {
-            quantumAdvantage.value = cachedValue.quantumAdvantage
-            quantumEconomicAdvantage.value = cachedValue.quantumEconomicAdvantage
-            loading.value = false
-            return
-        }
+        // const cachedValue = valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`]
+        // if (cachedValue) {
+        //     quantumAdvantage.value = cachedValue.quantumAdvantage
+        //     quantumEconomicAdvantage.value = cachedValue.quantumEconomicAdvantage
+        //     loading.value = false
+        //     return
+        // }
         loading.value = true
         console.log('Updating graphs')
         await pyodide(`[
@@ -3276,10 +3276,10 @@ export const useGraphStore = defineStore('graph', () => {
             }
             console.log('quantumAdvantage', quantumAdvantage.value)
             console.log('quantumEconomicAdvantage', quantumEconomicAdvantage.value)
-            valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`] = {
-                quantumAdvantage: quantumAdvantage.value,
-                quantumEconomicAdvantage: quantumEconomicAdvantage.value
-            }
+            // valuesCached[`${inputs.classicalRuntime}_${inputs.quantumRuntime}_${inputs.selectedHardware.name}_${inputs.hardwareSlowdown}_${inputs.improvementRate}`] = {
+            //     quantumAdvantage: quantumAdvantage.value,
+            //     quantumEconomicAdvantage: quantumEconomicAdvantage.value
+            // }
             loading.value = false
            
             
