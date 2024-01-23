@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { useInputStore } from '../store/input.js'
 import Multiselect from 'vue-multiselect'
+import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
 
 
 const inputStore = useInputStore();
@@ -151,14 +152,15 @@ const hardwares = ref([
                     <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{
                         inputStore.hardwareSlowdown
                     }}</sup></label>
-                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0"
+                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 accent-[#002D9D]" type="range" min="0"
                         max="50" id="harwareSlowdown" name="harwareSlowdown" v-model="inputStore.hardwareSlowdown" />
+                        <HardwareSlowdownAdvanced />
                 </div>
                 <div class="flex gap-4">
                     <label class="text-center font-medium block" for="improvementRate">Quantum Improvement Rate: {{
                         inputStore.improvementRate
                     }}%</label>
-                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 " type="range" min="0"
+                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 accent-[#002D9D]" type="range" min="0"
                         max="99" step="1" id="improvementRate" name="improvementRate"
                         v-model="inputStore.improvementRate" />
                 </div>
