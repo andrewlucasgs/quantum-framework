@@ -2,6 +2,8 @@
 import { inject, ref, watch } from 'vue';
 import Highcharts from 'highcharts'
 import highchartsMore from 'highcharts/highcharts-more';
+import highchartsAnnotations from 'highcharts/modules/annotations';
+highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
 
@@ -11,16 +13,20 @@ import { useGraphStore } from '../store/graph.js';
 const graphStore = useGraphStore();
 
 function drawDashLine(chart, point, dashLine) {
+    console.log('djlkajdlkajldsk')
+    console.log(point)
+
+
     const xAxis = chart.xAxis[0]
     const yAxis = chart.yAxis[0]
 
     const x = Math.round(xAxis.toPixels(point[0]))
-    const y = Math.round(yAxis.toPixels(point[1]))
+    const y = Math.round(yAxis.toPixels(Math.log10(point[1])))
     const d = ['M', xAxis.left, y, 'L', x, y, 'L', x, yAxis.top + yAxis.height]
 
     return dashLine
         ? dashLine.attr({ d })
-        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'red', 'stroke-width': 2, zIndex: 1 }).add()
+        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'rgba(255,0,0,0.3)', 'stroke-width': 2, zIndex: 1 }).add()
 }
 
 const chartOptions = {
@@ -75,6 +81,12 @@ const chartOptions = {
         min: 1,
         // max: 10**20,
     },
+    plotOptions: {
+        areaspline: {
+            fillOpacity: 0.5,
+            threshold: 20
+        }
+    },
     series: [
 
         {
@@ -108,15 +120,33 @@ watch(() => graphStore.quantumEconomicAdvantage, async () => {
 
 })
 
+function getAreaData() {
+    const xMax = 2024 + (graphStore.quantumEconomicAdvantage.tStar - 2024) * 2;
+    const tStar = graphStore.quantumEconomicAdvantage.tStar;
+    const feasibility = graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[0] >= tStar);
+    const advantage = graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[0] >= tStar);
+    const data = feasibility.map((point, i) => [point[0], advantage[i][1], point[1]])
+    return data
+
+
+
+}
+
 async function updateGraphData() {
     const xMax = 2024 + (graphStore.quantumEconomicAdvantage.tStar - 2024) * 2;
     const yMax = graphStore.quantumEconomicAdvantage.quantumFeasible[graphStore.quantumEconomicAdvantage.quantumFeasible.length - 1][1]
-    // console.log(xMax, yMax)
     chartOptions.series = [
         {
             name: 'Feasibility',
             data: graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'green',
+            dashStyle: 'dash',
+            zoneAxis: 'x',
+            zones: [{
+                value: graphStore.quantumEconomicAdvantage.tStar,
+            }, {
+                dashStyle: 'solid'
+            }],
             marker: {
                 enabled: false,
                 symbol: 'circle'
@@ -126,6 +156,14 @@ async function updateGraphData() {
             name: 'Quantum Advantage',
             data: graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'blue',
+            dashStyle: 'dash',
+            zoneAxis: 'x',
+            zones: [{
+                value: graphStore.quantumEconomicAdvantage.tStar,
+            }, {
+                dashStyle: 'solid'
+            }],
+
             marker: {
                 enabled: false,
                 symbol: 'circle'
@@ -142,12 +180,40 @@ async function updateGraphData() {
                 symbol: 'circle'
             },
         },
+        {
+            name: 'Quantum Economic Advantage',
+            type: 'areasplinerange',
+            data: getAreaData(),
+
+        }
 
 
 
     ]
-    
-   chartOptions.yAxis.max = Math.log10(graphStore.quantumEconomicAdvantage.nStar) * 2;
+
+    chartOptions.annotations = [
+        {
+            draggable: "",
+            labelOptions: {
+                backgroundColor: "#002D9D", 
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: graphStore.quantumEconomicAdvantage.tStar + 2,
+                        y: Math.log10(graphStore.quantumEconomicAdvantage.nStar) + 2,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: "QUANTUM ECONOMIC\n ADVANTAGE"
+                },
+            ]
+        }
+    ]
+
+    chartOptions.yAxis.max = Math.log10(graphStore.quantumEconomicAdvantage.nStar) * 2;
 
 }
 

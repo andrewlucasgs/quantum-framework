@@ -17,7 +17,7 @@ function drawDashLine(chart, point, dashLine) {
 
     return dashLine
         ? dashLine.attr({ d })
-        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'red', 'stroke-width': 2, zIndex: 1 }).add()
+        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'rgba(255,0,0,0.3)', 'stroke-width': 2, zIndex: 1 }).add()
 }
 
 
