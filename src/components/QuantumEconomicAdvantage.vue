@@ -1,5 +1,6 @@
 <script setup>
 import { inject, ref, watch } from 'vue';
+import { useInputStore } from '../store/input.js'
 import Highcharts from 'highcharts'
 import highchartsMore from 'highcharts/highcharts-more';
 import highchartsAnnotations from 'highcharts/modules/annotations';
@@ -9,8 +10,13 @@ import { Chart } from 'highcharts-vue'
 
 
 import { useGraphStore } from '../store/graph.js';
+import { max } from 'mathjs';
 
+const props = defineProps(["hardwareIndex"])
+
+const inputStore = useInputStore();
 const graphStore = useGraphStore();
+
 
 function drawDashLine(chart, point, dashLine) {
     console.log('djlkajdlkajldsk')
@@ -34,10 +40,10 @@ const chartOptions = {
         type: 'spline',
         events: {
             load: function () {
-                this.dashLines = [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]].map(point => drawDashLine(this, point))
+                this.dashLines = [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]].map(point => drawDashLine(this, point))
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumEconomicAdvantage.tStar, graphStore.quantumEconomicAdvantage.nStar]][i], line))
+                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]][i], line))
             }
         }
     },
@@ -111,7 +117,18 @@ const chartOptions = {
 
 }
 
+let lastQueryString = ""
+let cheapFlag = ref(false)
+
 watch(() => graphStore.quantumEconomicAdvantage, async () => {
+    // console.log("in qea watch")
+    // console.log(props.hardwareIndex)
+    //graphstore changes with any input change, so this check only rerenders graph if a crucial input changed
+    let qeaQueryString = `${inputStore.classicalRuntime}_${inputStore.quantumRuntime}__${inputStore.createdHardwares[props.hardwareIndex].hardwareString}`
+    // if (qeaQueryString === lastQueryString) {
+    //     return
+    // }
+    lastQueryString = qeaQueryString
     await updateGraphData();
     key.value += 1;
 
@@ -121,11 +138,23 @@ watch(() => graphStore.quantumEconomicAdvantage, async () => {
 })
 
 function getAreaData() {
-    const xMax = 2024 + (graphStore.quantumEconomicAdvantage.tStar - 2024) * 2;
-    const tStar = graphStore.quantumEconomicAdvantage.tStar;
-    const feasibility = graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[0] >= tStar);
-    const advantage = graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[0] >= tStar);
-    const data = feasibility.map((point, i) => [point[0], advantage[i][1], point[1]])
+    const xMax = 2024 + (graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar - 2024) * 2;
+    const tStar = graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar;
+    const feasibility = graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible.filter(point => point[0] <= xMax && point[0] >= tStar);
+    const advantage = graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumAdvantage.filter(point => point[0] <= xMax && point[0] >= tStar);
+    
+    console.log("in area data")
+    console.log(feasibility.length)
+    console.log(advantage.length)
+    
+    // const data = feasibility.map((point, i) => [point[0], advantage[i][1], point[1]])
+    //^^^ apparently feasiblity and advantage don't always have exact same length, will fix later
+    let length = Math.min(feasibility.length, advantage.length)
+    let data = []
+    for (let i = 0; i < length; i++) {
+        let point = feasibility[i]
+        data.push([point[0], advantage[i][1], point[1]])
+    }
     return data
 
 
@@ -133,17 +162,26 @@ function getAreaData() {
 }
 
 async function updateGraphData() {
-    const xMax = 2024 + (graphStore.quantumEconomicAdvantage.tStar - 2024) * 2;
-    const yMax = graphStore.quantumEconomicAdvantage.quantumFeasible[graphStore.quantumEconomicAdvantage.quantumFeasible.length - 1][1]
+    if (props.hardwareIndex in graphStore.quantumAdvantage) {
+        cheapFlag.value = true
+    }
+    else {
+        cheapFlag.value = false
+        chartOptions.series = []
+        return
+    }
+
+    const xMax = 2024 + (graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar - 2024) * 2;
+    const yMax = graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible[graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible.length - 1][1]
     chartOptions.series = [
         {
             name: 'Feasibility',
-            data: graphStore.quantumEconomicAdvantage.quantumFeasible.filter(point => point[0] <= xMax && point[1] <= yMax),
+            data: graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'green',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: graphStore.quantumEconomicAdvantage.tStar,
+                value: graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -154,12 +192,12 @@ async function updateGraphData() {
         },
         {
             name: 'Quantum Advantage',
-            data: graphStore.quantumEconomicAdvantage.quantumAdvantage.filter(point => point[0] <= xMax && point[1] <= yMax),
+            data: graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumAdvantage.filter(point => point[0] <= xMax && point[1] <= yMax),
             color: 'blue',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: graphStore.quantumEconomicAdvantage.tStar,
+                value: graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -171,7 +209,7 @@ async function updateGraphData() {
         },
         {
             name: 'Intersection',
-            data: [[graphStore.quantumEconomicAdvantage.tStar, Math.log10(graphStore.quantumEconomicAdvantage.nStar)]],
+            data: [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, Math.log10(graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar)]],
             color: 'red',
             type: 'scatter',
             maxPointWidth: 1,
@@ -179,11 +217,14 @@ async function updateGraphData() {
                 enabled: true,
                 symbol: 'circle'
             },
+            showInLegend: false
         },
         {
             name: 'Quantum Economic Advantage',
             type: 'areasplinerange',
             data: getAreaData(),
+            showInLegend: false,
+            enableMouseTracking: false
 
         }
 
@@ -201,8 +242,8 @@ async function updateGraphData() {
             labels: [
                 {
                     point: {
-                        x: graphStore.quantumEconomicAdvantage.tStar + 2,
-                        y: Math.log10(graphStore.quantumEconomicAdvantage.nStar) + 2,
+                        x: graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar + 2,
+                        y: Math.log10(graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar) + 2,
                         xAxis: 0,
                         yAxis: 0
                     },
@@ -210,10 +251,56 @@ async function updateGraphData() {
                     text: "QUANTUM ECONOMIC\n ADVANTAGE"
                 },
             ]
-        }
+        },
+       
+        {
+            draggable : "",
+            labelOptions: {
+                backgroundColor: "transparent", 
+                borderColor: "red",
+                // color: "red",
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: chartOptions.xAxis.min,
+                        y: Math.log10(graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar) - 4,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: `10<sup>${Math.round(Math.log10(graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar) * 100) / 100}</sup`,
+                    
+                },
+            ]
+        },
+        {
+            draggable : "",
+            labelOptions: {
+                backgroundColor: "transparent", 
+                borderColor: "red",
+                // color: "red",
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar + 0.5,
+                        y: 0,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: `${Math.round(graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar * 100) / 100}`,
+                    
+                },
+            ]
+        },
+
     ]
 
-    chartOptions.yAxis.max = Math.log10(graphStore.quantumEconomicAdvantage.nStar) * 2;
+    chartOptions.yAxis.max = Math.log10(graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar) * 2;
 
 }
 
@@ -242,6 +329,6 @@ const key = ref(0);
 
 <template>
     <div>
-        <Chart :key="key" :options="chartOptions" />
+        <Chart :key="key" :options="chartOptions" v-if="cheapFlag" />
     </div>
 </template>

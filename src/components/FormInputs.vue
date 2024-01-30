@@ -53,34 +53,32 @@ const problems = ref([
 
 const selectedProblem = ref(problems.value[0]);
 
-watch(selectedProblem, () => {
-    inputStore.classicalRuntime = selectedProblem.value.classicalRuntime;
-    inputStore.quantumRuntime = selectedProblem.value.quantumRuntime;
-})
-
 const hardwares = ref([
     {
         name: "IBM",
-        // slowdown: 6,
-        // quantum_improvement_rate: 2,
+        hardwareSlowdown: 6,
+        quantum_improvement_rate: 50,
         physical_logical_ratio: 1000,
+        growth_factor: 2,
         newest_year: 2025,
         newest_qubits: 4158
 
     },
     {
         name: "Intel",
-        // slowdown: 6,
-        // quantum_improvement_rate: 2,
-        physical_logical_ratio: 1000,
+        hardwareSlowdown: 5,
+        quantum_improvement_rate: 40,
+        physical_logical_ratio: 1200,
+        growth_factor: 1.8,
         newest_year: 2023,
         newest_qubits: 49
     },
     {
         name: "IQM",
-        // slowdown: 6,
-        // quantum_improvement_rate: 2,
-        physical_logical_ratio: 1000,
+        hardwareSlowdown: 7,
+        quantum_improvement_rate: 60,
+        physical_logical_ratio: 800,
+        growth_factor: 2.2,
         newest_year: 2025,
         newest_qubits: 150
     },
@@ -94,8 +92,56 @@ const hardwares = ref([
     // },
 ]);
 
-// const selectedHardware = ref(hardwares.value[0]);
+const selectedHardware = ref(hardwares.value[0]);
 
+watch(selectedProblem, () => {
+    inputStore.classicalRuntime = selectedProblem.value.classicalRuntime;
+    inputStore.quantumRuntime = selectedProblem.value.quantumRuntime;
+})
+
+watch(selectedHardware, () => {
+    hardwareSlowdown.value = selectedHardware.value.hardwareSlowdown;
+    quantum_improvement_rate.value = selectedHardware.value.quantum_improvement_rate;
+    physical_logical_ratio.value = selectedHardware.value.physical_logical_ratio;
+    growth_factor.value = selectedHardware.value.growth_factor;
+})
+
+const hardwareSlowdown = ref(selectedHardware.value.hardwareSlowdown);
+const quantum_improvement_rate = ref(selectedHardware.value.quantum_improvement_rate);
+const physical_logical_ratio = ref(selectedHardware.value.physical_logical_ratio);
+const growth_factor = ref(selectedHardware.value.growth_factor)
+
+function updateSlowdown(newSlowdown) {
+    hardwareSlowdown.value = newSlowdown;
+}
+
+function createHardware() {
+    // console.log("in create hardware")
+    let hardwareString = `${selectedHardware.value.name}_${hardwareSlowdown.value}_${quantum_improvement_rate.value}_${physical_logical_ratio.value}_${growth_factor.value}`
+    if (inputStore.hardwareSet.has(hardwareString)) {
+        console.log("duplicate hardware entry flagged")
+        return
+    }
+    
+    inputStore.createdHardwares[inputStore.totalCreated] = 
+        {
+            hardwareString: hardwareString,
+            name: selectedHardware.value.name,
+            hardwareSlowdown: hardwareSlowdown.value,
+            quantum_improvement_rate: quantum_improvement_rate.value,
+            physical_logical_ratio: physical_logical_ratio.value,
+            growth_factor: growth_factor.value,
+            newest_qubits: selectedHardware.value.newest_qubits,
+            newest_year: selectedHardware.value.newest_year
+        }
+    inputStore.hardwareSet.add(hardwareString)
+    inputStore.totalCreated += 1 //DOES THIS ACTUALLY CHANGE INPUT STORE
+
+    // console.log(inputStore.createdHardwares)
+    // console.log(inputStore.hardwareSet)
+    // console.log(inputStore.totalCreated)
+    
+}
 </script>
 
 
@@ -139,9 +185,9 @@ const hardwares = ref([
         <div class="flex-1">
             <h2 class="text-xl font-bold text-[#002D9D]">2. Select a hardware</h2>
             <div>
-                <label class="font-medium">Hadware Provider</label>
+                <label class="font-medium">Hardware Provider</label>
 
-                <multiselect class="custom-multiselect" track-by="name" label="name" v-model="inputStore.selectedHardware"
+                <multiselect class="custom-multiselect" track-by="name" label="name" v-model="selectedHardware"
                     :options="hardwares" :searchable="true" :multiple="false" :close-on-select="true" :show-labels="false"
                     placeholder="Pick a value">
                 </multiselect>
@@ -149,22 +195,36 @@ const hardwares = ref([
             </div>
             <div class="mt-4 fex gap-4">
                 <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{
-                        inputStore.hardwareSlowdown
-                    }}</sup></label>
-                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 accent-[#002D9D]" type="range" min="0"
-                        max="50" id="harwareSlowdown" name="harwareSlowdown" v-model="inputStore.hardwareSlowdown" />
-                        <HardwareSlowdownAdvanced />
+                    <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{ hardwareSlowdown }}</sup></label>
+                    <!-- <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="hardwareSlowdown" v-model="hardwareSlowdown"/> -->
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
+                        max="12" id="harwareSlowdown" name="harwareSlowdown" v-model="hardwareSlowdown" />
+                        <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown"/>
                 </div>
                 <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="improvementRate">Quantum Improvement Rate: {{
-                        inputStore.improvementRate
-                    }}%</label>
-                    <input class="flex-1 border-2 border-gray-500 bg-white rounded-md px-2 py-1 accent-[#002D9D]" type="range" min="0"
-                        max="99" step="1" id="improvementRate" name="improvementRate"
-                        v-model="inputStore.improvementRate" />
+                    <label class="text-center font-medium block" for="quantum_improvement_rate">Quantum Improvement Rate: {{ quantum_improvement_rate }}%</label>
+                    <!-- <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="quantum_improvement_rate" v-model="quantum_improvement_rate"/> -->
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
+                        max="75" step="1" id="quantum_improvement_rate" name="quantum_improvement_rate"
+                        v-model="quantum_improvement_rate" />
+                </div>
+                <div class="flex gap-4">
+                    <label class="text-center font-medium block" for="physical_logical_ratio">Physical to Logical Qubit Ratio: </label>
+                    <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="physical_logical_ratio" v-model="physical_logical_ratio"/>
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="1"
+                        max="2000" step="1" id="physical_logical_ratio" name="physical_logical_ratio"
+                        v-model="physical_logical_ratio" />
+                </div>
+                <div class="flex gap-4">
+                    <label class="text-center font-medium block" for="growth_factor">Exponential Growth Factor: {{
+                        growth_factor
+                    }}</label>
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="1.5"
+                        max="2.5" step="0.1" id="growth_factor" name="growth_factor"
+                        v-model="growth_factor" />
                 </div>
             </div>
+            <button class="rounded-md bg-[#002D9D] px-4 py-2 text-sm font-medium text-white hover:bg-[#002D9D77] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75" @click="createHardware">Create Hardware</button>
         </div>
     </div>
 </template>

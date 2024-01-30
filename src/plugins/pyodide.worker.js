@@ -126,10 +126,11 @@ async function loadPyodideAndPackages() {
             "quantum_steps": quantum_points
         }
     
-    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, newest_qubits=4158, newest_year=2023, current_year=2024):
-        print("we made it this far")
+    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, growth_factor=2, newest_qubits=4158, newest_year=2025, current_year=2024):
+        # print("we made it this far")
         print(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate, physical_logical_qubits_ratio, newest_qubits, newest_year, current_year)
-
+    
+    
         n = sp.Symbol('n')
     
         #below calculations require a rate that the slowdown will be divided by, but the input rate
@@ -139,8 +140,9 @@ async function loadPyodideAndPackages() {
         quantum_improvement_rate = 1 / (1 - quantum_improvement_rate / 100)
     
         #quantum feasible in the form f(year) = problem size
-        quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
-        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , 2))/({newest_qubits}) , 2) + ({newest_year})')
+        # quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
+        quantum_feasible_log = sp.simplify(f'log( ({growth_factor}), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
+        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , {growth_factor}))/({newest_qubits}) , 2) + ({newest_year})')
         quantum_feasible = sp.simplify(quantum_feasible)
     
         #getting nStar value again could probably be a function
@@ -210,7 +212,8 @@ async function loadPyodideAndPackages() {
             staticNStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
             return staticNStar
         else:
-            return False    
+            return False
+    
     
 
 

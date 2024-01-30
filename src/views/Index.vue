@@ -8,8 +8,10 @@ import QuantumEconomicAdvantage from '../components/QuantumEconomicAdvantage.vue
 import QubitsRoadmap from '../components/QubitsRoadmap.vue';
 
 
+import { useInputStore } from '../store/input.js'
 import { useGraphStore } from '../store/graph.js';
 
+const inputStore = useInputStore();
 const graphStore = useGraphStore();
 
 </script>
@@ -20,7 +22,7 @@ const graphStore = useGraphStore();
             <div class="mx-auto max-w-screen-2xl">
                 <div class="flex gap-2 items-center">
                     <img src="/quantum-logo.png" class="h-16" alt="">
-                    <h1 class=" text-white text-3xl font-medium">Quantum Advantage Calculator</h1>
+                    <h1 class=" text-white text-3xl font-medium">Quantum Economic Advantage Calculator</h1>
                 </div>
             </div>
         </div>
@@ -35,8 +37,13 @@ const graphStore = useGraphStore();
                 </div>
 
             </div>
-            <QuantumAdvantageChart class="flex-1" />
-            <QuantumEconomicAdvantage class="flex-1" />
+            <div class="vertical-container">
+                <div class="horizontal-container"  v-for="(hardware, hardwareIndex) in inputStore.createdHardwares" :key="hardwareIndex">
+                    {{ hardware.hardwareString }}
+                    <QuantumAdvantageChart :hardwareIndex="hardwareIndex" class="flex-1" />
+                    <QuantumEconomicAdvantage :hardwareIndex="hardwareIndex" class="flex-1" />
+                </div>
+            </div>
         </div>
         <div class="max-w-7xl mx-auto px-2">
         </div>
@@ -45,3 +52,15 @@ const graphStore = useGraphStore();
         </div>
     </div>
 </template>
+
+<style scoped>
+.vertical-container {
+  display: flex;
+  flex-direction: column;
+}
+.horizontal-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+</style>

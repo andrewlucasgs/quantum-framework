@@ -9,7 +9,7 @@
             <div class="flex flex-col">
                 <label class="font-medium text-lg" for="speed">Speed</label>
                 <p class="text-xs text-gray-600">The ratio of the speed of a classical computer
-                    divided by the speed of the quantum computer</p>
+                    divided by the speed of the quantum computer.</p>
                 <div class="flex items-center justify-between w-full gap-2">
                     <input class="flex-1 accent-[#002D9D]" type="range" id="speed" v-model="speed" min="1" max="100000" />
                     <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="speed" v-model="speed" />
@@ -33,7 +33,7 @@
                 <p class="text-xs text-gray-600">
                     The ratio of the multiplicative constant from
                     the classical algorithm's time complexity divided by that
-                    from the quantum algorithm's
+                    from the quantum algorithm's.
                 </p>
                 <div class="flex items-center justify-between w-full gap-2">
                     <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant" v-model="algorithmConstant" min="1"
@@ -68,12 +68,14 @@ const hwSlowdown = computed(() => {
     return Math.round(Math.log10(speed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
 })
 function save (){
-    inputStore.hardwareSlowdown = hwSlowdown.value;
+    // inputStore.hardwareSlowdown = hwSlowdown.value;
     // inputStore.hardwareSlowdownOptions = {
     //     speed: speed.value,
     //     gateOverhead: gateOverhead.value,
     //     algorithmConstant: algorithmConstant.value,
     // }
+
+    emit("updateSlowdown", hwSlowdown.value);
     dialog.value.closeModal();   
 }
 
@@ -86,5 +88,7 @@ function reset (){
     gateOverhead.value = 100;
     algorithmConstant.value = 1;
 }
+
+const emit = defineEmits(['updateSlowdown'])
 
 </script>
