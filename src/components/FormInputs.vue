@@ -147,7 +147,7 @@ function createHardware() {
 
 
 <template>
-    <div class="flex gap-8">
+    <div class="flex flex-col gap-8">
         <div class="flex-1">
             <h2 class="text-xl font-bold text-[#002D9D]">1. Select a problem</h2>
             <div>

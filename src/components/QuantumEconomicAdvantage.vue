@@ -38,6 +38,7 @@ function drawDashLine(chart, point, dashLine) {
 const chartOptions = {
     chart: {
         type: 'spline',
+        width: 500,
         events: {
             load: function () {
                 this.dashLines = [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]].map(point => drawDashLine(this, point))
@@ -45,13 +46,17 @@ const chartOptions = {
             redraw: function () {
                 this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]][i], line))
             }
-        }
+        },
+
     },
     credits: {
         enabled: false
     },
     title: {
-        text: 'Economic Advantage of Quantum Computing'
+        text: 'Economic Advantage of Quantum Computing',
+        style: {
+            fontSize: '14px'
+        }
     },
     tooltip: {
         useHTML: true,

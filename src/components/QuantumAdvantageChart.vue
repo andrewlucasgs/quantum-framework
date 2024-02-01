@@ -28,6 +28,7 @@ function drawDashLine(chart, point, dashLine) {
 const chartOptions = {
     chart: {
         type: 'spline',
+        width: 500,
         events: {
             load: function () {
                 this.dashLines = [[graphStore.quantumAdvantage[props.hardwareIndex].nStar, graphStore.quantumAdvantage[props.hardwareIndex].stepStar]].map(point => drawDashLine(this, point))
@@ -41,7 +42,10 @@ const chartOptions = {
         enabled: false
     },
     title: {
-        text: 'Minimum Problem Size for Quantum Algorithmic Advantage'
+        text: 'Minimum Problem Size for Quantum Algorithmic Advantage',
+        style: {
+            fontSize: '14px'
+        }
     },
     tooltip: {
         useHTML: true,
