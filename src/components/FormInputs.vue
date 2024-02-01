@@ -122,25 +122,25 @@ function createHardware() {
         console.log("duplicate hardware entry flagged")
         return
     }
-    
-    inputStore.createdHardwares[inputStore.totalCreated] = 
-        {
-            hardwareString: hardwareString,
-            name: selectedHardware.value.name,
-            hardwareSlowdown: hardwareSlowdown.value,
-            quantum_improvement_rate: quantum_improvement_rate.value,
-            physical_logical_ratio: physical_logical_ratio.value,
-            growth_factor: growth_factor.value,
-            newest_qubits: selectedHardware.value.newest_qubits,
-            newest_year: selectedHardware.value.newest_year
-        }
+
+    inputStore.createdHardwares[inputStore.totalCreated] =
+    {
+        hardwareString: hardwareString,
+        name: selectedHardware.value.name,
+        hardwareSlowdown: hardwareSlowdown.value,
+        quantum_improvement_rate: quantum_improvement_rate.value,
+        physical_logical_ratio: physical_logical_ratio.value,
+        growth_factor: growth_factor.value,
+        newest_qubits: selectedHardware.value.newest_qubits,
+        newest_year: selectedHardware.value.newest_year
+    }
     inputStore.hardwareSet.add(hardwareString)
     inputStore.totalCreated += 1 //DOES THIS ACTUALLY CHANGE INPUT STORE
 
     // console.log(inputStore.createdHardwares)
     // console.log(inputStore.hardwareSet)
     // console.log(inputStore.totalCreated)
-    
+
 }
 </script>
 
@@ -194,37 +194,80 @@ function createHardware() {
 
             </div>
             <div class="mt-4 fex gap-4">
-                <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{ hardwareSlowdown }}</sup></label>
-                    <!-- <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="hardwareSlowdown" v-model="hardwareSlowdown"/> -->
-                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
-                        max="12" id="harwareSlowdown" name="harwareSlowdown" v-model="hardwareSlowdown" />
-                        <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown"/>
+
+
+                <div class="flex flex-col">
+
+                    <div class="flex gap-2">
+
+                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown
+                        </label>
+                        <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                            <button
+                                class="rounded-md bg-gray-500 text-xs p-1 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                                @click="openModal">Advanced options</button>
+
+                        </HardwareSlowdownAdvanced>
+                    </div>
+                    <p class="text-xs text-gray-600">The speed difference between classical & quantum computers</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" v-model="hardwareSlowdown"
+                            min="0" max="12" step="0.5" />
+
+                        <div class="   w-1/5">
+                            <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                            <button
+                                class="bg-gray-100 p-2  rounded-lg text-center w-full hover:bg-gray-200"
+                                @click="openModal">10<sup>{{ hardwareSlowdown }}</sup></button>
+
+                        </HardwareSlowdownAdvanced>
+                            
+                        </div>
+                    </div>
                 </div>
-                <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="quantum_improvement_rate">Quantum Improvement Rate: {{ quantum_improvement_rate }}%</label>
-                    <!-- <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="quantum_improvement_rate" v-model="quantum_improvement_rate"/> -->
-                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
-                        max="75" step="1" id="quantum_improvement_rate" name="quantum_improvement_rate"
-                        v-model="quantum_improvement_rate" />
+
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="quantum_improvement_rate">Quantum Improvement Rate (%)</label>
+                    <p class="text-xs text-gray-600">The ratio of between improvements in quantum computing and improvements
+                        in classical computing.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
+                            v-model="quantum_improvement_rate" min="1" max="75" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="quantum_improvement_rate" v-model="quantum_improvement_rate" />
+                    </div>
                 </div>
-                <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="physical_logical_ratio">Physical to Logical Qubit Ratio: </label>
-                    <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="physical_logical_ratio" v-model="physical_logical_ratio"/>
-                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="1"
-                        max="2000" step="1" id="physical_logical_ratio" name="physical_logical_ratio"
-                        v-model="physical_logical_ratio" />
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="physical_logical_ratio">Physical to Logical Qubit
+                        Ratio</label>
+                    <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering error
+                        correction.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
+                            v-model="physical_logical_ratio" min="1" max="2000" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="physical_logical_ratio" v-model="physical_logical_ratio" />
+                    </div>
                 </div>
-                <div class="flex gap-4">
-                    <label class="text-center font-medium block" for="growth_factor">Exponential Growth Factor: {{
-                        growth_factor
-                    }}</label>
-                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="1.5"
-                        max="2.5" step="0.1" id="growth_factor" name="growth_factor"
-                        v-model="growth_factor" />
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="growth_factor">Exponential Growth Factor</label>
+                    <p class="text-xs text-gray-600">The yearly growth factor of the number of physical qubits (2 means
+                        doubling each year).</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="growth_factor" v-model="growth_factor"
+                            min="1.5" max="2.5" step="0.1" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="growth_factor"
+                            v-model="growth_factor" />
+                    </div>
                 </div>
+
             </div>
-            <button class="rounded-md bg-[#002D9D] px-4 py-2 text-sm font-medium text-white hover:bg-[#002D9D77] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75" @click="createHardware">Create Hardware</button>
+            <button
+                class="rounded-md bg-[#002D9D] px-4 py-2 text-sm font-medium text-white hover:bg-[#002D9D77] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                @click="createHardware">Create Hardware</button>
         </div>
     </div>
 </template>

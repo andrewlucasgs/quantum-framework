@@ -1,9 +1,10 @@
 <template>
     <div class="">
-        <button type="button" @click="openModal"
+        <!-- <button type="button" @click="openModal"
             class="rounded-md bg-black/20 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
             {{ buttonLabel }}
-        </button>
+        </button> -->
+        <slot name="button" :openModal="openModal" />
     </div>
     <TransitionRoot appear :show="isOpen" as="template">
         <Dialog as="div" @close="closeModal" class="relative z-10">
@@ -81,6 +82,7 @@ const props = defineProps({
 
 const isOpen = ref(false)
 
+
 function closeModal() {
     isOpen.value = false
 }
@@ -93,6 +95,11 @@ defineExpose({
 })
 
 
-const emit = defineEmits(['save', 'reset', 'cancel'])
+const emit = defineEmits(['save', 'reset', 'cancel', 'openModal'])
+watch(isOpen, (isOpen) => {
+    if (isOpen) {
+        emit('openModal', isOpen)
+    }
+})
 </script>
   

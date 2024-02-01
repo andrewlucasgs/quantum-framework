@@ -25,6 +25,12 @@ export const useInputStore = defineStore('input', () => {
     const hardwareSet = ref(new Set(["IBM_6_50_1000"]))
     const totalCreated = ref(1)
 
+    const hardwareSlowdownAdvancedOptions = ref({
+      speed: 10000,
+      gateOverhead: 100,
+      algorithmConstant: 1,
+    })
+
 
   // const selectedHardware = {
   //   name: "IBM",
@@ -36,5 +42,5 @@ export const useInputStore = defineStore('input', () => {
   //   }
 
 
-  return { classicalRuntime, quantumRuntime, createdHardwares, hardwareSet, totalCreated }
+  return { classicalRuntime, quantumRuntime, createdHardwares, hardwareSet, totalCreated, hardwareSlowdownAdvancedOptions }
 })

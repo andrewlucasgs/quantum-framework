@@ -47,6 +47,9 @@ const chartOptions = {
             }
         }
     },
+    credits: {
+        enabled: false
+    },
     title: {
         text: 'Economic Advantage of Quantum Computing'
     },

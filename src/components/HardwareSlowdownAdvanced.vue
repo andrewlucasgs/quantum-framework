@@ -4,7 +4,13 @@
     @save="save"
     @cancel="cancel"
     @reset="reset"
+    @openModal="updateValues"
     >
+    <template v-slot:button="{openModal}">
+        <slot :openModal="openModal" />
+    </template>
+
+
         <template #content>
             <div class="flex flex-col">
                 <label class="font-medium text-lg" for="speed">Speed</label>
@@ -54,10 +60,10 @@
 
 <script setup>
 import Dialog from './Dialog.vue';
-import { computed, ref } from 'vue';
-import { useInputStore } from '../store/input.js';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useDialogInputStore } from '../store/dialogInputs.js';
 
-const inputStore = useInputStore();
+const dialogInputStore = useDialogInputStore();
 const dialog = ref(null);
 
 const speed = ref(10000);
@@ -67,13 +73,19 @@ const algorithmConstant = ref(1);
 const hwSlowdown = computed(() => {
     return Math.round(Math.log10(speed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
 })
+
+function updateValues (){
+    speed.value = dialogInputStore.hardwareSlowdownAdvancedOptions.speed;
+    gateOverhead.value = dialogInputStore.hardwareSlowdownAdvancedOptions.gateOverhead;
+    algorithmConstant.value = dialogInputStore.hardwareSlowdownAdvancedOptions.algorithmConstant;
+}
+
 function save (){
-    // inputStore.hardwareSlowdown = hwSlowdown.value;
-    // inputStore.hardwareSlowdownOptions = {
-    //     speed: speed.value,
-    //     gateOverhead: gateOverhead.value,
-    //     algorithmConstant: algorithmConstant.value,
-    // }
+    dialogInputStore.hardwareSlowdownAdvancedOptions = {
+        speed: speed.value,
+        gateOverhead: gateOverhead.value,
+        algorithmConstant: algorithmConstant.value
+    }
 
     emit("updateSlowdown", hwSlowdown.value);
     dialog.value.closeModal();   

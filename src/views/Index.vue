@@ -19,17 +19,17 @@ const graphStore = useGraphStore();
 <template>
     <div>
         <div class=" bg-[#002D9D] py-4 px-8">
-            <div class="mx-auto max-w-screen-2xl">
+            <div class="mx-auto max-w-screen-xl">
                 <div class="flex gap-2 items-center">
                     <img src="/quantum-logo.png" class="h-16" alt="">
                     <h1 class=" text-white text-3xl font-medium">Quantum Economic Advantage Calculator</h1>
                 </div>
             </div>
         </div>
-        <div class="mx-auto max-w-screen-2xl mt-8">
+        <div class="mx-auto max-w-screen-xl mt-8">
             <FormInputs />
         </div>
-        <div class="relative min-h-[300px] max-w-screen-2xl mx-auto flex mt-16">
+        <div class="relative min-h-[300px] max-w-screen-xl mx-auto flex mt-16">
             <div v-if="graphStore.loading"
                 class="absolute bg-slate-800 h-full w-full z-10 flex justify-center items-center opacity-30">
                 <div class="text-5xl text-white">

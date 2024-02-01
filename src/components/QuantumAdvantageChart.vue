@@ -37,6 +37,9 @@ const chartOptions = {
             }
         }
     },
+    credits: {
+        enabled: false
+    },
     title: {
         text: 'Minimum Problem Size for Quantum Algorithmic Advantage'
     },
