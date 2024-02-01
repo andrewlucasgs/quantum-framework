@@ -48,7 +48,7 @@ function del(hardwareIndex, hardwareString) {
                 <div class="flex flex-1 flex-col gap-8 h-full overflow-scroll">
                     <div class="flex flex-col gap-4 items-center justify-center border-b-2 border-black"
                         v-for="(hardware, hardwareIndex) in inputStore.createdHardwares" :key="hardwareIndex">
-                        <div class=" shadow-md p-2 flex  items-center gap-8 w-full">
+                        <div class=" shadow-md py-2 px-4 flex  items-center justify-between gap-8 w-full">
                             <h2 class="font-bold text-lg">{{ hardware.name }}</h2>
                             <div class="flex gap-4 text-xs">
                                 <span>
@@ -73,14 +73,18 @@ function del(hardwareIndex, hardwareString) {
                                         hardware.growth_factor }}
                                 </span>
                             </div>
-                            <div>
+                            <div class="flex gap-4">
                                 <EditHardware :hardwareIndex="hardwareIndex" v-slot="{ openModal }"> 
+                        
                      <button
-                        class="rounded-md bg-gray-500 text-xs p-1 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                     class="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-[#002D9D] hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         @click="openModal">Edit Hardware</button>
                     </EditHardware> 
                     <!-- <br> -->
-                    <button @click="del(hardwareIndex, hardware.hardwareString)">Delete</button>
+                    <button
+                    class="inline-flex justify-center rounded-md border border-transparent bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+
+                    @click="del(hardwareIndex, hardware.hardwareString)">Delete</button>
                             </div>
                         </div>
                         <div class="flex gap-4 items-center justify-center">
