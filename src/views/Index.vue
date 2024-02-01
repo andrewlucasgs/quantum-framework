@@ -23,7 +23,7 @@ function del(hardwareIndex, hardwareString) {
 </script>
 
 <template>
-    <div class="flex flex-col h-screen w-full overflow-hidden">
+    <div class="flex flex-col h-screen w-full ">
         <div class=" bg-[#002D9D] py-4 px-8">
             <div class="mx-auto">
                 <div class="flex gap-2 items-center">
@@ -32,8 +32,8 @@ function del(hardwareIndex, hardwareString) {
                 </div>
             </div>
         </div>
-        <div class="flex flex-1 h-full">
-            <div class=" overflow-auto p-4 w-1/4 border-r-2">
+        <div class="flex flex-1 ">
+            <div class="overflow-scroll p-4 w-1/4 border-r-2">
                 <FormInputs />
             </div>
 
