@@ -5,6 +5,7 @@ import { inject } from 'vue';
 import FormInputs from '../components/FormInputs.vue';
 import QuantumAdvantageChart from '../components/QuantumAdvantageChart.vue';
 import QuantumEconomicAdvantage from '../components/QuantumEconomicAdvantage.vue';
+import EditHardware from '../components/EditHardware.vue';
 import QubitsRoadmap from '../components/QubitsRoadmap.vue';
 
 
@@ -13,6 +14,11 @@ import { useGraphStore } from '../store/graph.js';
 
 const inputStore = useInputStore();
 const graphStore = useGraphStore();
+
+function del(hardwareIndex, hardwareString) {
+    inputStore.hardwareSet.delete(hardwareString);
+    delete inputStore.createdHardwares[hardwareIndex];
+}
 
 </script>
 
@@ -40,6 +46,16 @@ const graphStore = useGraphStore();
             <div class="vertical-container">
                 <div class="horizontal-container"  v-for="(hardware, hardwareIndex) in inputStore.createdHardwares" :key="hardwareIndex">
                     {{ hardware.hardwareString }}
+                    <!-- <br> -->
+                    <!-- <button @click="edit(hardwareIndex)">Edit</button> -->
+                    <EditHardware :hardwareIndex="hardwareIndex" v-slot="{ openModal }"> 
+                     <button
+                        class="rounded-md bg-gray-500 text-xs p-1 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                        @click="openModal">Edit Hardware</button>
+                    </EditHardware> 
+                    <!-- <br> -->
+                    <button @click="del(hardwareIndex, hardware.hardwareString)">Delete</button>
+                    <!-- <br> -->
                     <QuantumAdvantageChart :hardwareIndex="hardwareIndex" class="flex-1" />
                     <QuantumEconomicAdvantage :hardwareIndex="hardwareIndex" class="flex-1" />
                 </div>

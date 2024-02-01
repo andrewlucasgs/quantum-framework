@@ -80,19 +80,23 @@ const chartOptions = {
 
 }
 
-let lastQueryString = ""
+// let lastQueryString = ""
 
 let cheapFlag = ref(false)
 
 watch(() => graphStore.quantumAdvantage, async () => {
-    console.log("in qa watch")
+    console.log("in QA WATCH")
     console.log(props.hardwareIndex)
-    //graphstore changes with any input change, so this check only rerenders graph if a crucial input changed
-    let qaQueryString = `${inputStore.classicalRuntime}_${inputStore.quantumRuntime}__${inputStore.createdHardwares[props.hardwareIndex].hardwareSlowdown}`
+    // // //graphstore changes with any input change, so this check only rerenders graph if a crucial input changed
+    // let qaQueryString = `${inputStore.classicalRuntime}_${inputStore.quantumRuntime}__${inputStore.createdHardwares[props.hardwareIndex].hardwareSlowdown}`
     // if (qaQueryString === lastQueryString) {
+    //     console.log("in PROBLEM")
+    //     console.log(qaQueryString)
+    //     console.log(lastQueryString)
     //     return
     // }
-    lastQueryString = qaQueryString
+    // lastQueryString = qaQueryString
+    
     updateGraphData();
 
     key.value += 1;
@@ -135,7 +139,55 @@ function updateGraphData() {
             color: 'red',
             type: 'scatter',
             dashStyle: 'dash',
+            showInLegend: false,
         }
+    ]
+
+    chartOptions.annotations = [
+        {
+            draggable : "",
+            labelOptions: {
+                backgroundColor: "transparent", 
+                borderColor: "red",
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: chartOptions.xAxis.min,
+                        y: graphStore.quantumAdvantage[props.hardwareIndex].stepStar,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: `10<sup>${Math.round(Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].stepStar) * 100) / 100}</sup>`,
+                    
+                },
+            ]
+        },
+        {
+            draggable : "",
+            labelOptions: {
+                backgroundColor: "transparent", 
+                borderColor: "red",
+                // color: "red",
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: graphStore.quantumAdvantage[props.hardwareIndex].nStar * 100,//times 100 to slightly offset text in the offset scale
+                        y: Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].stepStar),
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: `10<sup>${Math.round(Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].nStar) * 100) / 100}</sup>`,
+                    
+                },
+            ]
+        },
+
     ]
 }
 

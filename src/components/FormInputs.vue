@@ -200,7 +200,7 @@ function createHardware() {
 
                     <div class="flex gap-2">
 
-                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown
+                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown>
                         </label>
                         <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                             <button
@@ -209,7 +209,7 @@ function createHardware() {
 
                         </HardwareSlowdownAdvanced>
                     </div>
-                    <p class="text-xs text-gray-600">The speed difference between classical & quantum computers</p>
+                    <p class="text-xs text-gray-600">The speed difference between classical & quantum computers.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" v-model="hardwareSlowdown"
                             min="0" max="12" step="0.5" />
@@ -224,13 +224,18 @@ function createHardware() {
                             
                         </div>
                     </div>
-                </div>
+                <!-- <div class="flex gap-4">
+                    <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{ hardwareSlowdown }}</sup></label>
+                    <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="hardwareSlowdown" v-model="hardwareSlowdown"/>
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
+                        max="12" id="harwareSlowdown" name="harwareSlowdown" v-model="hardwareSlowdown" />
+                    <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown"/>
+                </div> -->
 
 
                 <div class="flex flex-col">
                     <label class="font-medium text-lg" for="quantum_improvement_rate">Quantum Improvement Rate (%)</label>
-                    <p class="text-xs text-gray-600">The ratio of between improvements in quantum computing and improvements
-                        in classical computing.</p>
+                    <p class="text-xs text-gray-600">The ratio of improvement over time between quantum computing and classical computing.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
                             v-model="quantum_improvement_rate" min="1" max="75" />
@@ -269,6 +274,7 @@ function createHardware() {
                 class="rounded-md bg-[#002D9D] px-4 py-2 text-sm font-medium text-white hover:bg-[#002D9D77] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                 @click="createHardware">Create Hardware</button>
         </div>
+    </div>
     </div>
 </template>
 

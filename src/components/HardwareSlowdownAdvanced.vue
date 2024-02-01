@@ -49,6 +49,13 @@
                 </div>
 
             </div>
+            <div class="mt-4">
+                <p class="text-xs text-gray-600">
+                    Source: <a href="https://arxiv.org/abs/2310.15505">https://arxiv.org/abs/2310.15505</a>
+                </p>
+
+            </div>
+
             <div class="mt-4 text-center">
                 <h2 class="italic font-medium">Speed x Gate Overhead x Alg. Constant =</h2>
                 <h2 class="font-medium text-2xl">10<sup>{{ hwSlowdown }}</sup></h2>

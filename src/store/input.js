@@ -22,7 +22,7 @@ export const useInputStore = defineStore('input', () => {
     newest_year: 2025
     }
   }
-    const hardwareSet = ref(new Set(["IBM_6_50_1000"]))
+    const hardwareSet = ref(new Set(["IBM_6_50_1000_2"]))
     const totalCreated = ref(1)
 
     const hardwareSlowdownAdvancedOptions = ref({

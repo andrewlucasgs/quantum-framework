@@ -261,7 +261,6 @@ async function updateGraphData() {
             labelOptions: {
                 backgroundColor: "transparent", 
                 borderColor: "red",
-                // color: "red",
                 shape: "rect"
             },
             labels: [

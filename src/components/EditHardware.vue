@@ -1,0 +1,234 @@
+<template>
+    <Dialog title="Edit" button-label="Edit Hardware"
+    ref="dialog"
+    @save="save"
+    @cancel="cancel"
+    @reset="reset"
+    >
+    <template v-slot:button="{openModal}">
+        <slot :openModal="openModal" />
+    </template>
+    
+        <template #content>
+            <div>
+                <label class="font-medium">Hardware Provider</label>
+
+                <multiselect class="custom-multiselect" track-by="name" label="name" v-model="selectedHardware"
+                    :options="hardwares" :searchable="true" :multiple="false" :close-on-select="true" :show-labels="false"
+                    placeholder="Pick a value">
+                </multiselect>
+
+            </div>
+            <div class="mt-4 fex gap-4">
+
+
+                <div class="flex flex-col">
+
+                    <div class="flex gap-2">
+
+                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown>
+                        </label>
+                        <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                            <button
+                                class="rounded-md bg-gray-500 text-xs p-1 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                                @click="openModal">Advanced options</button>
+
+                        </HardwareSlowdownAdvanced>
+                    </div>
+                    <p class="text-xs text-gray-600">The speed difference between classical & quantum computers</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" v-model="hardwareSlowdown"
+                            min="0" max="12" step="0.5" />
+
+                        <div class="   w-1/5">
+                            <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                            <button
+                                class="bg-gray-100 p-2  rounded-lg text-center w-full hover:bg-gray-200"
+                                @click="openModal">10<sup>{{ hardwareSlowdown }}</sup></button>
+
+                        </HardwareSlowdownAdvanced>
+                            
+                        </div>
+                    </div>
+                <!-- <div class="flex gap-4">
+                    <label class="text-center font-medium block" for="harwareSlowdown">Hardware Slowdown: 10<sup>{{ hardwareSlowdown }}</sup></label>
+                    <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="hardwareSlowdown" v-model="hardwareSlowdown"/>
+                    <input class="flex-1 border-gray-500 bg-white rounded-md py-1 accent-[#002D9D]" type="range" min="0"
+                        max="12" id="harwareSlowdown" name="harwareSlowdown" v-model="hardwareSlowdown" />
+                    <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown"/>
+                </div> -->
+
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="quantum_improvement_rate">Quantum Improvement Rate (%)</label>
+                    <p class="text-xs text-gray-600">The ratio of between improvements in quantum computing and improvements
+                        in classical computing.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
+                            v-model="quantum_improvement_rate" min="1" max="75" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="quantum_improvement_rate" v-model="quantum_improvement_rate" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="physical_logical_ratio">Physical to Logical Qubit
+                        Ratio</label>
+                    <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering error
+                        correction.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
+                            v-model="physical_logical_ratio" min="1" max="2000" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="physical_logical_ratio" v-model="physical_logical_ratio" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-lg" for="growth_factor">Exponential Growth Factor</label>
+                    <p class="text-xs text-gray-600">The yearly growth factor of the number of physical qubits (2 means
+                        doubling each year).</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="growth_factor" v-model="growth_factor"
+                            min="1.5" max="2.5" step="0.1" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="growth_factor"
+                            v-model="growth_factor" />
+                    </div>
+                </div>
+
+            </div>
+            </div>
+        </template>
+    </Dialog>
+</template>
+
+<script setup>
+import Dialog from './Dialog.vue';
+import { computed, ref, watch } from 'vue';
+import Multiselect from 'vue-multiselect'
+import { useInputStore } from '../store/input.js';
+import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
+
+const props = defineProps(["hardwareIndex"])
+
+const inputStore = useInputStore();
+const dialog = ref(null);
+
+const hardwares = ref([
+    {
+        name: "IBM",
+        hardwareSlowdown: 6,
+        quantum_improvement_rate: 50,
+        physical_logical_ratio: 1000,
+        growth_factor: 2,
+        newest_year: 2025,
+        newest_qubits: 4158
+
+    },
+    {
+        name: "Intel",
+        hardwareSlowdown: 5,
+        quantum_improvement_rate: 40,
+        physical_logical_ratio: 1200,
+        growth_factor: 1.8,
+        newest_year: 2023,
+        newest_qubits: 49
+    },
+    {
+        name: "IQM",
+        hardwareSlowdown: 7,
+        quantum_improvement_rate: 60,
+        physical_logical_ratio: 800,
+        growth_factor: 2.2,
+        newest_year: 2025,
+        newest_qubits: 150
+    },
+    // {
+    //     name: "Google",
+    //     // slowdown: 6,
+    //     // quantum_improvement_rate: 2,
+    //     physical_logical_ratio: 1000,
+    //     newest_year: 2023,
+    //     newest_qubits: 4158
+    // },
+]);
+
+let hardware = inputStore.createdHardwares[props.hardwareIndex]
+
+const selectedHardware = ref(hardwares.value[0]);
+for (let i = 0; i < hardwares.value.length; i++) { //loop matches selectedHardware to input one by name
+    if (hardwares.value[i].name === hardware.name) {
+        selectedHardware.value = hardwares.value[i];
+        break;
+    }
+}
+
+watch(selectedHardware, () => {
+    hardwareSlowdown.value = selectedHardware.value.hardwareSlowdown;
+    quantum_improvement_rate.value = selectedHardware.value.quantum_improvement_rate;
+    physical_logical_ratio.value = selectedHardware.value.physical_logical_ratio;
+    growth_factor.value = selectedHardware.value.growth_factor;
+})
+
+const hardwareSlowdown = ref(hardware.hardwareSlowdown);
+const quantum_improvement_rate = ref(hardware.quantum_improvement_rate);
+const physical_logical_ratio = ref(hardware.physical_logical_ratio);
+const growth_factor = ref(hardware.growth_factor)
+
+function updateSlowdown(newSlowdown) {
+    hardwareSlowdown.value = newSlowdown;
+}
+
+function save() {
+    let hardwareString = `${selectedHardware.value.name}_${hardwareSlowdown.value}_${quantum_improvement_rate.value}_${physical_logical_ratio.value}_${growth_factor.value}`;
+    let hardware = inputStore.createdHardwares[props.hardwareIndex];
+    if (hardware.hardwareString === hardwareString) { //implies that parameters are the same after editing
+        // dialog.value.closeModal();   
+    }
+    else if (inputStore.hardwareSet.has(hardwareString)) { //implies that the edit will create a duplicate
+        //TELL THE USER A DUPLICATE HAS OCCURRED
+        console.log("duplicate hardware edit flagged")
+        // dialog.value.closeModal();   
+    }
+    else {
+        inputStore.hardwareSet.delete(hardware.hardwareString) //remove pre-edit hardware string
+        inputStore.hardwareSet.add(hardwareString)
+
+        inputStore.createdHardwares[props.hardwareIndex] = 
+        {
+            hardwareString: hardwareString,
+            name: selectedHardware.value.name,
+            hardwareSlowdown: hardwareSlowdown.value,
+            quantum_improvement_rate: quantum_improvement_rate.value,
+            physical_logical_ratio: physical_logical_ratio.value,
+            growth_factor: growth_factor.value,
+            newest_qubits: selectedHardware.value.newest_qubits,
+            newest_year: selectedHardware.value.newest_year
+        }
+    }
+
+
+    dialog.value.closeModal();   
+}
+
+function cancel() {
+    dialog.value.closeModal();   
+}
+
+function reset() {
+    let hardware = inputStore.createdHardwares[props.hardwareIndex];
+    
+    for (let i = 0; i < hardwares.value.length; i++) { //loop matches selectedHardware to input one by name
+        if (hardwares.value[i].name === hardware.name) {
+            selectedHardware.value = hardwares.value[i];
+            break;
+        }
+    }
+
+    hardwareSlowdown.value = hardware.hardwareSlowdown;
+    quantum_improvement_rate.value = hardware.quantum_improvement_rate;
+    physical_logical_ratio.value = hardware.physical_logical_ratio;
+    growth_factor.value = hardware.growth_factor;
+}
+
+</script>
