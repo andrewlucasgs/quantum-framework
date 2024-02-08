@@ -99,7 +99,7 @@ function updateGraphData() {
             data: props.data.classicalSteps,
             color: 'green',
             marker: {
-                symbol: 'circle'
+                enabled: false
             }
         },
         {
@@ -107,7 +107,7 @@ function updateGraphData() {
             data: props.data.quantumSteps,
             color: 'blue',
             marker: {
-                symbol: 'circle'
+                enabled: false
             }
         },
         {
