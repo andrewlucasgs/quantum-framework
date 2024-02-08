@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref,toRaw } from 'vue'
 
 const modelTemplate = {
 
     problemName: 'Database Search',
-    classicalRuntime: (n) => n,
-    quantumRuntime: (n) => Math.sqrt(n),
+    classicalRuntime: function(n) {return n},
+    quantumRuntime: function(n) {return Math.sqrt(n)},
     classicalRuntimeLabel: 'O(n)',
     quantumRuntimeLabel: 'O(sqrt(n))',
 
@@ -27,18 +27,15 @@ const modelTemplate = {
 }
 
 function deepClone(obj) {
-    if (obj === null || typeof obj !== 'object') {
-        return obj
-    }
-
-    const temp = obj.constructor()
-
-    for (let key in obj) {
-        temp[key] = deepClone(obj[key])
-    }
-
-    return temp
-}
+    const clone = Array.isArray(obj) ? [] : {};
+  
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      clone[key] = (typeof value === "object" && value !== null) ? deepClone(value) : value;
+    });
+  
+    return clone;
+  }
 
 export const useModelsStore = defineStore('models', () => {
     const models = ref(
@@ -59,7 +56,8 @@ export const useModelsStore = defineStore('models', () => {
 
     function duplicateModel(modelIndex) {
         const clone = deepClone(models.value[modelIndex])
-        models.value.splice(modelIndex, 0, clone)
+
+        models.value.push(clone)
     }
 
     function updateModel(modelIndex, model) {

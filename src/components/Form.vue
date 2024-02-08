@@ -110,13 +110,31 @@ function updateSlowdown(value) {
     model.value.hardwareSlowdown = value;
 }
 
+const selectedProblem = ref(null);
+const selectedHardware = ref(null);
 onMounted(() => {
     model.value = models.models[props.modelIndex];
+    selectedHardware.value = hardwares.value.find(h => h.hardwareName === model.value.hardwareName);
+    selectedProblem.value = problems.value.find(p => p.problemName === model.value.problemName);
 });
 
-watch([() => model.value, () => model.value], ([problem, hardware]) => {
-    models.updateModel(props.modelIndex, model.value);
+watch([() => selectedProblem.value, () => selectedHardware.value] , ([problem, hardware]) => {
+    model.value.problemName = problem.problemName;
+    model.value.classicalRuntime = problem.classicalRuntime;
+    model.value.quantumRuntime = problem.quantumRuntime;
+    model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
+    model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
+    model.value.hardwareName = hardware.hardwareName;
+    model.value.hardwareSlowdown = hardware.hardwareSlowdown;
+    model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
+    model.value.roadmap = hardware.roadmap;
 }, { deep: true });
+
+watch(() => model.value, (value) => {
+    models.updateModel(props.modelIndex, value);
+}, { deep: true });
+
+
 
 
 const editMode = ref(false);
@@ -173,7 +191,7 @@ function duplicateModel() {
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
             <div class="w-1/4">
                 <label class="font-medium">Problem family</label>
-                <multiselect class="custom-multiselect" track-by="problemName" label="problemName" v-model="model"
+                <multiselect class="custom-multiselect" track-by="problemName" label="problemName" v-model="selectedProblem"
                     :options="problems" :searchable="true" :close-on-select="true" :show-labels="false"
                     placeholder="Pick a value"></multiselect>
                 <p>
@@ -185,7 +203,7 @@ function duplicateModel() {
             </div>
             <div class="w-1/4">
                 <label class="font-medium">Roadmap</label>
-                <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName" v-model="model"
+                <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName" v-model="selectedHardware"
                     :options="hardwares" :searchable="true" :close-on-select="true" :show-labels="false"
                     placeholder="Pick a harware provider"></multiselect>
                 <EditRoadmap :roadmap="model.roadmap" @updateRoadmap="updateRoadmap" v-slot="{ openModal }">

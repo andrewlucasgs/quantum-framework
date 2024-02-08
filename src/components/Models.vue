@@ -11,7 +11,7 @@ const props = defineProps({
 
 
 // find when f(x) = 0
-function bisectionMethod(f, a, b, tol = 1e-12, maxIter = 10000000) {
+function bisectionMethod(f, a, b, tol = 1e-6, maxIter = 10000000) {
     let fa = f(a);
     let fb = f(b);
     if (fa * fb >= 0) {
@@ -63,6 +63,7 @@ function linearInterpolation(xValues, yValues, x) {
 
 
 function getQuantumAdvantage(classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 2, year = 2024) {
+    console.log(classicalRuntime, typeof classicalRuntime)
     function toSolve(n) {
         const N = 10 ** n;
         let adjustmentFactor = hardwareSlowdown * (Math.pow(quantumImprovementRate, year - 2024));
@@ -129,13 +130,24 @@ function calculateQuantumEconomicAdvantage(model) {
     let quantumFeasible = qf(model.roadmap);
     console.log(quantumImprovementRate)
     let quantumAdvantage = qa(classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
-    const tStar = bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 2100);
+    const tStar = bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2, 2600);
+    if (tStar != null) {
+        
     quantumEconomicAdvantageData.value = {
         tStar: tStar,
         nStar: quantumFeasible(tStar),
         quantumFeasible: Array.from({ length: (tStar - year) * 2 + 1 }, (_, i) => [year + i, quantumFeasible(year + i)]),
         quantumAdvantage: Array.from({ length: (tStar - year) * 2 + 1 }, (_, i) => [year + i, quantumAdvantage(year + i)])
     }
+} else {
+    quantumEconomicAdvantageData.value = {
+        tStar: 0,
+        nStar: 0,
+        quantumFeasible: Array.from({ length: (2030 - year) * 2 + 1 }, (_, i) => [year + i, quantumFeasible(year + i)]),
+        quantumAdvantage: Array.from({ length: (2030 - year) * 2 + 1 }, (_, i) => [year + i, quantumAdvantage(year + i)])
+    }
+
+}
 }
 
 const currentAdvantageData = ref({});
@@ -143,6 +155,7 @@ const quantumEconomicAdvantageData = ref({});
 
 // watch problems and hardwareslowdown
 watch(() => props.model, (model) => {
+    console.log('heeeey')
     calculateCurrentAdvantage(props.model);
     calculateQuantumEconomicAdvantage(props.model);
 }, { immediate: true, deep: true });
