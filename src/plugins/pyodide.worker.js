@@ -141,8 +141,8 @@ async function loadPyodideAndPackages() {
     
         #quantum feasible in the form f(year) = problem size
         # quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
-        quantum_feasible_log = sp.simplify(f'log( ({growth_factor}), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
-        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , {growth_factor}))/({newest_qubits}) , 2) + ({newest_year})')
+        quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * {growth_factor} ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
+        quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , 2))/({newest_qubits}) , {growth_factor}) + ({newest_year})')
         quantum_feasible = sp.simplify(quantum_feasible)
     
         #getting nStar value again could probably be a function

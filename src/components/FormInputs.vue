@@ -200,7 +200,7 @@ function createHardware() {
 
                     <div class="flex gap-2">
 
-                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown>
+                        <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown
                         </label>
                         <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                             <button
@@ -212,7 +212,7 @@ function createHardware() {
                     <p class="text-xs text-gray-600">The speed difference between classical & quantum computers.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" v-model="hardwareSlowdown"
-                            min="0" max="12" step="0.5" />
+                            min="0" max="8" step="0.5" />
 
                         <div class="   w-1/5">
                             <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
@@ -238,7 +238,7 @@ function createHardware() {
                     <p class="text-xs text-gray-600">The ratio of improvement over time between quantum computing and classical computing.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
-                            v-model="quantum_improvement_rate" min="1" max="75" />
+                            v-model="quantum_improvement_rate" min="-90" max="90" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="quantum_improvement_rate" v-model="quantum_improvement_rate" />
                     </div>
@@ -251,7 +251,7 @@ function createHardware() {
                         correction.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                            v-model="physical_logical_ratio" min="1" max="2000" />
+                            v-model="physical_logical_ratio" min="1" max="10000" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="physical_logical_ratio" v-model="physical_logical_ratio" />
                     </div>
@@ -263,7 +263,7 @@ function createHardware() {
                         doubling each year).</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="growth_factor" v-model="growth_factor"
-                            min="1.5" max="2.5" step="0.1" />
+                            min="1.1" max="3" step="0.1" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="growth_factor"
                             v-model="growth_factor" />
                     </div>
