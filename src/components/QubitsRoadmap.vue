@@ -10,22 +10,21 @@ const props = defineProps({
 function getPhysicalQubits(year, roadmap) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap);
+    let qubits = Object.values(roadmap).map(x => Math.log10(x))
 
     let numberOfPhysicalQubits;
-    if (roadmap.hasOwnProperty(year)) {
-        numberOfPhysicalQubits = roadmap[year];
+    if (roadmap.hasOwnProperty(Number(year))) {
+        numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
     } else if (year > Math.max(...years)) {
         // Simplified linear regression for years > 2024
         let regression = exponentialRegression(years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
-        // numberOfPhysicalQubits = regression.slope * year + regression.intercept;
         numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
-    } else {
-        // Implement a simple linear interpolation
-        numberOfPhysicalQubits = exponentialInterpolation(years, qubits, year);
-    }
 
-    return numberOfPhysicalQubits;
+    } else {
+        numberOfPhysicalQubits = exponentialInterpolation(years, qubits, year)
+
+    }
+    return (numberOfPhysicalQubits)
 }
 
 // Implement simpleLinearRegression and linearInterpolation functions based on your needs
@@ -95,8 +94,9 @@ function exponentialInterpolation(xValues, yValues, x) {
 }
 
 
+
 const physicalQubits = ref(Array.from({
-    length: Math.max(Math.max(...Object.keys(props.data)), 2024 + 10) - 2024 + 1
+    length: Math.max(Math.max(...Object.keys(props.data)) +10, 2024 + 10) - 2024
 }, (_, i) => [
     i + 2024,
     getPhysicalQubits(i + 2024, props.data)
@@ -104,7 +104,6 @@ const physicalQubits = ref(Array.from({
 
 
 
-console.log(physicalQubits.value)
 
 const chartOptions = {
     chart: {
@@ -121,7 +120,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `Qubits: ${this.x}<br>Year: ${this.y}`;
+            return `Qubits: ${parseInt(10**this.y)}<br>Year: ${this.x}`;
         }
     },
     legend: {
@@ -152,8 +151,7 @@ const chartOptions = {
         labels: {
 
             formatter: function () {
-                console.log(this.value)
-                return `10<sup>${(Math.round(Math.log10(this.value || 1) * 100) / 100)}</sup>`;
+                return `10<sup>${this.value}</sup>`;
             },
             useHTML: true,
 
@@ -181,7 +179,9 @@ const chartOptions = {
             },
             dataLabels: {
                 enabled: true,
-                format: '{point.y}',
+                formatter: function () {
+                    return parseInt(10**this.y);
+                },
                 style: {
                     fontSize: '9px',
                     color: 'blue',
@@ -207,7 +207,6 @@ const chartOptions = {
 const key = ref(0);
 
 watch(() => props.data, () => {
-    console.log(props.data)
 
     physicalQubits.value = Array.from({
         length: Math.max(Math.max(...Object.keys(props.data)), 2024 + 10) - 2024 + 1
@@ -215,7 +214,6 @@ watch(() => props.data, () => {
         i + 2024,
         getPhysicalQubits(i + 2024, props.data)
     ])
-    console.log(physicalQubits.value)
     chartOptions.series[0].data = physicalQubits.value;
     chartOptions.series[1].data = physicalQubits.value.filter(([year, qubits]) => props.data.hasOwnProperty(year));
     chartOptions.series[2].data = physicalQubits.value.filter(([year, qubits]) => !props.data.hasOwnProperty(year));

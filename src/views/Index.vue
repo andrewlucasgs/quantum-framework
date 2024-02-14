@@ -19,10 +19,10 @@ const models = useModelsStore();
 
         <div class="flex flex-col h-full">
             
-            <div v-for="(model, modelIndex) in models.models" :key="modelIndex" >
-                <Models :model="model" :modelIndex="modelIndex" />
+            <div v-for="(model, modelIndex) in models.models" :key="model.id" >
+                <Models :model="model"  />
             </div>
-            <div>
+            <div class="mx-auto">
                 <button @click="models.addModel" class="bg-[#002D9D] text-white rounded-lg p-2 m-4">Add Model</button>
             </div>
         </div>

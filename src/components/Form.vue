@@ -6,47 +6,49 @@ import { useModelsStore } from '../store/models';
 import { onMounted, ref, watch } from 'vue';
 import QubitsRoadmap from './QubitsRoadmap.vue';
 import EditRoadmap from './EditRoadmap.vue';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 const models = useModelsStore();
 
 const props = defineProps({
-    modelIndex: Number
+    modelId: Number
 });
 
 const problems = ref([
     {
         problemName: "Database Search",
         classicalRuntime: (n) => n,
-        quantumRuntime: (n) => Math.sqrt(n),
+        quantumRuntime: (n) => n/2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
     },
     {
         problemName: "Sorting",
-        classicalRuntime: (n) => n * Math.log2(n),
+        classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
         quantumRuntime: (n) => n,
         classicalRuntimeLabel: "O(n \\log_2 n)",
         quantumRuntimeLabel: "O(n)",
     },
     {
         problemName: "Integer Factorization",
-        classicalRuntime: (n) => Math.exp(Math.sqrt(Math.log(n) * Math.log(Math.log(n)))),
-        quantumRuntime: (n) => Math.pow(n, 1 / 3),
+        classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
+        quantumRuntime: (n) => n/3,
         classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
         quantumRuntimeLabel: "O(n^{1/3})",
     },
     {
         problemName: "Linear Algebra",
-        classicalRuntime: (n) => Math.pow(n, 3),
-        quantumRuntime: (n) => Math.pow(n, 2.373),
+        classicalRuntime: (n) => 3*n,
+        quantumRuntime: (n) => 2.373 * n,
         classicalRuntimeLabel: "O(n^3)",
         quantumRuntimeLabel: "O(n^{2.373})",
 
     },
     {
         problemName: "Machine Learning",
-        classicalRuntime: (n) => Math.pow(n, 2),
-        quantumRuntime: (n) => Math.pow(n, 1.5),
+        classicalRuntime: (n) => 2*n,
+        quantumRuntime: (n) => 1.5 * n,
         classicalRuntimeLabel: "O(n^2)",
         quantumRuntimeLabel: "O(n^{1.5})",
     },
@@ -103,22 +105,19 @@ const hardwares = ref([
 
 
 
-const model = ref(
-    models.models[props.modelIndex])
+const model = ref(models.models.find(m => m.id === props.modelId));
 
 function updateSlowdown(value) {
     model.value.hardwareSlowdown = value;
 }
 
-const selectedProblem = ref(null);
-const selectedHardware = ref(null);
+const selectedProblem = ref(problems.value.find(p => p.problemName === model.value.problemName));
+const selectedHardware = ref(hardwares.value.find(h => h.hardwareName === model.value.hardwareName));
 onMounted(() => {
-    model.value = models.models[props.modelIndex];
-    selectedHardware.value = hardwares.value.find(h => h.hardwareName === model.value.hardwareName);
-    selectedProblem.value = problems.value.find(p => p.problemName === model.value.problemName);
+    model.value = Object.assign({}, models.models.find(m => m.id === props.modelId))
 });
 
-watch([() => selectedProblem.value, () => selectedHardware.value] , ([problem, hardware]) => {
+watch([() => selectedProblem.value, () => selectedHardware.value], ([problem, hardware]) => {
     model.value.problemName = problem.problemName;
     model.value.classicalRuntime = problem.classicalRuntime;
     model.value.quantumRuntime = problem.quantumRuntime;
@@ -128,10 +127,11 @@ watch([() => selectedProblem.value, () => selectedHardware.value] , ([problem, h
     model.value.hardwareSlowdown = hardware.hardwareSlowdown;
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
     model.value.roadmap = hardware.roadmap;
+    console.log('asdasdasldl')
 }, { deep: true });
 
 watch(() => model.value, (value) => {
-    models.updateModel(props.modelIndex, value);
+    models.updateModel(props.modelId, value);
 }, { deep: true });
 
 
@@ -144,19 +144,19 @@ function updateRoadmap(value) {
 }
 
 function removeModel() {
-    models.removeModel(props.modelIndex);
+    models.removeModel(props.modelId);
 }
 
 function duplicateModel() {
-    models.duplicateModel(props.modelIndex);
+    models.duplicateModel(props.modelId);
 }
 
 </script>
 
 <template>
-    <div class="">
+    <div class="" v-if="model">
         <div class="flex justify-between items-center border-b w-full px-8 py-2 bg-slate-100">
-            <h2 class="text-2xl text-center font-medium">{{ model.problemName }} on {{ model.hardwareName }}</h2>
+            <h2 class="text-2xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{ model.hardwareName }}</h2>
             <div class="flex gap-4">
                 <button
                     class="flex items-center justify-center rounded-md bg-[#002D9D] px-2 py-2 text-sm text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -195,17 +195,17 @@ function duplicateModel() {
                     :options="problems" :searchable="true" :close-on-select="true" :show-labels="false"
                     placeholder="Pick a value"></multiselect>
                 <p>
-                    Classical Runtime: {{ model.classicalRuntimeLabel }}
+                    Classical Runtime: <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
                 </p>
                 <p>
-                    Quantum Runtime: {{ model.quantumRuntimeLabel }}
+                    Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
                 </p>
             </div>
             <div class="w-1/4">
                 <label class="font-medium">Roadmap</label>
-                <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName" v-model="selectedHardware"
-                    :options="hardwares" :searchable="true" :close-on-select="true" :show-labels="false"
-                    placeholder="Pick a harware provider"></multiselect>
+                <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+                    v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                    :show-labels="false" placeholder="Pick a harware provider"></multiselect>
                 <EditRoadmap :roadmap="model.roadmap" @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
                     <button
                         class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"

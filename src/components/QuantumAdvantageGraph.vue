@@ -53,11 +53,11 @@ const chartOptions = {
         title: {
             text: 'Problem Size',
         },
-        min: 1,
+        min: 0,
         labels: {
             useHTML: true,
             formatter: function () {
-                return toBase10HTML(10 ** this.value);
+                return toBase10HTML(this.value);
             }
         },
         tickPositions: [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2],
@@ -68,7 +68,7 @@ const chartOptions = {
         title: {
             text: 'Classical Time Steps'
         },
-        type: 'logarithmic',
+        type: 'linear',
         labels: {
 
             useHTML: true,
@@ -76,7 +76,7 @@ const chartOptions = {
                 return toBase10HTML(this.value);
             }
         },
-        min: 1,
+        min: 0
     },
     series: []
 
@@ -93,6 +93,11 @@ watch(() => props.data, async () => {
 }, { immediate: true, deep: true})
 
 function updateGraphData() {
+    if(props.data.nStar  <= 0){
+        chartOptions.xAxis.tickPositions = [0, 25, 50, 75, 100]
+    } else {
+        chartOptions.xAxis.tickPositions = [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2]
+    }
     chartOptions.series = [
         {
             name: 'Classical',
@@ -137,7 +142,7 @@ function updateGraphData() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(props.data.stepStar) * 100) / 100}</sup>`,
+                    text: `10<sup>${Math.round((props.data.stepStar) * 100) / 100}</sup>`,
 
                 },
             ]
@@ -154,12 +159,12 @@ function updateGraphData() {
                 {
                     point: {
                         x: props.data.nStar * 100,//times 100 to slightly offset text in the offset scale
-                        y: Math.log10(props.data.stepStar),
+                        y: (props.data.stepStar),
                         xAxis: 0,
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(props.data.nStar) * 100) / 100}</sup>`,
+                    text: `10<sup>${Math.round((props.data.nStar) * 100) / 100}</sup>`,
 
                 },
             ]
@@ -171,7 +176,7 @@ function updateGraphData() {
 
 function toBase10HTML(number) {
     // Calculate the base 10 logarithm of the number.
-    var exponent = Math.log10(number);
+    var exponent = number
     if (exponent === -Infinity) {
         return '10<sup>0</sup>';
     }
