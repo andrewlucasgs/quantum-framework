@@ -198,6 +198,18 @@ const chartOptions = {
             marker: {
                 symbol: 'circle'
             },
+            dataLabels: {
+                enabled: true,
+                formatter: function () {
+                    return parseInt(10**this.y);
+                },
+                style: {
+                    fontSize: '9px',
+                    color: 'red',
+                    fontWeight: 'light',
+                    textOutline: false 
+                }
+            }
         },
 
     ],

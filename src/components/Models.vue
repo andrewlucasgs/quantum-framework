@@ -181,7 +181,6 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio = 1000) {
     if (roadmap.hasOwnProperty(year)) {
         numberOfPhysicalQubits = Math.log10(roadmap[year])
     } else if (year > Math.max(...years)) {
-        // Simplified linear regression for years > 2024
         let regression = exponentialRegression(years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
         numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
 

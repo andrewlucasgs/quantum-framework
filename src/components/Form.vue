@@ -168,7 +168,7 @@ function duplicateModel() {
 
                 </button>
                 <button
-                    class="flex items-center justify-center rounded-md bg-blue-100 px-2 py-2 text-sm text-[#002D9D] hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    class="flex items-center justify-center rounded-md bg-blue-100 ring-1 ring-opacity-50 ring-[#002D9D] px-2 py-2 text-sm text-[#002D9D] hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     @click="duplicateModel">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-4 h-4">
@@ -177,7 +177,7 @@ function duplicateModel() {
                     </svg>
                 </button>
                 <button
-                    class="flex items-center justify-center rounded-md bg-red-50 px-2 py-2 text-sm text-red-900 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    class="flex items-center justify-center rounded-md bg-red-50  ring-1 ring-opacity-50 ring-red-900 px-2 py-2 text-sm text-red-900 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     @click="removeModel"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -190,8 +190,8 @@ function duplicateModel() {
         <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out overflow-hidden"
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
             <div class="w-1/4">
-                <label class="font-medium">Problem family</label>
-                <multiselect class="custom-multiselect" track-by="problemName" label="problemName" v-model="selectedProblem"
+                <label class="font-medium">Problem </label>
+                <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName" v-model="selectedProblem"
                     :options="problems" :searchable="true" :close-on-select="true" :show-labels="false"
                     placeholder="Pick a value"></multiselect>
                 <p>
@@ -202,15 +202,18 @@ function duplicateModel() {
                 </p>
             </div>
             <div class="w-1/4">
-                <label class="font-medium">Roadmap</label>
+                <div class="flex justify-between mb-1">
+
+                    <label class="font-medium">Roadmap</label>
+                    <EditRoadmap :roadmap="model.roadmap" @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                        <button
+                            class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                            @click="openModal">Edit roadmap</button>
+                    </EditRoadmap>
+                </div>
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
                     :show-labels="false" placeholder="Pick a harware provider"></multiselect>
-                <EditRoadmap :roadmap="model.roadmap" @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
-                    <button
-                        class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-                        @click="openModal">Edit roadmap</button>
-                </EditRoadmap>
 
                 <table class="w-full table-auto mt-4 text-xs">
                     <thead class="bg-gray-100">
