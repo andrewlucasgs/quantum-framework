@@ -67,8 +67,6 @@ async function loadPyodideAndPackages() {
     def get_points_advantage(expr, staticNStar, nStar):
         n = sp.Symbol('n')
     
-        # start = sp.nsolve(f'{expr} - {current_year}', n, nStar)
-        # start = sp.nsolve(expr + "-" + str(current_year), n, nStar)
         highest = float(sp.log(staticNStar, 10))
         midPoint = float(sp.log(nStar, 10))
     
@@ -87,8 +85,6 @@ async function loadPyodideAndPackages() {
         new_points = []
         for point in points:
             new_points.append([point[0], float(sp.log(point[1], 10))])
-            # if point[0] > 2026 and point[0] < 2027:
-            #     print(point[0], point[1], float(sp.log(point[1], 10)))
         return new_points
     
     #returns a flat quantum advantage line where all y-values (problem sizes) are nStar. There
@@ -96,27 +92,22 @@ async function loadPyodideAndPackages() {
     #   would only be used when the quantum improvement rate is zero.
     def flat_advantage_line(nStar, feasiblePoints):
         points = []
+        nStarLog = float(sp.log(nStar, 10))
         for point in feasiblePoints:
-            points.append([point[0], float(sp.log(nStar, 10))])
+            points.append([point[0], nStarLog])
         return points
     
     def get_quantum_advantage_data(classical, quantum, hardware_slowdown):
-        validation = [is_valid(classical), is_valid(
-            quantum), is_valid(hardware_slowdown)]
-        if False in validation:
+        nStar = get_nstar(classical, quantum, hardware_slowdown)
+        if nStar is None:
             return None
-        solutions = solve(classical, quantum, hardware_slowdown)
-        nStar = 1
-        if len(solutions) > 0:
-            nStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
-        midPoint = nStar if nStar > 1 and nStar < sp.oo else 1000000000000
-    
-        classical_points = get_points(classical, midPoint)
+        
+        classical_points = get_points(classical, nStar)
     
         quantum = sp.simplify(quantum)
         hardware_slowdown = sp.simplify(hardware_slowdown)
         quantumXHardware = sp.simplify(quantum * hardware_slowdown)
-        quantum_points = get_points(quantumXHardware, midPoint)
+        quantum_points = get_points(quantumXHardware, nStar)
         n = sp.symbols('n')
         step_star = sp.simplify(quantumXHardware).subs(n, nStar)    
         return {
@@ -126,39 +117,25 @@ async function loadPyodideAndPackages() {
             "quantum_steps": quantum_points
         }
     
-    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=2, physical_logical_qubits_ratio=1000, growth_factor=2, newest_qubits=4158, newest_year=2025, current_year=2024):
-        # print("we made it this far")
+    def get_quantum_economic_advantage_data(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate=50, physical_logical_qubits_ratio=1000, growth_factor=2, newest_qubits=4158, newest_year=2025, current_year=2024):
         print(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate, physical_logical_qubits_ratio, newest_qubits, newest_year, current_year)
-    
     
         n = sp.Symbol('n')
     
-        #below calculations require a rate that the slowdown will be divided by, but the input rate
-        #   is one which would be multiplied instead, so the below conversion is used
-        # example, input quantum_improvement rate is 50 signifying that it should decrease by 50% each year,
-        #   a new rate is calculated such that you could divide by 2
-        quantum_improvement_rate = 1 / (1 - quantum_improvement_rate / 100)
+        #converts input of 50 to 0.5
+        quantum_improvement_rate = quantum_improvement_rate * .01 
     
         #quantum feasible in the form f(year) = problem size
-        # quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * 2 ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
         quantum_feasible_log = sp.simplify(f'log( (2), 10) * ( {newest_qubits} * {growth_factor} ^ (n - {newest_year})) / {physical_logical_qubits_ratio}')
         quantum_feasible = sp.simplify(f'log( (({physical_logical_qubits_ratio})*log( (n) , 2))/({newest_qubits}) , {growth_factor}) + ({newest_year})')
-        quantum_feasible = sp.simplify(quantum_feasible)
     
-        #getting nStar value again could probably be a function
-        #using nStar in the static case makes math easier
-        validation = [is_valid(classical_runtime), is_valid(
-        quantum_runtime), is_valid(hardware_slowdown)]
-        if False in validation:
+        staticNStar = get_nstar(classical_runtime, quantum_runtime, hardware_slowdown)
+        if staticNStar is None:
             return None
-        solutions = solve(classical_runtime, quantum_runtime, hardware_slowdown)
-        staticNStar = 1
-        if len(solutions) > 0:
-            staticNStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
         staticTStar = sp.sympify(quantum_feasible).subs(n, staticNStar)
     
     
-        if quantum_improvement_rate == 1: 
+        if quantum_improvement_rate == 0: 
             feasible_points = get_points_feasible(quantum_feasible_log, staticTStar)
             return {
                 "n_star": staticNStar,
@@ -166,8 +143,7 @@ async function loadPyodideAndPackages() {
                 "quantum_feasible": feasible_points,
                 "quantum_advantage": flat_advantage_line(staticNStar, feasible_points)
             }
-    
-        quantum_advantage = sp.simplify(f'log( (({hardware_slowdown})*({quantum_runtime})/({classical_runtime}) ), ({quantum_improvement_rate})) + ({current_year})')
+        quantum_advantage = sp.simplify(f'-log( (({hardware_slowdown})*({quantum_runtime})/({classical_runtime}) ), ({quantum_improvement_rate})) + ({current_year})')
         quantum_advantage = sp.simplify(quantum_advantage)
     
     
@@ -188,19 +164,6 @@ async function loadPyodideAndPackages() {
             # "quantum_advantage": log10(get_points(quantum_advantage, intersection, start=1, inverted=True))
         }
     
-    def get_quantum_economic_advantage_data_2(classical_runtime, quantum_runtime, hardware_slowdown, quantum_improvement_rate, hardwares, current_year=2024):
-        staticNStar = get_nstar(classical_runtime, quantum_runtime, hardware_slowdown)
-        if staticNStar is None:
-            print("could not find static n star")
-    
-        #below calculations require a rate that the slowdown will be divided by, but the input rate
-        #   is one which would be multiplied instead, so the below conversion is used
-        # example, input quantum_improvement rate is 50 signifying that it should decrease by 50% each year,
-        #   a new rate is calculated such that you could divide by 2
-        quantum_improvement_rate = 1 / (1 - quantum_improvement_rate / 100)
-        
-    
-    
     def get_nstar(classical_runtime, quantum_runtime, hardware_slowdown):
         validation = [is_valid(classical_runtime), is_valid(
         quantum_runtime), is_valid(hardware_slowdown)]
@@ -212,11 +175,7 @@ async function loadPyodideAndPackages() {
             staticNStar = solutions[-1] if solutions[-1] > 1 else float(sp.oo)
             return staticNStar
         else:
-            return False
-    
-    
-
-
+            return None
     
 
     `);

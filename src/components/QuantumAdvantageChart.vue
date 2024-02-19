@@ -89,8 +89,6 @@ const chartOptions = {
 let cheapFlag = ref(false)
 
 watch(() => graphStore.quantumAdvantage, async () => {
-    console.log("in QA WATCH")
-    console.log(props.hardwareIndex)
     // // //graphstore changes with any input change, so this check only rerenders graph if a crucial input changed
     // let qaQueryString = `${inputStore.classicalRuntime}_${inputStore.quantumRuntime}__${inputStore.createdHardwares[props.hardwareIndex].hardwareSlowdown}`
     // if (qaQueryString === lastQueryString) {
@@ -109,8 +107,6 @@ watch(() => graphStore.quantumAdvantage, async () => {
 function updateGraphData() {
     console.log("in update graph qa")
     console.log(graphStore.quantumAdvantage)
-    console.log(props.hardwareIndex)
-    console.log(props.hardwareIndex in graphStore.quantumAdvantage)
 
     if (props.hardwareIndex in graphStore.quantumAdvantage) {
         cheapFlag.value = true

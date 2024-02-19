@@ -152,6 +152,9 @@ function getAreaData() {
     const advantage = graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumAdvantage.filter(point => point[0] <= xMax && point[0] >= tStar);
     
     console.log("in area data")
+    console.log(graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar)
+    console.log(xMax, tStar)
+    console.log(graphStore.quantumEconomicAdvantage[props.hardwareIndex])
     console.log(feasibility.length)
     console.log(advantage.length)
     
@@ -180,6 +183,9 @@ async function updateGraphData() {
     }
 
     const xMax = 2024 + (graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar - 2024) * 2;
+
+    console.log("qeaaaa", graphStore.quantumEconomicAdvantage[props.hardwareIndex])
+
     const yMax = graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible[graphStore.quantumEconomicAdvantage[props.hardwareIndex].quantumFeasible.length - 1][1]
     chartOptions.series = [
         {
@@ -235,10 +241,10 @@ async function updateGraphData() {
             enableMouseTracking: false
 
         }
-
-
-
+        
+        
     ]
+    console.log('free me', chartOptions.series[0].data.length)
 
     chartOptions.annotations = [
         {
