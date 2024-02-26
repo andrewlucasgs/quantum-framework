@@ -18,6 +18,7 @@ const modelTemplate = {
         2033: 100000
 
     },
+    extrapolationType: 'exponential',
     hardwareSlowdown: 6,
     quantumImprovementRate: 50,
     physicalLogicalQubitsRatio: 1000

@@ -4,30 +4,10 @@ import { Chart } from 'highcharts-vue'
 import { defineProps, ref, watch } from 'vue';
 
 const props = defineProps({
-    data: Object
+    data: Object,
+    extrapolationType: String
 });
 
-function getPhysicalQubits(year, roadmap) {
-    year = parseFloat(year);
-    let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap).map(x => Math.log10(x))
-
-    let numberOfPhysicalQubits;
-    if (roadmap.hasOwnProperty(Number(year))) {
-        numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
-    } else if (year > Math.max(...years)) {
-        // Simplified linear regression for years > 2024
-        let regression = exponentialRegression(years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
-        numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
-
-    } else {
-        numberOfPhysicalQubits = exponentialInterpolation(years, qubits, year)
-
-    }
-    return (numberOfPhysicalQubits)
-}
-
-// Implement simpleLinearRegression and linearInterpolation functions based on your needs
 function simpleLinearRegression(x, y) {
     let n = x.length;
     let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
@@ -51,7 +31,6 @@ function linearInterpolation(xValues, yValues, x) {
     let x2 = xValues[i + 1], y2 = yValues[i + 1];
     return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
 }
-
 
 function exponentialRegression(x, y) {
     let n = x.length;
@@ -93,17 +72,46 @@ function exponentialInterpolation(xValues, yValues, x) {
     return Math.exp(logY);
 }
 
+const regressionFunctions = {
+    linear: simpleLinearRegression,
+    exponential: exponentialRegression
+}
 
+const interpolationFunctions = {
+    linear: linearInterpolation,
+    exponential: exponentialInterpolation
+}
+
+function getPhysicalQubits(year, roadmap) {
+    year = parseFloat(year);
+    let years = Object.keys(roadmap).map(Number);
+    let qubits = Object.values(roadmap).map(x => Math.log10(x))
+
+    let numberOfPhysicalQubits;
+    if (roadmap.hasOwnProperty(Number(year))) {
+        numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
+    } else if (year > Math.max(...years)) {
+        // Simplified linear regression for years > 2024
+        let regression = regressionFunctions[props.extrapolationType](years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
+        if (props.extrapolationType === 'linear') {
+            numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+        } else {
+            numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+        }
+
+    } else {
+        numberOfPhysicalQubits = interpolationFunctions[props.extrapolationType](years, qubits, year)
+
+    }
+    return (numberOfPhysicalQubits)
+}
 
 const physicalQubits = ref(Array.from({
-    length: Math.max(Math.max(...Object.keys(props.data)) +10, 2024 + 10) - 2024
+    length: Math.max(Math.max(...Object.keys(props.data)) + 10, 2024 + 10) - 2024
 }, (_, i) => [
     i + 2024,
     getPhysicalQubits(i + 2024, props.data)
 ]))
-
-
-
 
 const chartOptions = {
     chart: {
@@ -120,7 +128,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `Qubits: ${parseInt(10**this.y)}<br>Year: ${this.x}`;
+            return `Qubits: ${parseInt(10 ** this.y)}<br>Year: ${this.x}`;
         }
     },
     legend: {
@@ -129,7 +137,7 @@ const chartOptions = {
         verticalAlign: 'top',
         layout: 'vertical',
         x: 60,
-        y:0,
+        y: 0,
         floating: true
 
 
@@ -156,7 +164,7 @@ const chartOptions = {
             useHTML: true,
 
         },
-        
+
 
     },
     series: [
@@ -180,13 +188,13 @@ const chartOptions = {
             dataLabels: {
                 enabled: true,
                 formatter: function () {
-                    return parseInt(10**this.y);
+                    return parseInt(10 ** this.y);
                 },
                 style: {
                     fontSize: '9px',
                     color: 'blue',
                     fontWeight: 'light',
-                    textOutline: false 
+                    textOutline: false
                 }
             }
         },
@@ -201,13 +209,13 @@ const chartOptions = {
             dataLabels: {
                 enabled: true,
                 formatter: function () {
-                    return parseInt(10**this.y);
+                    return parseInt(10 ** this.y);
                 },
                 style: {
                     fontSize: '9px',
                     color: 'red',
                     fontWeight: 'light',
-                    textOutline: false 
+                    textOutline: false
                 }
             }
         },
@@ -218,19 +226,20 @@ const chartOptions = {
 
 const key = ref(0);
 
-watch(() => props.data, () => {
+watch(() => [props.data, props.extrapolationType],
+    () => {
 
-    physicalQubits.value = Array.from({
-        length: Math.max(Math.max(...Object.keys(props.data)), 2024 + 10) - 2024 + 1
-    }, (_, i) => [
-        i + 2024,
-        getPhysicalQubits(i + 2024, props.data)
-    ])
-    chartOptions.series[0].data = physicalQubits.value;
-    chartOptions.series[1].data = physicalQubits.value.filter(([year, qubits]) => props.data.hasOwnProperty(year));
-    chartOptions.series[2].data = physicalQubits.value.filter(([year, qubits]) => !props.data.hasOwnProperty(year));
-    key.value += 1;
-}, { deep: true });
+        physicalQubits.value = Array.from({
+            length: Math.max(Math.max(...Object.keys(props.data)), 2024 + 10) - 2024 + 1
+        }, (_, i) => [
+            i + 2024,
+            getPhysicalQubits(i + 2024, props.data)
+        ])
+        chartOptions.series[0].data = physicalQubits.value;
+        chartOptions.series[1].data = physicalQubits.value.filter(([year, qubits]) => props.data.hasOwnProperty(year));
+        chartOptions.series[2].data = physicalQubits.value.filter(([year, qubits]) => !props.data.hasOwnProperty(year));
+        key.value += 1;
+    }, { deep: true });
 
 
 </script>

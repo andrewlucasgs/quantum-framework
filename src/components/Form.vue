@@ -4,7 +4,6 @@ import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
 import { useModelsStore } from '../store/models';
 
 import { onMounted, ref, watch } from 'vue';
-import QubitsRoadmap from './QubitsRoadmap.vue';
 import EditRoadmap from './EditRoadmap.vue';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -68,7 +67,8 @@ const hardwares = ref([
             2024: 1386,
             2025: 4158,
             2033: 100000
-        }
+        },
+        extrapolationType: "exponential",
 
     },
     {
@@ -85,7 +85,8 @@ const hardwares = ref([
             2026: 5158,
             2027: 5158,
 
-        }
+        },
+        extrapolationType: "linear",
     },
     {
         hardwareName: "IQM",
@@ -98,7 +99,8 @@ const hardwares = ref([
             2023: 1121,
             2024: 1386,
             2025: 4158,
-        }
+        },
+        extrapolationType: "linear",
     },
 
 ]);
@@ -140,7 +142,8 @@ watch(() => model.value, (value) => {
 const editMode = ref(false);
 
 function updateRoadmap(value) {
-    model.value.roadmap = value;
+    model.value.roadmap = value.roadmap;
+    model.value.extrapolationType = value.extrapolationType;
 }
 
 function removeModel() {
@@ -149,6 +152,23 @@ function removeModel() {
 
 function duplicateModel() {
     models.duplicateModel(props.modelId);
+}
+
+function getRelevantRoadmapPoints(data) {
+    const keys = Object.keys(data);
+    const result = {};
+
+    if (keys.length <= 3) {
+        return data;
+    }
+
+    result[keys[0]] = data[keys[0]];
+    result[keys[keys.length - 1]] = data[keys[keys.length - 1]];
+
+    const middleIndex = Math.floor((keys.length - 1) / 2);
+    result[keys[middleIndex]] = data[keys[middleIndex]];
+
+    return result;
 }
 
 </script>
@@ -205,7 +225,9 @@ function duplicateModel() {
                 <div class="flex justify-between mb-1">
 
                     <label class="font-medium">Roadmap</label>
-                    <EditRoadmap :roadmap="model.roadmap" @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                    <EditRoadmap :roadmap="model.roadmap" 
+                    :extrapolationType="model.extrapolationType"
+                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
                         <button
                             class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                             @click="openModal">Edit roadmap</button>
@@ -213,6 +235,7 @@ function duplicateModel() {
                 </div>
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                    :allowEmpty="false"
                     :show-labels="false" placeholder="Pick a harware provider"></multiselect>
 
                 <table class="w-full table-auto mt-4 text-xs">
@@ -223,10 +246,21 @@ function duplicateModel() {
                         </tr>
                     </thead>
                     <tbody class="text-left">
-                        <tr v-for="(value, key) in model.roadmap" :key="key" class="border-b">
+                        <tr v-for="(value, key) in getRelevantRoadmapPoints(model.roadmap)" :key="key" class="border-b">
                             <td class="p-1">
                                 {{ key }}</td>
                             <td>{{ value }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="p-1 text-center">
+                                <EditRoadmap :roadmap="model.roadmap" 
+                    :extrapolationType="model.extrapolationType"
+                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                        <button
+                            class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            @click="openModal">See more</button>
+                    </EditRoadmap>
+                </td>
                         </tr>
                     </tbody>
                 </table>
@@ -294,6 +328,8 @@ function duplicateModel() {
 <style lang="css" scoped>
 .custom-multiselect :deep(.multiselect__tags) .multiselect__tag {
     background-color: #002D9D;
+    z-index: 999 !important;
+
 }
 
 .custom-multiselect :deep(.multiselect__option) {
@@ -308,6 +344,8 @@ function duplicateModel() {
     box-sizing: border-box;
     outline: none;
     transition: all 0.2s ease-in-out;
+    z-index: 999 !important;
+
 }
 
 
@@ -328,5 +366,7 @@ function duplicateModel() {
     box-sizing: border-box;
     outline: none;
     transition: all 0.2s ease-in-out;
+    z-index: 999 !important;
+
 }
 </style>

@@ -171,6 +171,16 @@ function calculateCurrentAdvantage(model) {
     }
 }
 
+const regressionFunctions = {
+    linear: simpleLinearRegression,
+    exponential: exponentialRegression
+}
+
+const interpolationFunctions = {
+    linear: linearInterpolation,
+    exponential: exponentialInterpolation
+}
+
 
 function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio = 1000) {
     year = parseFloat(year);
@@ -181,11 +191,15 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio = 1000) {
     if (roadmap.hasOwnProperty(year)) {
         numberOfPhysicalQubits = Math.log10(roadmap[year])
     } else if (year > Math.max(...years)) {
-        let regression = exponentialRegression(years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
-        numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+        let regression = regressionFunctions[props.model.extrapolationType](years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
+        if (props.model.extrapolationType === 'linear') {
+            numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+        } else {
+            numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+        }
 
     } else {
-        numberOfPhysicalQubits = exponentialInterpolation(years, qubits, year)
+        numberOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
 
     }
     let problemSize = (numberOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))

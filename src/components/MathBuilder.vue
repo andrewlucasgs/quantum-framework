@@ -4,7 +4,7 @@ import { create, all } from 'mathjs'
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 const math = create(all, {
-    log
+    log: true,
 })
 
 function convertMathjsObjectToJsFunc(mathjsObj) {

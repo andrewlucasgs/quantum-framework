@@ -1,5 +1,6 @@
 <script setup>
 import Models from '../components/Models.vue';
+import MathBuilder from '../components/MathBuilder.VUE'
 import {useModelsStore} from '../store/models';
 
 const models = useModelsStore();
