@@ -18,7 +18,7 @@ const problems = ref([
     {
         problemName: "Database Search",
         classicalRuntime: (n) => n,
-        quantumRuntime: (n) => n/2,
+        quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
     },
@@ -32,13 +32,13 @@ const problems = ref([
     {
         problemName: "Integer Factorization",
         classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
-        quantumRuntime: (n) => n/3,
+        quantumRuntime: (n) => n / 3,
         classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
-        quantumRuntimeLabel: "O(n^{1/3})",
+        quantumRuntimeLabel: "O(n^{1/5})",
     },
     {
         problemName: "Linear Algebra",
-        classicalRuntime: (n) => 3*n,
+        classicalRuntime: (n) => 3 * n,
         quantumRuntime: (n) => 2.373 * n,
         classicalRuntimeLabel: "O(n^3)",
         quantumRuntimeLabel: "O(n^{2.373})",
@@ -46,7 +46,7 @@ const problems = ref([
     },
     {
         problemName: "Machine Learning",
-        classicalRuntime: (n) => 2*n,
+        classicalRuntime: (n) => 2 * n,
         quantumRuntime: (n) => 1.5 * n,
         classicalRuntimeLabel: "O(n^2)",
         quantumRuntimeLabel: "O(n^{1.5})",
@@ -139,7 +139,7 @@ watch(() => model.value, (value) => {
 
 
 
-const editMode = ref(false);
+const editMode = ref(true);
 
 function updateRoadmap(value) {
     model.value.roadmap = value.roadmap;
@@ -176,15 +176,13 @@ function getRelevantRoadmapPoints(data) {
 <template>
     <div class="" v-if="model">
         <div class="flex justify-between items-center border-b w-full px-8 py-2 bg-slate-100">
-            <h2 class="text-2xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{ model.hardwareName }}</h2>
+            <h2 class="text-2xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{
+        model.hardwareName }}</h2>
+
             <div class="flex gap-4">
                 <button
-                    class="flex items-center justify-center rounded-md bg-[#002D9D] px-2 py-2 text-sm text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    @click="editMode = !editMode"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
+                    class="flex items-center justify-center rounded-md bg-[#002D9D] px-2 py-2 text-xs text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    @click="editMode = !editMode">Advanced Options
 
                 </button>
                 <button
@@ -207,13 +205,32 @@ function getRelevantRoadmapPoints(data) {
             </div>
         </div>
         <!-- transition height -->
-        <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out overflow-hidden"
+        <div class="px-8  py-2 flex justify-between items-center gap-8 transition-all duration-500 ease-in-out"
+            :class="{ 'max-h-96 opacity-100': editMode, 'max-h-0 opacity-0': !editMode }">
+            <div class="w-full">
+                <label class="font-medium">Problem </label>
+                <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
+                    v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
+                    :show-labels="false" placeholder="Pick a value"></multiselect>
+              
+            </div>
+            <div class="w-full">
+                <label class="font-medium">Roadmap </label>
+               
+            <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+                v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
+              
+            </div>
+
+        </div>
+        <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
             <div class="w-1/4">
                 <label class="font-medium">Problem </label>
-                <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName" v-model="selectedProblem"
-                    :options="problems" :searchable="true" :close-on-select="true" :show-labels="false"
-                    placeholder="Pick a value"></multiselect>
+                <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
+                    v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
+                    :show-labels="false" placeholder="Pick a value"></multiselect>
                 <p>
                     Classical Runtime: <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
                 </p>
@@ -225,9 +242,8 @@ function getRelevantRoadmapPoints(data) {
                 <div class="flex justify-between mb-1">
 
                     <label class="font-medium">Roadmap</label>
-                    <EditRoadmap :roadmap="model.roadmap" 
-                    :extrapolationType="model.extrapolationType"
-                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                    <EditRoadmap :roadmap="model.roadmap" :extrapolationType="model.extrapolationType"
+                        @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
                         <button
                             class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                             @click="openModal">Edit roadmap</button>
@@ -235,8 +251,7 @@ function getRelevantRoadmapPoints(data) {
                 </div>
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-                    :allowEmpty="false"
-                    :show-labels="false" placeholder="Pick a harware provider"></multiselect>
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
 
                 <table class="w-full table-auto mt-4 text-xs">
                     <thead class="bg-gray-100">
@@ -253,14 +268,13 @@ function getRelevantRoadmapPoints(data) {
                         </tr>
                         <tr>
                             <td colspan="2" class="p-1 text-center">
-                                <EditRoadmap :roadmap="model.roadmap" 
-                    :extrapolationType="model.extrapolationType"
-                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
-                        <button
-                            class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                            @click="openModal">See more</button>
-                    </EditRoadmap>
-                </td>
+                                <EditRoadmap :roadmap="model.roadmap" :extrapolationType="model.extrapolationType"
+                                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                                    <button
+                                        class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                        @click="openModal">See more</button>
+                                </EditRoadmap>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -325,6 +339,7 @@ function getRelevantRoadmapPoints(data) {
 
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
+
 <style lang="css" scoped>
 .custom-multiselect :deep(.multiselect__tags) .multiselect__tag {
     background-color: #002D9D;

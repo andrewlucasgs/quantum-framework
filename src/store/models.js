@@ -47,7 +47,11 @@ export const useModelsStore = defineStore('models', () => {
 
     function addModel() {
         const model = deepClone(modelTemplate)
-        model.id = Math.max(...models.value.map(m => m.id)) + 1
+        if (models.value.length === 0) {
+            model.id = 1
+        } else {
+            model.id = Math.max(...models.value.map(m => m.id)) + 1
+        }
         models.value.push(model)
         // i = current scroll position
         var i = window.scrollY;
