@@ -1,7 +1,10 @@
 <script setup>
-import Models from '../components/Models.vue';
-import MathBuilder from '../components/MathBuilder.VUE'
+// import Models from '../components/Models.vue';
 import {useModelsStore} from '../store/models';
+import { defineAsyncComponent } from 'vue';
+
+// import async models from '../store/models';
+const Models = defineAsyncComponent(() => import('../components/Models.vue'));
 
 const models = useModelsStore();
 
@@ -27,7 +30,6 @@ const models = useModelsStore();
                 <button @click="models.addModel" class="bg-[#002D9D] text-white rounded-lg p-2 m-4">Add Model</button>
             </div>
         </div>
-        <!-- <MathBuilder /> -->
     </div>
 </template>
 

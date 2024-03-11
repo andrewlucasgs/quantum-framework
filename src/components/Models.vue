@@ -1,8 +1,8 @@
 <script setup>
-import { watch, ref } from 'vue';
-import QuantumAdvantageGraph from './QuantumAdvantageGraph.vue';
-import QuantumEconomicAdvantageGraph from './QuantumEconomicAdvantageGraph.vue';
-import Form from './Form.vue';
+import { watch, ref, defineAsyncComponent } from 'vue';
+const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
+const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
+const Form = defineAsyncComponent(() => import('./Form.vue'));
 
 const props = defineProps({
     model: Object,
