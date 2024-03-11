@@ -205,8 +205,8 @@ function getRelevantRoadmapPoints(data) {
             </div>
         </div>
         <!-- transition height -->
-        <div class="px-8  py-2 flex justify-between items-center gap-8 transition-all duration-500 ease-in-out"
-            :class="{ 'max-h-96 opacity-100': editMode, 'max-h-0 opacity-0': !editMode }">
+        <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
+            :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
             <div class="w-full">
                 <label class="font-medium">Problem </label>
                 <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
