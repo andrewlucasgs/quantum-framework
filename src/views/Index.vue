@@ -1,24 +1,12 @@
 <script setup>
-import { inject } from 'vue';
+// import Models from '../components/Models.vue';
+import {useModelsStore} from '../store/models';
+import { defineAsyncComponent } from 'vue';
 
+// import async models from '../store/models';
+const Models = defineAsyncComponent(() => import('../components/Models.vue'));
 
-import FormInputs from '../components/FormInputs.vue';
-import QuantumAdvantageChart from '../components/QuantumAdvantageChart.vue';
-import QuantumEconomicAdvantage from '../components/QuantumEconomicAdvantage.vue';
-import EditHardware from '../components/EditHardware.vue';
-import QubitsRoadmap from '../components/QubitsRoadmap.vue';
-
-
-import { useInputStore } from '../store/input.js'
-import { useGraphStore } from '../store/graph.js';
-
-const inputStore = useInputStore();
-const graphStore = useGraphStore();
-
-function del(hardwareIndex, hardwareString) {
-    inputStore.hardwareSet.delete(hardwareString);
-    delete inputStore.createdHardwares[hardwareIndex];
-}
+const models = useModelsStore();
 
 </script>
 
@@ -32,73 +20,15 @@ function del(hardwareIndex, hardwareString) {
                 </div>
             </div>
         </div>
-        <div class="flex flex-1 ">
-            <div class="overflow-scroll p-4 w-1/4 border-r-2">
-                <FormInputs />
+
+        <div class="flex flex-col h-full">
+            
+            <div v-for="(model, modelIndex) in models.models" :key="model.id" >
+                <Models :model="model"  />
             </div>
-
-            <div class="flex flex-1 relative min-h-[300px] h-full overflow-scroll">
-                <div v-if="graphStore.loading"
-                    class="absolute bg-slate-800 h-full w-full z-10 flex justify-center items-center opacity-30">
-                    <div class="text-5xl text-white">
-                        Processing...
-                    </div>
-
-                </div>
-                <div class="flex flex-1 flex-col gap-8 h-full overflow-scroll">
-                    <div class="flex flex-col gap-4 items-center justify-center border-b-2 border-black"
-                        v-for="(hardware, hardwareIndex) in inputStore.createdHardwares" :key="hardwareIndex">
-                        <div class=" shadow-md py-2 px-4 flex  items-center justify-between gap-8 w-full">
-                            <h2 class="font-bold text-lg">{{ hardware.name }}</h2>
-                            <div class="flex gap-4 text-xs">
-                                <span>
-                                    HW: 10 <sup>
-
-                                        {{ hardware.hardwareSlowdown }}
-                                    </sup>
-
-                                </span>
-                                <span>
-
-                                    QIR: {{
-                                        hardware.quantum_improvement_rate }}%
-                                </span>
-                                <span>
-
-                                    PLQR: {{ hardware.physical_logical_ratio }}
-                                </span>
-                                <span>
-
-                                    EGF: {{
-                                        hardware.growth_factor }}
-                                </span>
-                            </div>
-                            <div class="flex gap-4">
-                                <EditHardware :hardwareIndex="hardwareIndex" v-slot="{ openModal }"> 
-                        
-                     <button
-                     class="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-[#002D9D] hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        @click="openModal">Edit Hardware</button>
-                    </EditHardware> 
-                    <!-- <br> -->
-                    <button
-                    class="inline-flex justify-center rounded-md border border-transparent bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-
-                    @click="del(hardwareIndex, hardware.hardwareString)">Delete</button>
-                            </div>
-                        </div>
-                        <div class="flex gap-4 items-center justify-center">
-
-                            <QuantumAdvantageChart :hardwareIndex="hardwareIndex" class="flex-1" />
-                            <QuantumEconomicAdvantage :hardwareIndex="hardwareIndex" class="flex-1" />
-                        </div>
-                    </div>
-                </div>
+            <div class="mx-auto">
+                <button @click="models.addModel" class="bg-[#002D9D] text-white rounded-lg p-2 m-4">Add Model</button>
             </div>
-        </div>
-
-        <div class="max-w-7xl mx-auto px-2">
-            <!-- <QubitsRoadmap /> -->
         </div>
     </div>
 </template>

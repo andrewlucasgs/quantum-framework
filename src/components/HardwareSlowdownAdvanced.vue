@@ -5,6 +5,7 @@
     @cancel="cancel"
     @reset="reset"
     @openModal="updateValues"
+    classes="max-w-xl"
     >
     <template v-slot:button="{openModal}">
         <slot :openModal="openModal" />
@@ -13,7 +14,7 @@
 
         <template #content>
             <div class="flex flex-col">
-                <label class="font-medium text-lg" for="speed">Speed</label>
+                <label class="font-medium text-sm" for="speed">Speed</label>
                 <p class="text-xs text-gray-600">The ratio of the speed of a classical computer
                     divided by the speed of the quantum computer.</p>
                 <div class="flex items-center justify-between w-full gap-2">
@@ -23,7 +24,7 @@
 
             </div>
             <div class="mt-4">
-                <label class="font-medium text-lg" for="gateOverhead">Gate Overhead</label>
+                <label class="font-medium text-sm" for="gateOverhead">Gate Overhead</label>
                 <p class="text-xs text-gray-600">The gate overhead (i.e. additional calculations) that a quantum computer
                     needs to take to maintain
                     its error correction.</p>
@@ -35,15 +36,15 @@
 
             </div>
             <div class="mt-4">
-                <label class="font-medium text-lg" for="algorithmConstant">Algorithm Constant</label>
+                <label class="font-medium text-sm" for="algorithmConstant">Algorithm Constant</label>
                 <p class="text-xs text-gray-600">
                     The ratio of the multiplicative constant from
                     the classical algorithm's time complexity divided by that
                     from the quantum algorithm's.
                 </p>
                 <div class="flex items-center justify-between w-full gap-2">
-                    <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant" v-model="algorithmConstant" min="1"
-                        max="10" />
+                    <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant" v-model="algorithmConstant" min="0.1"
+                        max="2" step="0.1" />
                     <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="algorithmConstant"
                         v-model="algorithmConstant" />
                 </div>

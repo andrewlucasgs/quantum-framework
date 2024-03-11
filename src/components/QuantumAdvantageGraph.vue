@@ -1,14 +1,11 @@
 <script setup>
-import { computed, inject, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Chart } from 'highcharts-vue'
-import { useInputStore } from '../store/input.js'
-import { useGraphStore } from '../store/graph.js';
 
-const props = defineProps(["hardwareIndex"])
 
-const inputStore = useInputStore();
-const graphStore = useGraphStore();
-
+const props = defineProps({
+    data: Object
+});
 const key = ref(0);
 
 function drawDashLine(chart, point, dashLine) {
@@ -28,13 +25,12 @@ function drawDashLine(chart, point, dashLine) {
 const chartOptions = {
     chart: {
         type: 'spline',
-        width: 500,
         events: {
             load: function () {
-                this.dashLines = [[graphStore.quantumAdvantage[props.hardwareIndex].nStar, graphStore.quantumAdvantage[props.hardwareIndex].stepStar]].map(point => drawDashLine(this, point))
+                this.dashLines = [[props.data.nStar, props.data.stepStar]].map(point => drawDashLine(this, point))
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumAdvantage[props.hardwareIndex].nStar, graphStore.quantumAdvantage[props.hardwareIndex].stepStar]][i], line))
+                this.dashLines.forEach((line, i) => drawDashLine(this, [[props.data.nStar, props.data.stepStar]][i], line))
             }
         }
     },
@@ -57,20 +53,22 @@ const chartOptions = {
         title: {
             text: 'Problem Size',
         },
-        type: 'logarithmic',
-        min: 1,
+        min: 0,
         labels: {
             useHTML: true,
             formatter: function () {
                 return toBase10HTML(this.value);
             }
-        }
+        },
+        tickPositions: [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2],
+        startOnTick: true,
+        endOnTick: true,
     },
     yAxis: {
         title: {
             text: 'Classical Time Steps'
         },
-        type: 'logarithmic',
+        type: 'linear',
         labels: {
 
             useHTML: true,
@@ -78,7 +76,7 @@ const chartOptions = {
                 return toBase10HTML(this.value);
             }
         },
-        min: 1,
+        min: 0
     },
     series: []
 
@@ -86,56 +84,40 @@ const chartOptions = {
 
 // let lastQueryString = ""
 
-let cheapFlag = ref(false)
 
-watch(() => graphStore.quantumAdvantage, async () => {
-    // // //graphstore changes with any input change, so this check only rerenders graph if a crucial input changed
-    // let qaQueryString = `${inputStore.classicalRuntime}_${inputStore.quantumRuntime}__${inputStore.createdHardwares[props.hardwareIndex].hardwareSlowdown}`
-    // if (qaQueryString === lastQueryString) {
-    //     console.log("in PROBLEM")
-    //     console.log(qaQueryString)
-    //     console.log(lastQueryString)
-    //     return
-    // }
-    // lastQueryString = qaQueryString
-    
+watch(() => props.data, async () => {
+
+
     updateGraphData();
-
     key.value += 1;
-}, { immediate: true })
+}, { immediate: true, deep: true})
 
 function updateGraphData() {
-    console.log("in update graph qa")
-    console.log(graphStore.quantumAdvantage)
-
-    if (props.hardwareIndex in graphStore.quantumAdvantage) {
-        cheapFlag.value = true
-    }
-    else {
-        cheapFlag.value = false
-        chartOptions.series = []
-        return
+    if(props.data.nStar  <= 0){
+        chartOptions.xAxis.tickPositions = [0, 25, 50, 75, 100]
+    } else {
+        chartOptions.xAxis.tickPositions = [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2]
     }
     chartOptions.series = [
         {
             name: 'Classical',
-            data: graphStore.quantumAdvantage[props.hardwareIndex].classicalSteps,
+            data: props.data.classicalSteps,
             color: 'green',
             marker: {
-                symbol: 'circle'
+                enabled: false
             }
         },
         {
             name: 'Quantum',
-            data: graphStore.quantumAdvantage[props.hardwareIndex].quantumSteps,
+            data: props.data.quantumSteps,
             color: 'blue',
             marker: {
-                symbol: 'circle'
+                enabled: false
             }
         },
         {
             name: 'Quantum Advantage',
-            data: [[graphStore.quantumAdvantage[props.hardwareIndex].nStar, graphStore.quantumAdvantage[props.hardwareIndex].stepStar]],
+            data: [[props.data.nStar, props.data.stepStar]],
             color: 'red',
             type: 'scatter',
             dashStyle: 'dash',
@@ -145,9 +127,9 @@ function updateGraphData() {
 
     chartOptions.annotations = [
         {
-            draggable : "",
+            draggable: "",
             labelOptions: {
-                backgroundColor: "transparent", 
+                backgroundColor: "transparent",
                 borderColor: "red",
                 shape: "rect"
             },
@@ -155,20 +137,20 @@ function updateGraphData() {
                 {
                     point: {
                         x: chartOptions.xAxis.min,
-                        y: graphStore.quantumAdvantage[props.hardwareIndex].stepStar,
+                        y: props.data.stepStar,
                         xAxis: 0,
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].stepStar) * 100) / 100}</sup>`,
-                    
+                    text: `10<sup>${Math.round((props.data.stepStar) * 100) / 100}</sup>`,
+
                 },
             ]
         },
         {
-            draggable : "",
+            draggable: "",
             labelOptions: {
-                backgroundColor: "transparent", 
+                backgroundColor: "transparent",
                 borderColor: "red",
                 // color: "red",
                 shape: "rect"
@@ -176,14 +158,14 @@ function updateGraphData() {
             labels: [
                 {
                     point: {
-                        x: graphStore.quantumAdvantage[props.hardwareIndex].nStar * 100,//times 100 to slightly offset text in the offset scale
-                        y: Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].stepStar),
+                        x: props.data.nStar * 100,//times 100 to slightly offset text in the offset scale
+                        y: (props.data.stepStar),
                         xAxis: 0,
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(graphStore.quantumAdvantage[props.hardwareIndex].nStar) * 100) / 100}</sup>`,
-                    
+                    text: `10<sup>${Math.round((props.data.nStar) * 100) / 100}</sup>`,
+
                 },
             ]
         },
@@ -194,7 +176,7 @@ function updateGraphData() {
 
 function toBase10HTML(number) {
     // Calculate the base 10 logarithm of the number.
-    var exponent = Math.log10(number);
+    var exponent = number
     if (exponent === -Infinity) {
         return '10<sup>0</sup>';
     }
@@ -208,6 +190,6 @@ function toBase10HTML(number) {
 
 <template>
     <div>
-        <Chart :key="key" :options="chartOptions" v-if="cheapFlag" />
+        <Chart :key="key" :options="chartOptions" />
     </div>
 </template>
