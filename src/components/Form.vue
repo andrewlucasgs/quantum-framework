@@ -14,6 +14,18 @@ const props = defineProps({
     modelId: Number
 });
 
+const qubitSizeOptions = ref([
+    "2^{# of qubits}",
+    "2^(2^{# of qubits})",
+    "{# of qubits}",
+])
+
+const penalties = ref([
+    "log(n)",
+    "n",
+    "None",
+])
+
 const problems = ref([
     {
         problemName: "Database Search",
@@ -22,11 +34,28 @@ const problems = ref([
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
     },
+    // {
+    //     problemName: "Sorting",
+    //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
+    //     // classicalRuntime: (n) => n + Math.log10(n) - Math.log10(Math.log10(2)),
+    //     quantumRuntime: (n) => n,
+    //     classicalRuntimeLabel: "O(n \\log_2 n)",
+    //     quantumRuntimeLabel: "O(n)",
+    // },
+    // {
+    //     problemName: "Integer Factorization",
+    //     classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
+    //     quantumRuntime: (n) => n / 3,
+    //     // classicalRuntime: (n) => Math.sqrt(n * Math.log10(n)) * Math.log10(Math.E),
+    //     quantumRuntime: (n) => n/3,
+    //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
+    //     quantumRuntimeLabel: "O(n^{1/5})",
+    // },
     {
         problemName: "Quantum Chemistry TDHF",
         classicalRuntime: (n) => 3 * n,
         quantumRuntime: (n) => n,
-        classicalRuntimeLabel: "O(n^3)",
+        classicalRuntimeLabel: "O(n^{3})",
         quantumRuntimeLabel: "O(n)",
     },
     // {
@@ -67,6 +96,7 @@ const hardwares = ref([
         hardwareSlowdown: 6,
         quantumImprovementRate: 50,
         physicalLogicalQubitsRatio: 1000,
+        qubitToProblemSize: "2^{# of qubits}",
         roadmap: {
             2021: 127,
             2022: 433,
@@ -83,6 +113,7 @@ const hardwares = ref([
         hardwareSlowdown: 5,
         quantumImprovementRate: 40,
         physicalLogicalQubitsRatio: 1200,
+        qubitToProblemSize: "2^{# of qubits}",
         roadmap: {
             2021: 127,
             2022: 4333,
@@ -100,6 +131,7 @@ const hardwares = ref([
         hardwareSlowdown: 7,
         quantumImprovementRate: 60,
         physicalLogicalQubitsRatio: 800,
+        qubitToProblemSize: "2^{# of qubits}",
         roadmap: {
             2021: 127,
             2022: 433,
@@ -126,17 +158,20 @@ onMounted(() => {
     model.value = Object.assign({}, models.models.find(m => m.id === props.modelId))
 });
 
-watch([() => selectedProblem.value, () => selectedHardware.value], ([problem, hardware]) => {
+watch(() => selectedHardware.value, (hardware) => {
+    model.value.hardwareName = hardware.hardwareName;
+    model.value.hardwareSlowdown = hardware.hardwareSlowdown;
+    model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
+    model.value.qubitToProblemSize = hardware.qubitToProblemSize;
+    model.value.roadmap = hardware.roadmap;
+}, { deep: true });
+
+watch(() => selectedProblem.value, (problem) => {
     model.value.problemName = problem.problemName;
     model.value.classicalRuntime = problem.classicalRuntime;
     model.value.quantumRuntime = problem.quantumRuntime;
     model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
     model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
-    model.value.hardwareName = hardware.hardwareName;
-    model.value.hardwareSlowdown = hardware.hardwareSlowdown;
-    model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
-    model.value.roadmap = hardware.roadmap;
-    console.log('asdasdasldl')
 }, { deep: true });
 
 watch(() => model.value, (value) => {
@@ -244,6 +279,23 @@ function getRelevantRoadmapPoints(data) {
                 <p>
                     Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
                 </p>
+                
+                <!-- <br>
+                <label class="font-medium">Problem X Hardware Penalty Factor</label>
+                <multiselect class="custom-multiselect mt-1" v-model="model.penalty"
+                :options="penalties" :searchable="true" :close-on-select="true" :show-labels="false"
+                placeholder="Pick a value"></multiselect> -->
+                <br>
+                <div class="flex flex-col">
+                    <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
+                    <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with the
+                        given number of qubits.</p>
+                    <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
+                    :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
+                    placeholder="Pick a value"></multiselect>
+                </div>
+
+
             </div>
             <div class="w-1/4">
                 <div class="flex justify-between mb-1">

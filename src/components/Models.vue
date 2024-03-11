@@ -122,12 +122,19 @@ function getQuantumAdvantage(classicalRuntime, quantumRuntime, hardwareSlowdown,
 
 
 function calculateCurrentAdvantage(model) {
-    let quantumRuntime = model.quantumRuntime;
+    // console.log("right hereerer")
+    // console.log(model.hardwareSlowdown)
+    // console.log(model.quantumImprovementRate)
+    
+    // let quantumRuntime = model.quantumRuntime;
+    let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = Number(model.hardwareSlowdown);
     let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100)
     let year = new Date().getFullYear();
     let advantage = getQuantumAdvantage(classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
+    
+    // console.log(advantage)
     // range from 0 to double of the advantage with 200 ticks
     let range = []
 
@@ -182,7 +189,7 @@ const interpolationFunctions = {
 }
 
 
-function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio = 1000) {
+function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToProblemSize) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
     let qubits = Object.values(roadmap).map(x => Math.log10(x))
@@ -202,21 +209,43 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio = 1000) {
         numberOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
 
     }
-    let problemSize = (numberOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
-    return 10 ** problemSize;
+
+    // let problemSize = (numberOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
+    // return 10 ** problemSize;
+
+
+    if (qubitToProblemSize == "2^{# of qubits}") {
+        let problemSize = (numberOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
+        return 10 ** problemSize;
+    }
+    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
+        // console.log("inside 2")
+        // let problemSize = (numberOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
+        // let problemSize = Math.pow(10, numberOfPhysicalQubits) / physicalLogicalQubitsRatio * Math.log10(2)
+        let problemSize = Math.pow(2, Math.pow(10, numberOfPhysicalQubits) / physicalLogicalQubitsRatio) * Math.log10(2)
+        return problemSize;
+    }
+    else if (qubitToProblemSize == "{# of qubits}") {
+        let problemSize = numberOfPhysicalQubits -  Math.log10(physicalLogicalQubitsRatio)
+        return problemSize;
+    }
 }
 
 
 
 function calculateQuantumEconomicAdvantage(model) {
-    let quantumRuntime = model.quantumRuntime;
+    
+    
+    // let quantumRuntime = model.quantumRuntime;
+    let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
-    let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100)
+    let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100);
+    let qubitToProblemSize = model.qubitToProblemSize;
     let year = new Date().getFullYear();
     function qf(roadmap) {
-        return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio)
+        return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToProblemSize)
     }
 
     function qa(classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
@@ -266,6 +295,23 @@ function calculateQuantumEconomicAdvantage(model) {
             }
 
         }
+    }
+}
+
+function addPenalty(quantumRuntime, penalty) {
+    // console.log("inside errere")
+    
+    if (penalty == "log(n)") {
+        // return (n) => quantumRuntime(n) * Math.log(n) / Math.log(2)
+        return (n) => quantumRuntime(n) +  Math.log10(n) - Math.log10(Math.log(2))
+    }
+    else if (penalty == "n") {
+        // return (n) => quantumRuntime(n) * n;
+        return (n) => quantumRuntime(n) + n;
+    }
+    else {
+        console.log("inside herrere")
+        return quantumRuntime;
     }
 }
 
