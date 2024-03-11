@@ -23,19 +23,26 @@ const problems = ref([
         quantumRuntimeLabel: "O(\\sqrt{n})",
     },
     {
-        problemName: "Sorting",
-        classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
+        problemName: "Quantum Chemistry TDHF",
+        classicalRuntime: (n) => 3 * n,
         quantumRuntime: (n) => n,
-        classicalRuntimeLabel: "O(n \\log_2 n)",
+        classicalRuntimeLabel: "O(n^3)",
         quantumRuntimeLabel: "O(n)",
     },
-    {
-        problemName: "Integer Factorization",
-        classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
-        quantumRuntime: (n) => n / 3,
-        classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
-        quantumRuntimeLabel: "O(n^{1/5})",
-    },
+    // {
+    //     problemName: "Sorting",
+    //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
+    //     quantumRuntime: (n) => n,
+    //     classicalRuntimeLabel: "O(n \\log_2 n)",
+    //     quantumRuntimeLabel: "O(n)",
+    // },
+    // {
+    //     problemName: "Integer Factorization",
+    //     classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
+    //     quantumRuntime: (n) => n / 3,
+    //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
+    //     quantumRuntimeLabel: "O(n^{1/5})",
+    // },
     {
         problemName: "Linear Algebra",
         classicalRuntime: (n) => 3 * n,
@@ -257,7 +264,7 @@ function getRelevantRoadmapPoints(data) {
                     <thead class="bg-gray-100">
                         <tr class="text-left">
                             <th>Year</th>
-                            <th># of Physic Qubits</th>
+                            <th># of Physical Qubits</th>
                         </tr>
                     </thead>
                     <tbody class="text-left">
