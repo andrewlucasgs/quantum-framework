@@ -78,7 +78,7 @@
 <script setup>
 import Dialog from './Dialog.vue';
 import { computed, onMounted, ref, watch } from 'vue';
-import QubitsRoadmap from './qubitsroadmap.vue';
+import QubitsRoadmap from './QubitsRoadmap.vue';
 
 const dialog = ref(null);
 const roadmapData = ref(null);
