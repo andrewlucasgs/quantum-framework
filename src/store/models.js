@@ -21,8 +21,9 @@ const modelTemplate = {
     extrapolationType: 'exponential',
     hardwareSlowdown: 6,
     quantumImprovementRate: 50,
-    physicalLogicalQubitsRatio: 1000
-
+    physicalLogicalQubitsRatio: 1000,
+    qubitToProblemSize: "2^{# of qubits}",
+    penalty: "None"
 
 }
 
