@@ -33,6 +33,7 @@ const problems = ref([
         quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
+        qubitToProblemSize: "2^{# of qubits}",
     },
     // {
     //     problemName: "Sorting",
@@ -57,6 +58,7 @@ const problems = ref([
         quantumRuntime: (n) => n,
         classicalRuntimeLabel: "O(n^{3})",
         quantumRuntimeLabel: "O(n)",
+        qubitToProblemSize: "{# of qubits}",
     },
     // {
     //     problemName: "Sorting",
@@ -78,6 +80,7 @@ const problems = ref([
         quantumRuntime: (n) => 2.373 * n,
         classicalRuntimeLabel: "O(n^3)",
         quantumRuntimeLabel: "O(n^{2.373})",
+        qubitToProblemSize: "2^{# of qubits}",
 
     },
     {
@@ -86,61 +89,102 @@ const problems = ref([
         quantumRuntime: (n) => 1.5 * n,
         classicalRuntimeLabel: "O(n^2)",
         quantumRuntimeLabel: "O(n^{1.5})",
+        qubitToProblemSize: "2^{# of qubits}",
     },
 ]);
 
 
 const hardwares = ref([
     {
-        hardwareName: "IBM",
-        hardwareSlowdown: 6,
-        quantumImprovementRate: 50,
+        hardwareName: "IBM (Superconducting)",
+        hardwareSlowdown: 3.78,
+        quantumImprovementRate: 10,
         physicalLogicalQubitsRatio: 1000,
-        qubitToProblemSize: "2^{# of qubits}",
         roadmap: {
-            2021: 127,
-            2022: 433,
-            2023: 1121,
-            2024: 1386,
-            2025: 4158,
-            2033: 100000
+            2020: 27,
+            2022: 127,
+            2024: 133,
+            2025: 156,
+            2029: 200,
+            2033: 2000,
         },
         extrapolationType: "exponential",
-
     },
     {
-        hardwareName: "Intel",
-        hardwareSlowdown: 5,
-        quantumImprovementRate: 40,
-        physicalLogicalQubitsRatio: 1200,
-        qubitToProblemSize: "2^{# of qubits}",
+        hardwareName: "IonQ (Trapped Ion)",
+        hardwareSlowdown: 6.7,
+        quantumImprovementRate: 10,
+        physicalLogicalQubitsRatio: 1000,
         roadmap: {
-            2021: 127,
-            2022: 4333,
-            2023: 1121,
-            2024: 1386,
-            2025: 4158,
-            2026: 5158,
-            2027: 5158,
-
+            2021: 22000,
+            2022: 25000,
+            2023: 29000,
+            2024: 35000,
+            2025: 64000,
+            2026: 256000,
+            2027: 384000,
+            2028: 1024000,
         },
-        extrapolationType: "linear",
+        extrapolationType: "exponential",
     },
     {
-        hardwareName: "IQM",
-        hardwareSlowdown: 7,
-        quantumImprovementRate: 60,
-        physicalLogicalQubitsRatio: 800,
-        qubitToProblemSize: "2^{# of qubits}",
+        hardwareName: "QuEra (Neutral Atom)",
+        hardwareSlowdown: 5.1,
+        quantumImprovementRate: 10,
+        physicalLogicalQubitsRatio: 1000,
         roadmap: {
-            2021: 127,
-            2022: 433,
-            2023: 1121,
-            2024: 1386,
-            2025: 4158,
+            2023: 256,
+            2025: 3000,
+            2026: 10000,
         },
-        extrapolationType: "linear",
+        extrapolationType: "exponential",
     },
+    // {
+    //     hardwareName: "IBM",
+    //     hardwareSlowdown: 6,
+    //     quantumImprovementRate: 10,
+    //     physicalLogicalQubitsRatio: 1000,
+    //     roadmap: {
+    //         2021: 127,
+    //         2022: 433,
+    //         2023: 1121,
+    //         2024: 1386,
+    //         2025: 4158,
+    //         2033: 100000
+    //     },
+    //     extrapolationType: "exponential",
+    // },
+    // {
+    //     hardwareName: "Intel",
+    //     hardwareSlowdown: 5,
+    //     quantumImprovementRate: 10,
+    //     physicalLogicalQubitsRatio: 1000,
+    //     roadmap: {
+    //         2021: 127,
+    //         2022: 4333,
+    //         2023: 1121,
+    //         2024: 1386,
+    //         2025: 4158,
+    //         2026: 5158,
+    //         2027: 5158,
+
+    //     },
+    //     extrapolationType: "linear",
+    // },
+    // {
+    //     hardwareName: "IQM",
+    //     hardwareSlowdown: 7,
+    //     quantumImprovementRate: 10,
+    //     physicalLogicalQubitsRatio: 1000,
+    //     roadmap: {
+    //         2021: 127,
+    //         2022: 433,
+    //         2023: 1121,
+    //         2024: 1386,
+    //         2025: 4158,
+    //     },
+    //     extrapolationType: "linear",
+    // },
 
 ]);
 
@@ -162,7 +206,6 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.hardwareName = hardware.hardwareName;
     model.value.hardwareSlowdown = hardware.hardwareSlowdown;
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
-    model.value.qubitToProblemSize = hardware.qubitToProblemSize;
     model.value.roadmap = hardware.roadmap;
 }, { deep: true });
 
@@ -172,6 +215,7 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.quantumRuntime = problem.quantumRuntime;
     model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
     model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
+    model.value.qubitToProblemSize = problem.qubitToProblemSize;
 }, { deep: true });
 
 watch(() => model.value, (value) => {
@@ -350,7 +394,8 @@ function getRelevantRoadmapPoints(data) {
 
                         </HardwareSlowdownAdvanced>
                     </div>
-                    <p class="text-xs text-gray-600">The speed difference between classical & quantum computers.</p>
+                    <p class="text-xs text-gray-600">The number of operations a classical computer could perform in the time it takes
+                        a quantum computer to perform one.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown"
                             v-model="model.hardwareSlowdown" min="0" max="12" step="0.5" />
@@ -368,8 +413,7 @@ function getRelevantRoadmapPoints(data) {
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="quantum_improvement_rate">Quantum Improvement Rate
                         (%)</label>
-                    <p class="text-xs text-gray-600">The ratio of improvement over time between quantum computing and
-                        classical computing.</p>
+                    <p class="text-xs text-gray-600">The percentage by which the hardware slowdown is reduced by each year.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
                             v-model="model.quantumImprovementRate" min="-90" max="90" />

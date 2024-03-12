@@ -8,19 +8,28 @@ const modelTemplate = {
     quantumRuntime: (n) => n / 2,
     classicalRuntimeLabel: "O(n)",
     quantumRuntimeLabel: "O(\\sqrt{n})",
-    hardwareName: 'IBM',
+    hardwareName: 'IBM (Superconducting)',
     roadmap: {
-        2021: 127,
-        2022: 433,
-        2023: 1121,
-        2024: 1386,
-        2025: 4158,
-        2033: 100000
-
+        2020: 27,
+        2022: 127,
+        2024: 133,
+        2025: 156,
+        2029: 200,
+        2033: 2000,
     },
+    // roadmap: {
+    //     2021: 127,
+    //     2022: 433,
+    //     2023: 1121,
+    //     2024: 1386,
+    //     2025: 4158,
+    //     2033: 100000
+
+    // },
     extrapolationType: 'exponential',
-    hardwareSlowdown: 6,
-    quantumImprovementRate: 50,
+    hardwareSlowdown: 3.78,
+    // hardwareSlowdown: 6,
+    quantumImprovementRate: 10,
     physicalLogicalQubitsRatio: 1000,
     qubitToProblemSize: "2^{# of qubits}",
     penalty: "None"
