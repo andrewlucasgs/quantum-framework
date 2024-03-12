@@ -91,8 +91,7 @@ function getPhysicalQubits(year, roadmap) {
     if (roadmap.hasOwnProperty(Number(year))) {
         numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
     } else if (year > Math.max(...years)) {
-        // Simplified linear regression for years > 2024
-        let regression = regressionFunctions[props.extrapolationType](years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
+        let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2));
         if (props.extrapolationType === 'linear') {
             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
         } else {
