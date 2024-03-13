@@ -198,7 +198,7 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToPr
     if (roadmap.hasOwnProperty(year)) {
         numberOfPhysicalQubits = Math.log10(roadmap[year])
     } else if (year > Math.max(...years)) {
-        let regression = regressionFunctions[props.model.extrapolationType](years.filter(y => y >= 2024), qubits.filter((_, index) => years[index] >= 2024));
+        let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2));
         if (props.model.extrapolationType === 'linear') {
             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
         } else {
