@@ -34,7 +34,7 @@ const problems = ref([
         quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
-        qubitToProblemSize: "{# of qubits}",
+        qubitToProblemSize: "2^{# of qubits}",
     },
     {
         problemName: "Integer Factorization",
