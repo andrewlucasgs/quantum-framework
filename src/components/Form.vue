@@ -18,6 +18,7 @@ const qubitSizeOptions = ref([
     "2^{# of qubits}",
     "2^(2^{# of qubits})",
     "{# of qubits}",
+    "log({# of qubits})",
 ])
 
 const penalties = ref([
@@ -33,12 +34,63 @@ const problems = ref([
         quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
-        qubitToProblemSize: "2^{# of qubits}",
+        qubitToProblemSize: "{# of qubits}",
+    },
+    {
+        problemName: "Integer Factorization",
+        classicalRuntime: (n) => 4 / (9 ** (1/3)) * (Math.log(10) ** (2/3)) * Math.log10(Math.E) * (10 ** (n / 3)) * (n ** (2/3)),
+        quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
+        classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
+        quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
+        qubitToProblemSize: "{# of qubits}",
+    },
+    {
+        problemName: "Traveling Salesman",
+        classicalRuntime: (n) => 3 * n + 10 ** (n) * Math.log10(2),
+        quantumRuntime: (n) => n + 10 ** (n) * Math.log10(1.78),
+        classicalRuntimeLabel: "O(n^{3} * 2^{n})",
+        quantumRuntimeLabel: "O(n * 1.78^{n})",
+        qubitToProblemSize: "log({# of qubits})",
+    },
+    {
+        problemName: "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)",
+        classicalRuntime: (n) => 3 * n,
+        quantumRuntime: (n) => n,
+        classicalRuntimeLabel: "O(n^{3})",
+        quantumRuntimeLabel: "O(n)",
+        qubitToProblemSize: "{# of qubits}",
+    },
+    {
+        problemName: "Full Configuration Interaction (Quantum Chemistry)",
+        classicalRuntime: (n) => 10 ** (n) * Math.log10(Math.E) * (n * Math.log(10) - 1),
+        quantumRuntime: (n) => 11 * n,
+        classicalRuntimeLabel: "O(n!)",
+        quantumRuntimeLabel: "O(n^{11})",
+        qubitToProblemSize: "{# of qubits}",
     },
     // {
+    //     problemName: "Linear Algebra",
+    //     classicalRuntime: (n) => 3 * n,
+    //     quantumRuntime: (n) => 2.373 * n,
+    //     classicalRuntimeLabel: "O(n^3)",
+    //     quantumRuntimeLabel: "O(n^{2.373})",
+    //     qubitToProblemSize: "2^{# of qubits}",
+
+    // },
+    // {
+    //     problemName: "Machine Learning",
+    //     classicalRuntime: (n) => 2 * n,
+    //     quantumRuntime: (n) => 1.5 * n,
+    //     classicalRuntimeLabel: "O(n^2)",
+    //     quantumRuntimeLabel: "O(n^{1.5})",
+    //     qubitToProblemSize: "2^{# of qubits}",
+    // },
+
+    // {
+    //     // classicalRuntime: (n) => n + Math.log10(n) - Math.log10(Math.log10(2)),
     //     problemName: "Sorting",
     //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
-    //     // classicalRuntime: (n) => n + Math.log10(n) - Math.log10(Math.log10(2)),
+    //     // classicalRuntime: (n) => Math.log10(n * Math.log2(n)),
     //     quantumRuntime: (n) => n,
     //     classicalRuntimeLabel: "O(n \\log_2 n)",
     //     quantumRuntimeLabel: "O(n)",
@@ -52,14 +104,6 @@ const problems = ref([
     //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
     //     quantumRuntimeLabel: "O(n^{1/5})",
     // },
-    {
-        problemName: "Quantum Chemistry TDHF",
-        classicalRuntime: (n) => 3 * n,
-        quantumRuntime: (n) => n,
-        classicalRuntimeLabel: "O(n^{3})",
-        quantumRuntimeLabel: "O(n)",
-        qubitToProblemSize: "{# of qubits}",
-    },
     // {
     //     problemName: "Sorting",
     //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
@@ -74,23 +118,6 @@ const problems = ref([
     //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
     //     quantumRuntimeLabel: "O(n^{1/5})",
     // },
-    {
-        problemName: "Linear Algebra",
-        classicalRuntime: (n) => 3 * n,
-        quantumRuntime: (n) => 2.373 * n,
-        classicalRuntimeLabel: "O(n^3)",
-        quantumRuntimeLabel: "O(n^{2.373})",
-        qubitToProblemSize: "2^{# of qubits}",
-
-    },
-    {
-        problemName: "Machine Learning",
-        classicalRuntime: (n) => 2 * n,
-        quantumRuntime: (n) => 1.5 * n,
-        classicalRuntimeLabel: "O(n^2)",
-        quantumRuntimeLabel: "O(n^{1.5})",
-        qubitToProblemSize: "2^{# of qubits}",
-    },
 ]);
 
 
@@ -116,10 +143,14 @@ const hardwares = ref([
         quantumImprovementRate: 10,
         physicalLogicalQubitsRatio: 32,
         roadmap: {
-            2021: 352,
-            2022: 400,
-            2023: 464,
-            2024: 560,
+            2021: 22,
+            2022: 25,
+            2023: 29,
+            2024: 35,
+            // 2021: 352,
+            // 2022: 400,
+            // 2023: 464,
+            // 2024: 560,
             2025: 1024,
             2026: 4096,
             2027: 12288,
@@ -206,6 +237,7 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.hardwareName = hardware.hardwareName;
     model.value.hardwareSlowdown = hardware.hardwareSlowdown;
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
+    model.value.quantumImprovementRate = hardware.quantumImprovementRate;
     model.value.roadmap = hardware.roadmap;
 }, { deep: true });
 
@@ -297,7 +329,7 @@ function getRelevantRoadmapPoints(data) {
                 <label class="font-medium">Problem </label>
                 <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                     v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
-                    :show-labels="false" placeholder="Pick a value"></multiselect>
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a value"></multiselect>
               
             </div>
             <div class="w-full">
@@ -336,7 +368,7 @@ function getRelevantRoadmapPoints(data) {
                         given number of qubits.</p>
                     <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
                     :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
-                    placeholder="Pick a value"></multiselect>
+                    :allowEmpty="false" placeholder="Pick a value"></multiselect>
                 </div>
 
 
