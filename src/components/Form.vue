@@ -22,9 +22,9 @@ const qubitSizeOptions = ref([
 ])
 
 const penalties = ref([
-    "log(n)",
-    "n",
     "None",
+    "log(n)",
+    // "n",
 ])
 
 const problems = ref([
@@ -35,6 +35,7 @@ const problems = ref([
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
         qubitToProblemSize: "2^{# of qubits}",
+        penalty: "log(n)",
     },
     {
         problemName: "Integer Factorization",
@@ -43,6 +44,7 @@ const problems = ref([
         classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
         quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
         qubitToProblemSize: "{# of qubits}",
+        penalty: "log(n)",
     },
     {
         problemName: "Traveling Salesman",
@@ -51,6 +53,7 @@ const problems = ref([
         classicalRuntimeLabel: "O(n^{3} * 2^{n})",
         quantumRuntimeLabel: "O(n * 1.78^{n})",
         qubitToProblemSize: "log({# of qubits})",
+        penalty: "log(n)",
     },
     {
         problemName: "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)",
@@ -59,6 +62,7 @@ const problems = ref([
         classicalRuntimeLabel: "O(n^{3})",
         quantumRuntimeLabel: "O(n)",
         qubitToProblemSize: "{# of qubits}",
+        penalty: "log(n)",
     },
     {
         problemName: "Full Configuration Interaction (Quantum Chemistry)",
@@ -67,6 +71,7 @@ const problems = ref([
         classicalRuntimeLabel: "O(n!)",
         quantumRuntimeLabel: "O(n^{11})",
         qubitToProblemSize: "{# of qubits}",
+        penalty: "log(n)",
     },
     // {
     //     problemName: "Linear Algebra",
@@ -75,6 +80,7 @@ const problems = ref([
     //     classicalRuntimeLabel: "O(n^3)",
     //     quantumRuntimeLabel: "O(n^{2.373})",
     //     qubitToProblemSize: "2^{# of qubits}",
+    //     penalty: "log(n)",
 
     // },
     // {
@@ -248,6 +254,7 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
     model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
+    model.value.penalty = problem.penalty;
 }, { deep: true });
 
 watch(() => model.value, (value) => {
@@ -356,11 +363,12 @@ function getRelevantRoadmapPoints(data) {
                     Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
                 </p>
                 
-                <!-- <br>
-                <label class="font-medium">Problem X Hardware Penalty Factor</label>
+                <br>
+                <label class="font-medium text-sm">Connectivity Penalty</label>
+                <p class="text-xs text-gray-600">The overhead for embedding the quantum circuit in the hardware layout.</p>
                 <multiselect class="custom-multiselect mt-1" v-model="model.penalty"
                 :options="penalties" :searchable="true" :close-on-select="true" :show-labels="false"
-                placeholder="Pick a value"></multiselect> -->
+                placeholder="Pick a value"></multiselect>
                 <br>
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>

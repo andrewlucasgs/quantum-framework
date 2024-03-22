@@ -33,7 +33,7 @@ const modelTemplate = {
     physicalLogicalQubitsRatio: 1000,
     qubitToProblemSize: "2^{# of qubits}",
     // qubitToProblemSize: "{# of qubits}",
-    penalty: "None"
+    penalty: "log(n)"
 
 }
 

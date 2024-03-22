@@ -106,45 +106,103 @@ function exponentialInterpolation(xValues, yValues, x) {
 
 
 
-function getQuantumAdvantage(problemName, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
+function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
     let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
     if (adjustmentFactor <= 0) {
         return 0;
     }
+    // console.log("Inside QA")
+    
+    
 
-    // let f = n => 0
+    //assumes the penalty is log(n) or nothing
+    if (problemName === "Database Search")  {
+        // console.log("Inside DS")
+        // console.log(penalty)
 
-    if (problemName === "Database Search" || problemName === "Machine Learning") {
-        return 2 * adjustmentFactor
+        if (penalty === "log(n)") {
+            let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = bisectionMethod(f, 2, 10**100);
+            // console.log("printing penalty n")
+            // console.log(Math.log10(result))
+            if (result === null) return 0
+            // console.log(Math.log10(result))
+            return Math.log10(result)
+        }
+        else {
+            return 2 * adjustmentFactor
+        }
+    }
+    else if (problemName === "Machine Learning")  {
+        if (penalty === "log(n)") {
+            let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = bisectionMethod(f, 2, 10**100);
+            if (result === null) return 0
+            return Math.log10(result)
+        }
+        else {
+            return 2 * adjustmentFactor
+        }    
     }
     else if (problemName === "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)") {
-        return 0.5 * adjustmentFactor
+        if (penalty === "log(n)") {
+            let f = n => 2 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = bisectionMethod(f, 2, 10**100);
+            if (result === null) return 0
+            return Math.log10(result)
+        }
+        else {
+            return 0.5 * adjustmentFactor
+        } 
     }
     else if (problemName === "Linear Algebra") {
-        return adjustmentFactor / 0.627
+        if (penalty === "log(n)") {
+            let f = n => 0.627 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = bisectionMethod(f, 2, 10**100);
+            if (result === null) return 0
+            return Math.log10(result)
+        }
+        else {
+            return adjustmentFactor / 0.627
+        } 
     }
     else if (problemName === "Traveling Salesman") {
-        let f = n => n ** 2 - ((10 ** adjustmentFactor) * (0.89) ** n)
-        // let result = bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
-        let result = bisectionMethod(f, 0, 1000);
+        let f;
+        if (penalty === "log(n)") {
+            f = n => 2 * Math.log10(n) - adjustmentFactor - n * Math.log10(0.89) - Math.log10(Math.log2(n))
+        }
+        else {
+            f = n => 2 * Math.log10(n) - adjustmentFactor - n * Math.log10(0.89)
+        }
+        let result = bisectionMethod(f, 2, 2000); //hardware slowdown of 10 ** (100) would yield an nstar of around 1700, plenty of buffer
         if (result === null) return 0
-        if (result >= 99999) return Infinity
         return Math.log10(result)
     }
     else if (problemName === "Integer Factorization") {
-        let f = n => (64 * n / 9) ** (1/3) * (Math.log(n) ** (2/3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
+        let f;
+        if (penalty === "log(n)") {
+            f = n => (64 * n / 9) ** (1/3) * (Math.log(n) ** (2/3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n) * Math.log2(n))
+        }
+        else {
+            f = n => (64 * n / 9) ** (1/3) * (Math.log(n) ** (2/3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
+        }
         // let result = bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
         let result = bisectionMethod(f, 2, 1000);
         if (result === null) return 0
-        if (result >= 99999) return Infinity
+        // if (result >= 99999) return Infinity
         return Math.log10(result)
     }
     else if (problemName === "Full Configuration Interaction (Quantum Chemistry)") {
-        let f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10)
-        // let result = bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
-        let result = bisectionMethod(f, 1, 60);
+        let f;
+        if (penalty === "log(n)") {
+            f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10) - Math.log(Math.log2(n))
+        }
+        else {
+            f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10)
+        }
+        let result = bisectionMethod(f, 2, 60);
         if (result === null) return 0
-        if (result >= 99999) return Infinity
+        // if (result >= 99999) return Infinity
         return Math.log10(result)
     }
 
@@ -166,14 +224,15 @@ function calculateCurrentAdvantage(model) {
     // console.log(model.hardwareSlowdown)
     // console.log(model.quantumImprovementRate)
     
-    // let quantumRuntime = model.quantumRuntime;
     let problemName = model.problemName;
+    let penalty = model.penalty;
+    // let quantumRuntime = model.quantumRuntime;
     let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = Number(model.hardwareSlowdown);
     let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100)
     let year = new Date().getFullYear();
-    let advantage = getQuantumAdvantage(problemName, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
+    let advantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
     
     // console.log(advantage)
     // range from 0 to double of the advantage with 200 ticks
@@ -290,6 +349,7 @@ function calculateQuantumEconomicAdvantage(model) {
     
     // let quantumRuntime = model.quantumRuntime;
     let problemName = model.problemName;
+    let penalty = model.penalty;
     let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = model.hardwareSlowdown;
@@ -301,11 +361,11 @@ function calculateQuantumEconomicAdvantage(model) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToProblemSize)
     }
 
-    function qa(problemName, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
-        return year => getQuantumAdvantage(problemName, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
+    function qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
+        return year => getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
     }
     let quantumFeasible = qf(model.roadmap);
-    let quantumAdvantage = qa(problemName, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
+    let quantumAdvantage = qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
     // when there is no quantum advantage
     if (quantumAdvantage(2024) >= 99999) {
         let range = []
@@ -352,18 +412,16 @@ function calculateQuantumEconomicAdvantage(model) {
 }
 
 function addPenalty(quantumRuntime, penalty) {
-    // console.log("inside errere")
+    console.log(penalty)
     
     if (penalty == "log(n)") {
-        // return (n) => quantumRuntime(n) * Math.log(n) / Math.log(2)
-        return (n) => quantumRuntime(n) +  Math.log10(n) - Math.log10(Math.log(2))
+        console.log('log penalty applied')
+        return (n) => quantumRuntime(n) +  Math.log10(n) + Math.log10(Math.log2(10))
     }
     else if (penalty == "n") {
-        // return (n) => quantumRuntime(n) * n;
         return (n) => quantumRuntime(n) + n;
     }
     else {
-        // console.log("inside herrere")
         return quantumRuntime;
     }
 }
