@@ -1,56 +1,94 @@
 <template>
-    <Dialog title="Hardware Slowdown" button-label="Advanced options"
-    ref="dialog"
-    @save="save"
-    @cancel="cancel"
-    @reset="reset"
-    @openModal="updateValues"
-    classes="max-w-xl"
-    >
-    <template v-slot:button="{openModal}">
-        <slot :openModal="openModal" />
-    </template>
+    <Dialog title="Hardware Slowdown" button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel"
+        @reset="reset" @openModal="updateValues" classes="max-w-xl">
+        <template v-slot:button="{ openModal }">
+            <slot :openModal="openModal" />
+        </template>
 
 
         <template #content>
             <div class="flex flex-col">
-                <label class="font-medium text-sm" for="speed">Speed</label>
+                <div class="flex items-center gap-2">
+
+                    <label class="font-medium text-sm " for="speed">Speed</label>
+                    <div class="text-xs ">
+                        <input hidden type="radio" id="simple" value="simple" v-model="speedInput" />
+                        <label class="border rounded-sm transition-all text-center p-1" :class="{
+        'bg-[#002D9D] text-white': speedInput === 'simple',
+        'bg-gray-100': speedInput !== 'simple'
+    }" for="simple">Simple</label>
+                        <input hidden type="radio" id="manual" value="manual" v-model="speedInput" />
+                        <label class="border rounded-sm transition-all text-center p-1" :class="{
+        'bg-[#002D9D] text-white': speedInput === 'manual',
+        'bg-gray-100': speedInput !== 'manual'
+    }" for="manual">Manual</label>
+                    </div>
+                </div>
                 <p class="text-xs text-gray-600">The ratio of the speed of a classical computer
                     divided by the speed of the quantum computer.</p>
-                
-                <div>
-                    <input type="radio" id="simple" value="simple" v-model="speedInput" />
-                    <label for="simple"> Simple </label>
-                    <input type="radio" id="manual" value="manual" v-model="speedInput" />
-                    <label for="manual"> Manual </label>
-                </div>
-                
+
+
                 <div v-if="speedInput === 'manual'">
-                    <div>
-                        <br>
-                        Classical CPU GHz: <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="cpuGHz" v-model="cpuGHz" /> GHz <br>
-                        Average Quantum Operation Time: <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="gateTime" v-model="gateTime" /> ns <br> 
-                        <p style="font-size: small;">(Default is Two-Qubit Gate Time)</p><br>
-                        Speed Ratio: {{ manualSpeed }}
+                    <div class="flex items-end mt-2 justify-between w-full gap-2">
+                        <div class="flex-1">
+                            <div class="flex items-end">
+                                <div class="">
+                                    <p class="font-medium text-xs ">Average Quantum<br/>Operation Time</p>
+                                    <p style="font-size: 9px;">(Default: Two-Qubit Gate Time)</p>
+                                    <div class="flex items-center gap-1">
+                                        <input class="bg-gray-100 p-1 rounded-lg text-center w-1/2" type="number"
+                                            id="gateTime" v-model="gateTime" /> ns
+                                    </div>
+                                    
+                                </div>
+
+
+                                <div>
+
+                                    <p class="font-medium text-xs "> Classical CPU GHz</p>
+                                    <div class="flex items-center gap-1">
+
+                                        <input class="bg-gray-100 p-1 rounded-lg text-center w-1/2" type="number"
+                                            id="cpuGHz" v-model="cpuGHz" /> GHz
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="w-1/5 ">
+
+                            <p class="font-medium text-xs  ">Speed ratio</p>
+                            <div class="bg-gray-100 p-2 rounded-lg text-center w-full">
+
+                                {{ manualSpeed }}
+                            </div>
+                        </div>
+
+
                     </div>
+
 
                 </div>
                 <div v-else>
                     <div class="flex items-center justify-between w-full gap-2">
-                        <input class="flex-1 accent-[#002D9D]" type="range" id="speed" v-model="speed" min="1" max="100000" />
-                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="speed" v-model="speed" />
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="speed" v-model="speed" min="1"
+                            max="100000" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="speed"
+                            v-model="speed" />
                     </div>
                 </div>
-                
+
 
             </div>
             <div class="mt-4">
                 <label class="font-medium text-sm" for="gateOverhead">Gate Overhead</label>
-                <p class="text-xs text-gray-600">The gate overhead (i.e. additional calculations) that a quantum computer
+                <p class="text-xs text-gray-600">The gate overhead (i.e. additional calculations) that a quantum
+                    computer
                     needs to take to maintain
                     its error correction.</p>
                 <div class="flex items-center justify-between w-full gap-2">
-                    <input class="flex-1 accent-[#002D9D]" type="range" id="gateOverhead" v-model="gateOverhead" min="1" max="1000" />
+                    <input class="flex-1 accent-[#002D9D]" type="range" id="gateOverhead" v-model="gateOverhead" min="1"
+                        max="1000" />
                     <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="gateOverhead"
                         v-model="gateOverhead" />
                 </div>
@@ -64,8 +102,8 @@
                     from the quantum algorithm's.
                 </p>
                 <div class="flex items-center justify-between w-full gap-2">
-                    <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant" v-model="algorithmConstant" min="0.1"
-                        max="2" step="0.1" />
+                    <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant"
+                        v-model="algorithmConstant" min="0.1" max="2" step="0.1" />ß
                     <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="algorithmConstant"
                         v-model="algorithmConstant" />
                 </div>
@@ -112,10 +150,10 @@ const hwSlowdown = ref(6);
 
 watch([() => [speedInput.value, manualSpeed.value, speed.value, gateOverhead.value, algorithmConstant.value], () => {
     if (speedInput.value === "manual") {
-        hwSlowdown.value = Math.round(Math.log10(manualSpeed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
+        hwSlowdown.value = Math.round(Math.log10(manualSpeed.value * gateOverhead.value * algorithmConstant.value) * 100) / 100;
     }
     else {
-        hwSlowdown.value = Math.round(Math.log10(speed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
+        hwSlowdown.value = Math.round(Math.log10(speed.value * gateOverhead.value * algorithmConstant.value) * 100) / 100;
     }
 }])
 
@@ -131,7 +169,7 @@ watch([() => [speedInput.value, manualSpeed.value, speed.value, gateOverhead.val
 //     }
 // })
 
-function updateValues (){
+function updateValues() {
     speed.value = dialogInputStore.hardwareSlowdownAdvancedOptions.speed;
     gateOverhead.value = dialogInputStore.hardwareSlowdownAdvancedOptions.gateOverhead;
     algorithmConstant.value = dialogInputStore.hardwareSlowdownAdvancedOptions.algorithmConstant;
@@ -139,7 +177,7 @@ function updateValues (){
     cpuGHz.value = dialogInputStore.hardwareSlowdownAdvancedOptions.cpuGHz;
 }
 
-function save (){
+function save() {
     dialogInputStore.hardwareSlowdownAdvancedOptions = {
         speed: speed.value,
         gateOverhead: gateOverhead.value,
@@ -149,14 +187,14 @@ function save (){
     }
 
     emit("updateSlowdown", hwSlowdown.value);
-    dialog.value.closeModal();   
+    dialog.value.closeModal();
 }
 
-function cancel (){
-    dialog.value.closeModal();   
+function cancel() {
+    dialog.value.closeModal();
 }
 
-function reset (){
+function reset() {
     speed.value = 10000;
     gateOverhead.value = 100;
     algorithmConstant.value = 1;

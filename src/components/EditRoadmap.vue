@@ -1,8 +1,17 @@
 <template>
-    <Dialog title="Roadmap" button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel" @reset="reset"
+    <Dialog :title="'Edit ' + name + ' Roadmap'"
+    button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel" @reset="reset"
         classes="max-w-7xl" @openModal="updateValues">
         <template v-slot:button="{ openModal }">
             <slot :openModal="openModal" />
+        </template>
+
+        <template #reference>
+            <ReferenceDialog title="References" classes="max-w-lg">
+                        <template #content>
+                            <HardwareReferences />
+                        </template>
+                    </ReferenceDialog>
         </template>
 
 
@@ -15,6 +24,7 @@
                             additional data points as needed. Interpolation will be used to address any gaps between
                             existing milestones on the roadmap. For projecting future trends and values beyond the current
                             roadmap, regression analysis will be utilized.</p>
+                            
 
                     </div>
                     <div class="my-2 w-full">
@@ -79,10 +89,13 @@
 import Dialog from './Dialog.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import QubitsRoadmap from './QubitsRoadmap.vue';
+import ReferenceDialog from './ReferenceDialog.vue';
+import HardwareReferences from './HardwareReferences.vue';
 
 const dialog = ref(null);
 const roadmapData = ref(null);
 const props = defineProps({
+    name: String,
     roadmap: Object,
     extrapolationType: String
 });

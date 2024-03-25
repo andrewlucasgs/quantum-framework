@@ -1,10 +1,15 @@
 <template>
-    <div class="">
-        <!-- <button type="button" @click="openModal"
-            class="rounded-md bg-black/20 px-4 py-2 text-sm font-medium text-white hover:bg-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
-            {{ buttonLabel }}
-        </button> -->
-        <slot name="button" :openModal="openModal" />
+    <div class="group  flex items-center relative">
+        <button type="button" @click="openModal" class=" text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+            </svg>
+            <!-- display tooltip on hover icon  -->
+            <span
+                class=" transform translate-y-[-1200px] group-hover:translate-y-0 transition-opacity duration-300 delay-500 opacity-0 group-hover:opacity-100 absolute top-6 -left-full z-50 bg-gray-700 rounded-lg text-white p-1">References</span>
+        </button>
     </div>
     <TransitionRoot appear :show="isOpen" as="template">
         <Dialog as="div" @close="closeModal" class="relative z-10">
@@ -22,9 +27,9 @@
                             class="w-full  transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                             :class="classes">
 
-                
-                            <DialogTitle as="h3" class="flex  gap-2 items-center text-lg font-medium leading-6 text-gray-900">
-                                {{ title }} <slot name="reference"/>
+
+                            <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                                {{ title }}
                             </DialogTitle>
                             <div class="mt-2">
                                 <slot name="content" />
@@ -33,22 +38,10 @@
                             <div class="mt-4 flex justify-between">
                                 <button type="button"
                                     class="inline-flex justify-center rounded-md border border-transparent bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                    @click="emit('cancel')">
-                                    Cancel
+                                    @click="closeModal">
+                                    Close
                                 </button>
-                                <div class="space-x-8">
 
-                                    <button type="button"
-                                        class="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-[#002D9D] hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                        @click="emit('reset')">
-                                        Reset
-                                    </button>
-                                    <button type="button"
-                                        class="inline-flex justify-center rounded-md border border-transparent bg-[#002D9D] px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                        @click="emit('save')">
-                                        Save
-                                    </button>
-                                </div>
                             </div>
                         </DialogPanel>
                     </TransitionChild>
@@ -57,7 +50,7 @@
         </Dialog>
     </TransitionRoot>
 </template>
-  
+
 <script setup>
 import { ref, watch } from 'vue'
 import {
@@ -109,4 +102,3 @@ watch(isOpen, (isOpen) => {
     }
 })
 </script>
-  

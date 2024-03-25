@@ -7,6 +7,9 @@ import { onMounted, ref, watch } from 'vue';
 import EditRoadmap from './EditRoadmap.vue';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import ReferenceDialog from './ReferenceDialog.vue';
+import HardwareReferences from './HardwareReferences.vue';
+import ProblemReferences from './ProblemReferences.vue';
 
 const models = useModelsStore();
 
@@ -39,7 +42,7 @@ const problems = ref([
     },
     {
         problemName: "Integer Factorization",
-        classicalRuntime: (n) => 4 / (9 ** (1/3)) * (Math.log(10) ** (2/3)) * Math.log10(Math.E) * (10 ** (n / 3)) * (n ** (2/3)),
+        classicalRuntime: (n) => 4 / (9 ** (1 / 3)) * (Math.log(10) ** (2 / 3)) * Math.log10(Math.E) * (10 ** (n / 3)) * (n ** (2 / 3)),
         quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
         classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
         quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
@@ -333,26 +336,47 @@ function getRelevantRoadmapPoints(data) {
         <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
             :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
             <div class="w-full">
-                <label class="font-medium">Problem </label>
+                <div class="flex items-center gap-2">
+                    <label class="font-medium">Problem </label>
+                    <ReferenceDialog title="References" classes="max-w-lg">
+                        <template #content>
+                            <ProblemReferences />
+                        </template>
+                    </ReferenceDialog>
+                </div>
                 <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                     v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
                     :allowEmpty="false" :show-labels="false" placeholder="Pick a value"></multiselect>
-              
+
             </div>
             <div class="w-full">
-                <label class="font-medium">Roadmap </label>
-               
-            <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
-                v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-                :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
-              
+                <div class="flex items-center gap-2">
+                    <label class="font-medium">Roadmap </label>
+                    <ReferenceDialog title="References" classes="max-w-lg">
+                        <template #content>
+                            <HardwareReferences />
+                        </template>
+                    </ReferenceDialog>
+                </div>
+
+                <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+                    v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
+
             </div>
 
         </div>
         <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
             <div class="w-1/4">
-                <label class="font-medium">Problem </label>
+                <div class="flex items-center gap-2">
+                    <label class="font-medium">Problem </label>
+                    <ReferenceDialog title="References" classes="max-w-lg">
+                        <template #content>
+                            <ProblemReferences />
+                        </template>
+                    </ReferenceDialog>
+                </div>
                 <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                     v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
                     :show-labels="false" placeholder="Pick a value"></multiselect>
@@ -362,21 +386,23 @@ function getRelevantRoadmapPoints(data) {
                 <p>
                     Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
                 </p>
-                
+
                 <br>
                 <label class="font-medium text-sm">Connectivity Penalty</label>
-                <p class="text-xs text-gray-600">The overhead for embedding the quantum circuit in the hardware layout.</p>
-                <multiselect class="custom-multiselect mt-1" v-model="model.penalty"
-                :options="penalties" :searchable="true" :close-on-select="true" :show-labels="false"
-                placeholder="Pick a value"></multiselect>
+                <p class="text-xs text-gray-600">The overhead for embedding the quantum circuit in the hardware layout.
+                </p>
+                <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
+                    :searchable="true" :close-on-select="true" :show-labels="false" placeholder="Pick a value">
+                </multiselect>
                 <br>
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
-                    <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with the
+                    <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with
+                        the
                         given number of qubits.</p>
                     <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
-                    :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
-                    :allowEmpty="false" placeholder="Pick a value"></multiselect>
+                        :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
+                        :allowEmpty="false" placeholder="Pick a value"></multiselect>
                 </div>
 
 
@@ -384,9 +410,17 @@ function getRelevantRoadmapPoints(data) {
             <div class="w-1/4">
                 <div class="flex justify-between mb-1">
 
-                    <label class="font-medium">Roadmap</label>
-                    <EditRoadmap :roadmap="model.roadmap" :extrapolationType="model.extrapolationType"
-                        @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                    <div class="flex items-center gap-2">
+                        <label class="font-medium">Roadmap </label>
+                        <ReferenceDialog title="References" classes="max-w-lg">
+                            <template #content>
+                                <HardwareReferences />
+                            </template>
+                        </ReferenceDialog>
+                    </div>
+                    <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
+                        :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                        v-slot="{ openModal }">
                         <button
                             class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                             @click="openModal">Edit roadmap</button>
@@ -411,8 +445,9 @@ function getRelevantRoadmapPoints(data) {
                         </tr>
                         <tr>
                             <td colspan="2" class="p-1 text-center">
-                                <EditRoadmap :roadmap="model.roadmap" :extrapolationType="model.extrapolationType"
-                                    @updateRoadmap="updateRoadmap" v-slot="{ openModal }">
+                                <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
+                                    :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                                    v-slot="{ openModal }">
                                     <button
                                         class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                         @click="openModal">See more</button>
@@ -424,9 +459,24 @@ function getRelevantRoadmapPoints(data) {
             </div>
             <div class="flex-1">
                 <div>
-                    <div class="flex gap-2 items-center">
-                        <label class="font-medium text-sm" for="hardwareSlowdown">Hardware Slowdown
-                        </label>
+                    <div class="flex gap-2 items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <label class="font-medium text-s" for="hardwareSlowdown">Hardware Slowdown</label>
+                            <ReferenceDialog title="References" classes="max-w-lg">
+                                <template #content>
+                                    <h3 class="text-medium text-sm mt-4">Hardware Slowdown</h3>
+                                    <ul class="text-sm">
+                                        <li class="ml-4 list-disc">
+                                            <a class="text-[#012D9D] hover:underline" href="https://arxiv.org/pdf/2310.15505.pdf" target="_blank"
+                                                rel="noopener noreferrer">The Quantum Tortoise and the Classical Hare:
+A simple framework for understanding which
+problems quantum computing will accelerate (and
+which it won’t)</a>
+                                        </li>
+                                    </ul>
+                                </template>
+                            </ReferenceDialog>
+                        </div>
                         <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
@@ -434,7 +484,9 @@ function getRelevantRoadmapPoints(data) {
 
                         </HardwareSlowdownAdvanced>
                     </div>
-                    <p class="text-xs text-gray-600">The number of operations a classical computer could perform in the time it takes
+                    <p class="text-xs text-gray-600">The number of operations a classical computer could perform in the
+                        time it
+                        takes
                         a quantum computer to perform one.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown"
@@ -453,7 +505,8 @@ function getRelevantRoadmapPoints(data) {
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="quantum_improvement_rate">Quantum Improvement Rate
                         (%)</label>
-                    <p class="text-xs text-gray-600">The percentage by which the hardware slowdown is reduced by each year.</p>
+                    <p class="text-xs text-gray-600">The percentage by which the hardware slowdown is reduced by each
+                        year.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
                             v-model="model.quantumImprovementRate" min="-90" max="90" />
