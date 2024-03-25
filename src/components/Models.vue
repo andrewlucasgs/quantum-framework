@@ -412,10 +412,10 @@ function calculateQuantumEconomicAdvantage(model) {
 }
 
 function addPenalty(quantumRuntime, penalty) {
-    console.log(penalty)
+    // console.log(penalty)
     
     if (penalty == "log(n)") {
-        console.log('log penalty applied')
+        // console.log('log penalty applied')
         return (n) => quantumRuntime(n) +  Math.log10(n) + Math.log10(Math.log2(10))
     }
     else if (penalty == "n") {

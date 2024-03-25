@@ -27,8 +27,10 @@
                 
                 <div v-if="speedInput === 'manual'">
                     <div>
-                        2 Qubit Gate Time: <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="gateTime" v-model="gateTime" /> ns <br>
+                        <br>
                         Classical CPU GHz: <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="cpuGHz" v-model="cpuGHz" /> GHz <br>
+                        Average Quantum Operation Time: <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="gateTime" v-model="gateTime" /> ns <br> 
+                        <p style="font-size: small;">(Default is Two-Qubit Gate Time)</p><br>
                         Speed Ratio: {{ manualSpeed }}
                     </div>
 
