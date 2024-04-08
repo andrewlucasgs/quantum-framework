@@ -55,52 +55,52 @@ const references = [
         problemName: "Database Search",
         classicalRuntimeLabel: "O(n)",
         classicalReferenceTitle: "Grover's Algorithm",
-        classicalReferenceLink: "https://en.wikipedia.org/wiki/Grover%27s_algorithm",
+        classicalReferenceLink: "#",
 
         quantumRuntimeLabel: "O(\\sqrt{n})",
         quantumReferenceTitle: "Grover's Algorithm",
-        quantumReferenceLink: "https://en.wikipedia.org/wiki/Grover%27s_algorithm",
+        quantumReferenceLink: "#",
     },
     {
         problemName: "Integer Factorization",
         classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
         classicalReferenceTitle: "General Number Field Sieve",
-        classicalReferenceLink: "https://en.wikipedia.org/wiki/General_number_field_sieve",
+        classicalReferenceLink: "#",
 
 
         quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
         quantumReferenceTitle: "Shor's Algorithm",
-        quantumReferenceLink: "https://en.wikipedia.org/wiki/Shor%27s_algorithm",
+        quantumReferenceLink: "#",
     },
     {
         problemName: "Traveling Salesman",
         classicalRuntimeLabel: "O(n^{3} * 2^{n})",
         classicalReferenceTitle: "Dynamic Programming",
-        classicalReferenceLink: "https://en.wikipedia.org/wiki/Dynamic_programming",
+        classicalReferenceLink: "#",
 
         quantumRuntimeLabel: "O(n * 1.78^{n})",
         quantumReferenceTitle: "Quantum Approximate Optimization Algorithm",
-        quantumReferenceLink: "https://en.wikipedia.org/wiki/Quantum_approximate_optimization_algorithm",
+        quantumReferenceLink: "#",
     },
     {
         problemName: "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)",
         classicalRuntimeLabel: "O(n^{3})",
         classicalReferenceTitle: "Hartree-Fock Approximation",
-        classicalReferenceLink: "https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method",
+        classicalReferenceLink: "#",
 
         quantumRuntimeLabel: "O(n)",
         quantumReferenceTitle: "Variational Quantum Eigensolver",
-        quantumReferenceLink: "https://en.wikipedia.org/wiki/Variational_quantum_eigensolver",
+        quantumReferenceLink: "#",
     },
     {
         problemName: "Full Configuration Interaction (Quantum Chemistry)",
         classicalRuntimeLabel: "O(n!)",
         classicalReferenceTitle: "Full Configuration Interaction",
-        classicalReferenceLink: "https://en.wikipedia.org/wiki/Full_configuration_interaction",
+        classicalReferenceLink: "#",
 
         quantumRuntimeLabel: "O(n^{11})",
         quantumReferenceTitle: "Quantum Phase Estimation",
-        quantumReferenceLink: "https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm",
+        quantumReferenceLink: "#",
     },
 ]
 </script>
