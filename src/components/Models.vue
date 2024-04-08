@@ -524,12 +524,16 @@ watch(() => props.model, (model) => {
         <div>
             <Form :modelId="model.id" />
         </div>
-        <div class="md:flex gap-4 px-8  py-2">
+        <div class="md:flex gap-4 px-8 py-2">
 
             <QuantumAdvantageGraph :data="currentAdvantageData" />
             <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
-            <LogicalQubitsGraph :data="logicalQubitsData" />
         </div>
+        <div class="md:flex gap-4 px-8 py-2 justify-center">
+
+        <LogicalQubitsGraph :data="logicalQubitsData" />
+    </div>
+
     </div>
 </template>
 
