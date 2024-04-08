@@ -1,22 +1,45 @@
 <template>
     <div>
-        <h3 class="text-medium mt-4">IBM (Superconducting)</h3>
-        <ul class="text-sm">
-            <li class="ml-4 list-disc">
-                <a class="text-[#012D9D] hover:underline" href="https://www.ibm.com/roadmaps/quantum.pdf" target="_blank" rel="noopener noreferrer">IBM roadmap</a>
-            </li>
-        </ul>
-        <h3 class="text-medium mt-4"> QuEra (Neutral Atom)</h3>
-        <ul class="text-sm">
-            <li class="ml-4 list-disc">
-                <a class="text-[#012D9D] hover:underline" href="https://www.quera.com/qec" target="_blank" rel="noopener noreferrer">QuEra roadmap</a>
-            </li>
-        </ul>
-        <h3 class="text-medium mt-4"> IonQ (Trapped Ion)</h3>
-        <ul class="text-sm">
-            <li class="ml-4 list-disc">
-                <a class="text-[#012D9D] hover:underline" href="https://ionq.com/posts/how-we-achieved-our-2024-performance-target-of-aq-35" target="_blank" rel="noopener noreferrer">IonQ roadmap</a>
-            </li>
-        </ul>
+        <div class="table-responsive">
+            <table class="min-w-full divide-y divide-gray-300 text-xs">
+                <thead class="bg-gray-50">
+                    <tr class="divide-x divide-gray-200 font-medium text-gray-500 text-xs">
+                        <th>Roadmap</th>
+                        <th>Year</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    <tr class="divide-x divide-gray-200" v-for="reference in references" :key="reference.hardwareName">
+                        <td>{{ reference.hardwareName }}</td>
+                        <td>{{ reference.year }}</td>
+                        <td><a target="_blank" rel="noopener noreferrer"
+                             class="hover:underline" :href="reference.link">{{ reference.link }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
+
+<script setup>
+
+const references = [
+    {
+        hardwareName: "IBM (Superconducting)",
+        year: 2024,
+        link: "https://www.ibm.com/roadmaps/quantum.pdf",
+
+    },
+    {
+        hardwareName: "IonQ (Trapped Ion)",
+        year: 2024,
+        link: "https://ionq.com/posts/how-we-achieved-our-2024-performance-target-of-aq-35",
+    },
+    {
+        hardwareName: "QuEra (Neutral Atom)",
+        year: 2024,
+        link: "https://www.quera.com/qec",
+    },
+]
+</script>
