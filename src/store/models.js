@@ -31,6 +31,7 @@ const modelTemplate = {
     // hardwareSlowdown: 6,
     quantumImprovementRate: 10,
     physicalLogicalQubitsRatio: 1000,
+    ratioImprovementRate: 10,
     qubitToProblemSize: "2^{# of qubits}",
     // qubitToProblemSize: "{# of qubits}",
     penalty: "log(n)"

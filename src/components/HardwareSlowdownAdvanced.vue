@@ -10,7 +10,7 @@
             <div class="flex flex-col">
                 <div class="flex items-center gap-2">
 
-                    <label class="font-medium text-sm " for="speed">Speed</label>
+                    <label class="font-medium text-sm " for="speed">Classical/Quantum Speed Ratio</label>
                     <div class="text-xs ">
                         <input hidden type="radio" id="simple" value="simple" v-model="speedInput" />
                         <label class="border rounded-sm transition-all text-center p-1" :class="{
@@ -81,7 +81,7 @@
 
             </div>
             <div class="mt-4">
-                <label class="font-medium text-sm" for="gateOverhead">Gate Overhead</label>
+                <label class="font-medium text-sm" for="gateOverhead">Error Correction Gate Overhead</label>
                 <p class="text-xs text-gray-600">The gate overhead (i.e. additional calculations) that a quantum
                     computer
                     needs to take to maintain
@@ -95,7 +95,7 @@
 
             </div>
             <div class="mt-4">
-                <label class="font-medium text-sm" for="algorithmConstant">Algorithm Constant</label>
+                <label class="font-medium text-sm" for="algorithmConstant">Algorithm Constant Ratio</label>
                 <p class="text-xs text-gray-600">
                     The ratio of the multiplicative constant from
                     the classical algorithm's time complexity divided by that
