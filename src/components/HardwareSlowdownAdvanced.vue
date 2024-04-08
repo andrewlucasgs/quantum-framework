@@ -103,7 +103,7 @@
                 </p>
                 <div class="flex items-center justify-between w-full gap-2">
                     <input class="flex-1 accent-[#002D9D]" type="range" id="algorithmConstant"
-                        v-model="algorithmConstant" min="0.1" max="2" step="0.1" />ß
+                        v-model="algorithmConstant" min="0.1" max="2" step="0.1" />
                     <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="algorithmConstant"
                         v-model="algorithmConstant" />
                 </div>
