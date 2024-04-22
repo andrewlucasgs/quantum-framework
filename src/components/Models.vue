@@ -13,8 +13,6 @@ const props = defineProps({
 
 // find when f(x) = 0
 function bisectionMethod(f, a, b, tol = 1e-5, maxIter = 10000000) {
-
-function bisectionMethod(f, a, b, tol = 1e-5, maxIter = 10000000) {
     let fa = f(a);
     let fb = f(b);
     if (fa * fb >= 0) {
@@ -25,8 +23,6 @@ function bisectionMethod(f, a, b, tol = 1e-5, maxIter = 10000000) {
     for (let i = 0; i < maxIter; i++) {
         c = (a + b) / 2;
         let fc = f(c);
-        // if (fc === 0 || (b - a) / 2 < tol) {
-        if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
         // if (fc === 0 || (b - a) / 2 < tol) {
         if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
             return c;
@@ -535,7 +531,6 @@ watch(() => props.model, (model) => {
     calculateQuantumEconomicAdvantage(props.model);
 }, { immediate: true, deep: true });
 
-
 </script>
 
 <template>
@@ -556,4 +551,3 @@ watch(() => props.model, (model) => {
 
     </div>
 </template>
-
