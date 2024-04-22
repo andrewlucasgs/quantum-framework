@@ -136,6 +136,7 @@ const hardwares = ref([
         hardwareSlowdown: 3.78,
         quantumImprovementRate: 10,
         physicalLogicalQubitsRatio: 1000,
+        ratioImprovementRate: 10,
         roadmap: {
             2020: 27,
             2022: 127,
@@ -151,6 +152,7 @@ const hardwares = ref([
         hardwareSlowdown: 6.7,
         quantumImprovementRate: 10,
         physicalLogicalQubitsRatio: 32,
+        ratioImprovementRate: 10,
         roadmap: {
             2021: 22,
             2022: 25,
@@ -172,6 +174,7 @@ const hardwares = ref([
         hardwareSlowdown: 5.1,
         quantumImprovementRate: 10,
         physicalLogicalQubitsRatio: 100,
+        ratioImprovementRate: 10,
         roadmap: {
             2023: 256,
             2025: 3000,
@@ -248,6 +251,8 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
     model.value.quantumImprovementRate = hardware.quantumImprovementRate;
     model.value.roadmap = hardware.roadmap;
+    model.value.ratioImprovementRate = hardware.ratioImprovementRate;
+
 }, { deep: true });
 
 watch(() => selectedProblem.value, (problem) => {
@@ -525,6 +530,18 @@ which it won’t)</a>
                             v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio Improvement Rate
+                        (%)</label>
+                    <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced by each
+                        year.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
+                            v-model="model.ratioImprovementRate" min="-90" max="90" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="ratio_improvement_rate" v-model="model.ratioImprovementRate" />
                     </div>
                 </div>
             </div>
