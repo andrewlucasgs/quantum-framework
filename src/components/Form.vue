@@ -366,7 +366,7 @@ function getRelevantRoadmapPoints(data) {
 
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-                    :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
             </div>
 
@@ -433,7 +433,7 @@ function getRelevantRoadmapPoints(data) {
                 </div>
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-                    :allowEmpty="false" :show-labels="false" placeholder="Pick a harware provider"></multiselect>
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
                 <table class="w-full table-auto mt-4 text-xs">
                     <thead class="bg-gray-100">
@@ -535,7 +535,7 @@ which it won’t)</a>
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio Improvement Rate
                         (%)</label>
-                    <p class="text-xs text-gray-600">The percentage by which the physical to logical qubit ratio is reduced by each
+                    <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced by each
                         year.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"

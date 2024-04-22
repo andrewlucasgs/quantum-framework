@@ -12,11 +12,10 @@ const props = defineProps({
 
 
 // find when f(x) = 0
-function bisectionMethod(f, a, b, tol = 1e-2, maxIter = 10000000) {
+function bisectionMethod(f, a, b, tol = 1e-5, maxIter = 10000000) {
+
     let fa = f(a);
-    // console.log(fa)
     let fb = f(b);
-    // console.log(fb)
     if (fa * fb >= 0) {
         return null;
     }
@@ -25,7 +24,8 @@ function bisectionMethod(f, a, b, tol = 1e-2, maxIter = 10000000) {
     for (let i = 0; i < maxIter; i++) {
         c = (a + b) / 2;
         let fc = f(c);
-        if (fc === 0 || (b - a) / 2 < tol) {
+        // if (fc === 0 || (b - a) / 2 < tol) {
+        if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
             return c;
         }
         if (fa * fc < 0) {
@@ -36,6 +36,7 @@ function bisectionMethod(f, a, b, tol = 1e-2, maxIter = 10000000) {
             fa = fc;
         }
     }
+
     return c;
 }
 
@@ -106,7 +107,7 @@ function exponentialInterpolation(xValues, yValues, x) {
 }
 
 
-
+//returns log_10 of the problem size where qa is reached
 function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
     let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
     if (adjustmentFactor <= 0) { //if adjustmentFactor is ever 0, then there is no hardware slowdown, so any problem should be QEA
@@ -125,7 +126,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
             let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
             let result = bisectionMethod(f, 4, 10**100); //starts at 4 because of function behavior
             if (year > 2100) {
-                console.log(year, adjustmentFactor, result, Math.log10(result))
+                // console.log(year, adjustmentFactor, result, Math.log10(result))
             }
             // console.log("printing penalty n")
             // console.log(Math.log10(result))
@@ -314,7 +315,7 @@ const interpolationFunctions = {
 }
 
 //returns the log_10 of the amount of logical qubits available with the given parameters
-function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio) {
+function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
     let qubits = Object.values(roadmap).map(x => Math.log10(x))
@@ -335,15 +336,23 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio) {
         logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
     }
 
+    //log_10 of the PLQR including the ratio improvement rate
+    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+    if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
+        adjustedPLQR = Math.log10(3)
+    }
+
     //logLogicalQubits has the log_10 of the true number of logical qubits
-    let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
+    // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
+    let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
     return logLogicalQubits
 }
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
-function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToProblemSize) {
+function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
     //logLogicalQubits has the log_10 of the true number of logical qubits
-    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio)
+    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate)
+    // logicalQubitsList.value.push(logLogicalQubits)
 
     if (qubitToProblemSize == "2^{# of qubits}") {
         // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
@@ -378,7 +387,6 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToPr
 
 function calculateQuantumEconomicAdvantage(model) {
     
-    
     // let quantumRuntime = model.quantumRuntime;
     let problemName = model.problemName;
     let penalty = model.penalty;
@@ -386,13 +394,14 @@ function calculateQuantumEconomicAdvantage(model) {
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
+    let ratioImprovementRate = ((100 - model.ratioImprovementRate) / 100);
     let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100);
     let qubitToProblemSize = model.qubitToProblemSize;
     let year = new Date().getFullYear();
     function qf(roadmap) {
-        return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, qubitToProblemSize)
+        return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize)
     }
-
+    
     function qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
         return year => getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
     }
@@ -401,7 +410,7 @@ function calculateQuantumEconomicAdvantage(model) {
     // when there is no quantum advantage
     if (quantumAdvantage(2024) >= 99999) {
         let range = []
-
+        
         for (let i = 0; i < (2030 - year) * 2; i += (2030 - year) / 100) {
             range.push(i);
         }
@@ -416,10 +425,11 @@ function calculateQuantumEconomicAdvantage(model) {
             tStar: -1,
             qStar: -1,
             quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
+            // quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
             quantumAdvantage: range.map(i => [year + i, Infinity])
         }
 
-
+        
     } else {
 
         const tStar = bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
@@ -431,8 +441,13 @@ function calculateQuantumEconomicAdvantage(model) {
                 range.push(i);
             }
             let nStar = quantumFeasible(tStar)
+            // logicalQubitsList.value = []
+
             let quantumFeasibleList = range.map(i => [year + i, quantumFeasible(year + i)])
             let quantumAdvantageList = range.map(i => [year + i, quantumAdvantage(year + i)])
+
+            // console.log(logicalQubitsList)
+            // console.log(quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]))
             quantumEconomicAdvantageData.value = {
                 tStar: tStar,
                 nStar: nStar,
@@ -466,6 +481,7 @@ function calculateQuantumEconomicAdvantage(model) {
 
         }
     }
+    console.log("out")
 }
 
 //returns the amount of logical qubits needed to achieve said problem size using the function specified by qubitToProblemSize
@@ -508,6 +524,7 @@ function addPenalty(quantumRuntime, penalty) {
 const currentAdvantageData = ref({});
 const quantumEconomicAdvantageData = ref({});
 const logicalQubitsData = ref({}); //is dependent on quantumEconomicAdvantageData being calculated
+// const logicalQubitsList = ref([]); //holds the logical qubits associated with the data points in the quantum feasible list, used to prevent double calculating and rounding errors
 
 // watch problems and hardwareslowdown
 watch(() => props.model, (model) => {
