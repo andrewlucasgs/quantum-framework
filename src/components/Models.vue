@@ -3,6 +3,8 @@ import { watch, ref, defineAsyncComponent } from 'vue';
 const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
 const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
 const LogicalQubitsGraph = defineAsyncComponent(() => import('./LogicalQubitsGraph.vue'));
+const LogicalQubitsOnlyGraph = defineAsyncComponent(() => import('./LogicalQubitsOnlyGraph.vue'));
+const QuantumFeasibilityGraph = defineAsyncComponent(() => import('./QuantumFeasibilityGraph.vue'));
 const Form = defineAsyncComponent(() => import('./Form.vue'));
 
 const props = defineProps({
@@ -539,15 +541,26 @@ watch(() => props.model, (model) => {
         <div>
             <Form :modelId="model.id" />
         </div>
-        <div class="md:flex gap-4 px-8 py-2">
+        <template v-if="!model.quantumOnly">
+            <div class="md:flex gap-4 px-8 py-2"  >
+                
+                <QuantumAdvantageGraph :data="currentAdvantageData" />
+                <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
+            </div>
+            <div class="md:flex gap-4 px-8 py-2 justify-center">
+                
+                <LogicalQubitsGraph :data="logicalQubitsData" />
+            </div>
+        </template>
+        <template v-else>
+            <div class="md:flex gap-4 px-8 py-2"  >
 
-            <QuantumAdvantageGraph :data="currentAdvantageData" />
-            <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
-        </div>
-        <div class="md:flex gap-4 px-8 py-2 justify-center">
+            <LogicalQubitsOnlyGraph :data="{...logicalQubitsData, tStar: 2034}" />
 
-        <LogicalQubitsGraph :data="logicalQubitsData" />
-    </div>
+<QuantumFeasibilityGraph :data="{...quantumEconomicAdvantageData, tStar: 2034}" />
+</div>
+
+        </template>
 
     </div>
 </template>

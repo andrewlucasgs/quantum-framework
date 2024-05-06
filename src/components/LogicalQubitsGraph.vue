@@ -253,7 +253,7 @@ chartOptions.annotations = [
         labels: [
             {
                 point: {
-                    x: props.data.tStar + 0.5,
+                    x: props.data.tStar + (chartOptions.xAxis.max - props.data.tStar) / 2,
                     y: 0,
                     xAxis: 0,
                     yAxis: 0
@@ -427,12 +427,12 @@ function updateGraph() {
                 {
                     point: {
                         x: chartOptions.xAxis.min,
-                        y: Math.log10(props.data.qStar) - 4,
+                        y: props.data.qStar /1.1,
                         xAxis: 0,
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(props.data.qStar) * 100) / 100}</sup`,
+                    text: `10<sup>${Math.round(props.data.qStar * 100) / 100}</sup`,
 
                 },
             ]
@@ -448,7 +448,9 @@ function updateGraph() {
             labels: [
                 {
                     point: {
-                        x: props.data.tStar + 0.5,
+                        x: props.data.tStar + (
+                            (chartOptions.xAxis.tickPositions[chartOptions.xAxis.tickPositions.length - 1] - props.data.tStar) / 9
+                        ),
                         y: 0,
                         xAxis: 0,
                         yAxis: 0

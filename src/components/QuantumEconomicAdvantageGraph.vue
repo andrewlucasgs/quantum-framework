@@ -208,8 +208,8 @@ chartOptions.annotations = [
         labels: [
             {
                 point: {
-                    x: props.data.tStar + 1.5,
-                    y: props.data.nStar - 2.05,
+                    x: props.data.tStar,
+                    y: props.data.nStar,
                     xAxis: 0,
                     yAxis: 0
                 },
@@ -390,7 +390,8 @@ function updateGraph() {
         {
             draggable: "",
             labelOptions: {
-                backgroundColor: "transparent",
+                
+                backgroundColor: "#ffffff55",
                 shape: "rect",
                 borderColor: "transparent",
                 style: {
@@ -400,26 +401,26 @@ function updateGraph() {
                     text: "center",
                 }
             },
-            // labels: [
-            //     {
-            //         point: {
-            //             x: props.data.tStar + 1.5,
-            //             y: props.data.nStar - 2.05,
-            //             xAxis: 0,
-            //             yAxis: 0
-            //         },
-            //         useHTML: true,
-            //         formatter: function () {
-            //             return `<p class="text-center">QUANTUM ECONOMIC <BR>ADVANTAGE</p>`
-            //         },
-            //     },
-            // ]
+            labels: [
+                {
+                    point: {
+                        x: (props.data.tStar + lastYear) / 2,
+                        y: props.data.nStar,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    formatter: function () {
+                        return `<p class="text-center">QUANTUM ECONOMIC ADVANTAGE</p>`
+                    },
+                },
+            ]
         },
 
         {
             draggable: "",
             labelOptions: {
-                backgroundColor: "transparent",
+                backgroundColor: "#ffffffdd",
                 borderColor: " red",
                 shape: "rect"
             },
@@ -427,7 +428,7 @@ function updateGraph() {
                 {
                     point: {
                         x: chartOptions.xAxis.min,
-                        y: Math.log10(props.data.nStar) - 4,
+                        y: props.data.nStar /1.1,
                         xAxis: 0,
                         yAxis: 0
                     },
@@ -440,7 +441,7 @@ function updateGraph() {
         {
             draggable: "",
             labelOptions: {
-                backgroundColor: "transparent",
+                backgroundColor: "#ffffffdd",
                 borderColor: "red",
                 // color: "red",
                 shape: "rect"
@@ -448,8 +449,8 @@ function updateGraph() {
             labels: [
                 {
                     point: {
-                        x: props.data.tStar + 0.5,
-                        y: 0,
+                        x: props.data.tStar + (lastYear - props.data.tStar) / 9,
+                        y: chartOptions.yAxis.min,
                         xAxis: 0,
                         yAxis: 0
                     },
