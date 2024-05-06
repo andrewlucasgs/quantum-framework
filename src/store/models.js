@@ -35,7 +35,7 @@ const modelTemplate = {
     qubitToProblemSize: "2^{# of qubits}",
     // qubitToProblemSize: "{# of qubits}",
     penalty: "log(n)",
-    quantumOnly: true,
+    quantumOnly: false,
 
 }
 
