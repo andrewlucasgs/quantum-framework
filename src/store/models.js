@@ -34,7 +34,8 @@ const modelTemplate = {
     ratioImprovementRate: 10,
     qubitToProblemSize: "2^{# of qubits}",
     // qubitToProblemSize: "{# of qubits}",
-    penalty: "log(n)"
+    penalty: "log(n)",
+    quantumOnly: false,
 
 }
 

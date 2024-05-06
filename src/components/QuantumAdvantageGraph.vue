@@ -137,7 +137,7 @@ function updateGraphData() {
                 {
                     point: {
                         x: chartOptions.xAxis.min,
-                        y: props.data.stepStar,
+                        y: props.data.stepStar / 1.1,
                         xAxis: 0,
                         yAxis: 0
                     },
@@ -150,7 +150,7 @@ function updateGraphData() {
         {
             draggable: "",
             labelOptions: {
-                backgroundColor: "transparent",
+                backgroundColor: "#ffffffdd",
                 borderColor: "red",
                 // color: "red",
                 shape: "rect"
@@ -158,8 +158,8 @@ function updateGraphData() {
             labels: [
                 {
                     point: {
-                        x: props.data.nStar * 100,//times 100 to slightly offset text in the offset scale
-                        y: (props.data.stepStar),
+                        x: props.data.nStar * 1.1,
+                        y: chartOptions.yAxis.min,
                         xAxis: 0,
                         yAxis: 0
                     },

@@ -2,6 +2,7 @@
 import Multiselect from 'vue-multiselect'
 import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
 import { useModelsStore } from '../store/models';
+import { Switch } from '@headlessui/vue'
 
 import { onMounted, ref, watch } from 'vue';
 import EditRoadmap from './EditRoadmap.vue';
@@ -304,20 +305,47 @@ function getRelevantRoadmapPoints(data) {
     return result;
 }
 
+
+
 </script>
 
 <template>
     <div class="" v-if="model">
         <div class="flex justify-between items-center border-b w-full px-8 py-2 bg-slate-100">
-            <h2 class="text-2xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{
-        model.hardwareName }}</h2>
+            <h2 class="text-xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{
+                model.hardwareName }}</h2>
 
-            <div class="flex gap-4">
-                <button
-                    class="flex items-center justify-center rounded-md bg-[#002D9D] px-2 py-2 text-xs text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    @click="editMode = !editMode">Advanced Options
+            <div class="flex items-center gap-4">
+                <!-- toogle quantum only -->
+                <label class="flex items-center gap-1 cursor-pointer">
 
-                </button>
+                    <Switch v-model="model.quantumOnly" :class="model.quantumOnly ? 'bg-[#002D9D]' : 'bg-gray-400'"
+                    class="relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+                    <span class="sr-only">Quantum only</span>
+                    <span aria-hidden="true" :class="model.quantumOnly ? 'translate-x-4' : 'translate-x-0'"
+                    class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out" />
+                </Switch>
+                <span class="text-sm"
+                    :class="model.quantumOnly ? 'text-[#002D9D]' : 'text-gray-400'"
+                >
+                    Quantum only
+                </span>
+            </label>
+                <label class="flex items-center gap-1 cursor-pointer">
+                    <Switch v-model="editMode" :class="!editMode ? 'bg-[#002D9D]' : 'bg-gray-400'"
+                        class="relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+                        <span class="sr-only">Advanced Options</span>
+                        <span aria-hidden="true" :class="!editMode ? 'translate-x-4' : 'translate-x-0'"
+                            class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out" />
+                            
+                    </Switch>
+                    <span class="text-sm"
+                        :class="!editMode ? 'text-[#002D9D]' : 'text-gray-400'"
+                    >
+                        Advanced Options
+                </span>
+
+                </label>
                 <button
                     class="flex items-center justify-center rounded-md bg-blue-100 ring-1 ring-opacity-50 ring-[#002D9D] px-2 py-2 text-sm text-[#002D9D] hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     @click="duplicateModel">
@@ -337,6 +365,9 @@ function getRelevantRoadmapPoints(data) {
                 </button>
             </div>
         </div>
+
+        <template v-if="!model.quantumOnly">
+
         <!-- transition height -->
         <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
             :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
@@ -371,32 +402,34 @@ function getRelevantRoadmapPoints(data) {
             </div>
 
         </div>
+
+
         <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
             <div class="w-1/4">
-                <div class="flex items-center gap-2">
-                    <label class="font-medium">Problem </label>
-                    <ReferenceDialog title="References" classes="max-w-lg">
-                        <template #content>
-                            <ProblemReferences />
-                        </template>
-                    </ReferenceDialog>
-                </div>
-                <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
+                    <div class="flex items-center gap-2">
+                        <label class="font-medium">Problem </label>
+                        <ReferenceDialog title="References" classes="max-w-lg">
+                            <template #content>
+                                <ProblemReferences />
+                            </template>
+                        </ReferenceDialog>
+                    </div>
+                    <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                     v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
                     :show-labels="false" placeholder="Pick a value"></multiselect>
-                <p>
-                    Classical Runtime: <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
-                </p>
-                <p>
-                    Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
-                </p>
-
-                <br>
-                <label class="font-medium text-sm">Connectivity Penalty</label>
-                <p class="text-xs text-gray-600">The overhead for embedding the quantum circuit in the hardware layout.
-                </p>
-                <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
+                    <p>
+                        Classical Runtime: <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
+                    </p>
+                    <p>
+                        Quantum Runtime: <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
+                    </p>
+                    
+                    <br>
+                    <label class="font-medium text-sm">Connectivity Penalty</label>
+                    <p class="text-xs text-gray-600">The overhead for embedding the quantum circuit in the hardware layout.
+                    </p>
+                    <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
                     :searchable="true" :close-on-select="true" :show-labels="false" placeholder="Pick a value">
                 </multiselect>
                 <br>
@@ -472,11 +505,12 @@ function getRelevantRoadmapPoints(data) {
                                     <h3 class="text-medium text-sm mt-4">Hardware Slowdown</h3>
                                     <ul class="text-sm">
                                         <li class="ml-4 list-disc">
-                                            <a class="text-[#012D9D] hover:underline" href="https://arxiv.org/pdf/2310.15505.pdf" target="_blank"
+                                            <a class="text-[#012D9D] hover:underline"
+                                                href="https://arxiv.org/pdf/2310.15505.pdf" target="_blank"
                                                 rel="noopener noreferrer">The Quantum Tortoise and the Classical Hare:
-A simple framework for understanding which
-problems quantum computing will accelerate (and
-which it won’t)</a>
+                                                A simple framework for understanding which
+                                                problems quantum computing will accelerate (and
+                                                which it won’t)</a>
                                         </li>
                                     </ul>
                                 </template>
@@ -533,9 +567,11 @@ which it won’t)</a>
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio Improvement Rate
+                    <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
+                        Improvement Rate
                         (%)</label>
-                    <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced by each
+                    <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced
+                        by each
                         year.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
@@ -546,6 +582,125 @@ which it won’t)</a>
                 </div>
             </div>
         </div>
+        </template>
+        <template v-else>
+
+<!-- transition height -->
+<div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
+    :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
+    <div class="w-full">
+        <div class="flex items-center gap-2">
+            <label class="font-medium">Roadmap </label>
+            <ReferenceDialog title="References" classes="max-w-lg">
+                <template #content>
+                    <HardwareReferences />
+                </template>
+            </ReferenceDialog>
+        </div>
+
+        <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+            v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+            :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
+
+    </div>
+
+</div>
+
+
+<div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
+    :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
+    <div class="w-1/4">
+        <div class="flex justify-between mb-1">
+            <div class="flex items-center gap-2">
+                <label class="font-medium">Roadmap </label>
+                <ReferenceDialog title="References" classes="max-w-lg">
+                    <template #content>
+                        <HardwareReferences />
+                    </template>
+                </ReferenceDialog>
+            </div>
+            <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
+                :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                v-slot="{ openModal }">
+                <button
+                    class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                    @click="openModal">Edit roadmap</button>
+            </EditRoadmap>
+        </div>
+        <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+            v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+            :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
+
+        <table class="w-full table-auto mt-4 text-xs">
+            <thead class="bg-gray-100">
+                <tr class="text-left">
+                    <th>Year</th>
+                    <th># of Physical Qubits</th>
+                </tr>
+            </thead>
+            <tbody class="text-left">
+                <tr v-for="(value, key) in getRelevantRoadmapPoints(model.roadmap)" :key="key" class="border-b">
+                    <td class="p-1">
+                        {{ key }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="p-1 text-center">
+                        <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
+                            :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                            v-slot="{ openModal }">
+                            <button
+                                class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                @click="openModal">See more</button>
+                        </EditRoadmap>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="w-1/4">
+        <div class="flex flex-col">
+            <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
+            <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with
+                the
+                given number of qubits.</p>
+            <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
+                :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
+                :allowEmpty="false" placeholder="Pick a value"></multiselect>
+        </div>
+    </div>
+    
+    <div class="flex-1">
+
+        <div class="flex flex-col">
+            <label class="font-medium text-sm" for="physical_logical_ratio">Physical to Logical Qubit
+                Ratio</label>
+            <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering error
+                correction.</p>
+            <div class="flex items-center justify-between w-full gap-2">
+                <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
+                    v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
+                <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                    id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
+                Improvement Rate
+                (%)</label>
+            <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced
+                by each
+                year.</p>
+            <div class="flex items-center justify-between w-full gap-2">
+                <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
+                    v-model="model.ratioImprovementRate" min="-90" max="90" />
+                <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                    id="ratio_improvement_rate" v-model="model.ratioImprovementRate" />
+            </div>
+        </div>
+    </div>
+</div>
+</template>
 
     </div>
 </template>
