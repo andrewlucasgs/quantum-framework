@@ -191,81 +191,6 @@ const chartOptions = {
 }
 
 
-chartOptions.annotations = [
-    {
-        draggable: "",
-        labelOptions: {
-            backgroundColor: "transparent",
-            shape: "rect",
-            borderColor: "transparent",
-            style: {
-                border: 0,
-                color: "black",
-                fontSize: "9px",
-                text: "center",
-            }
-        },
-        labels: [
-            {
-                point: {
-                    x: props.data.tStar,
-                    y: props.data.nStar,
-                    xAxis: 0,
-                    yAxis: 0
-                },
-                useHTML: true,
-                formatter: function () {
-                    return `<p class="text-center">QUANTUM ECONOMIC <BR>ADVANTAGE</p>`
-                },
-            },
-        ]
-    },
-
-    {
-        draggable: "",
-        labelOptions: {
-            backgroundColor: "transparent",
-            borderColor: "red",
-            shape: "rect"
-        },
-        labels: [
-            {
-                point: {
-                    x: chartOptions.xAxis.min,
-                    y: Math.log10(props.data.nStar) - 4,
-                    xAxis: 0,
-                    yAxis: 0
-                },
-                useHTML: true,
-                text: `10<sup>${Math.round(Math.log10(props.data.nStar) * 100) / 100}</sup`,
-
-            },
-        ]
-    },
-    {
-        draggable: "",
-        labelOptions: {
-            backgroundColor: "transparent",
-            borderColor: "red",
-            // color: "red",
-            shape: "rect"
-        },
-        labels: [
-            {
-                point: {
-                    x: props.data.tStar + 0.5,
-                    y: 0,
-                    xAxis: 0,
-                    yAxis: 0
-                },
-                useHTML: true,
-                text: `${Math.round(props.data.tStar * 100) / 100}`,
-
-            },
-        ]
-    },
-
-]
 
 watch(() => props.data, async () => {
     updateGraph()
@@ -433,7 +358,7 @@ function updateGraph() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round(Math.log10(props.data.nStar) * 100) / 100}</sup`,
+                    text: `10<sup>${Math.round(props.data.nStar * 100) / 100}</sup`,
 
                 },
             ]
