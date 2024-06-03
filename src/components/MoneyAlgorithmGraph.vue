@@ -46,7 +46,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `Problem Size: ${toBase10HTML(this.x)}<br/>Cost: $${toBase10HTML(this.y)}`;
+            return `Problem Size: ${toBase10HTML(this.x)}<br/>Cost: ${toBase10HTML(this.y)}`;
         }
     },
     xAxis: {
@@ -73,7 +73,7 @@ const chartOptions = {
 
             useHTML: true,
             formatter: function () {
-                return "$" + toBase10HTML(this.value);
+                return toBase10HTML(this.value);
             }
         },
         min: 0

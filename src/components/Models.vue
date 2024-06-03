@@ -742,8 +742,8 @@ const moneyEconomicData = ref({});
 watch(() => props.model, (model) => {
     calculateCurrentAdvantage(props.model);
     calculateQuantumEconomicAdvantage(props.model);
-    // calculateMoneyAlgorithmicAdvantage(props.model);
-    // calculateMoneyEconomicAdvantage(props.model);
+    calculateMoneyAlgorithmicAdvantage(props.model);
+    calculateMoneyEconomicAdvantage(props.model);
 }, { immediate: true, deep: true });
 
 </script>
@@ -760,11 +760,11 @@ watch(() => props.model, (model) => {
                 <QuantumAdvantageGraph :data="currentAdvantageData" />
                 <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
             </div>
-            <!-- <div class="md:flex gap-4 px-8 py-2">
+            <div class="md:flex gap-4 px-8 py-2">
 
                 <MoneyAlgorithmGraph :data="moneyAlgorithmData" />
                 <MoneyEconomicGraph :data="moneyEconomicData" />
-            </div> -->
+            </div>
             <div class="md:flex gap-4 px-8 py-2 justify-center">
                 
                 <LogicalQubitsGraph :data="logicalQubitsData" />
