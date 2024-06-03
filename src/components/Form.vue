@@ -542,8 +542,8 @@ function getRelevantRoadmapPoints(data) {
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="font-medium text-sm" for="quantum_improvement_rate">Quantum Improvement Rate
-                        (%)</label>
+                    <!-- <label class="font-medium text-sm" for="quantum_improvement_rate">Quantum Improvement Rate
+                        (%)</label> -->
                     <p class="text-xs text-gray-600">The percentage by which the hardware slowdown is reduced by each
                         year.</p>
                     <div class="flex items-center justify-between w-full gap-2">
@@ -555,7 +555,7 @@ function getRelevantRoadmapPoints(data) {
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="font-medium text-sm" for="physical_logical_ratio">Physical to Logical Qubit
+                    <label class="font-medium text-s" for="physical_logical_ratio">Physical to Logical Qubit
                         Ratio</label>
                     <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering error
                         correction.</p>
@@ -567,9 +567,9 @@ function getRelevantRoadmapPoints(data) {
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
+                    <!-- <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
                         Improvement Rate
-                        (%)</label>
+                        (%)</label> -->
                     <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced
                         by each
                         year.</p>
@@ -685,9 +685,9 @@ function getRelevantRoadmapPoints(data) {
             </div>
         </div>
         <div class="flex flex-col">
-            <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
+            <!-- <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
                 Improvement Rate
-                (%)</label>
+                (%)</label> -->
             <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is reduced
                 by each
                 year.</p>
