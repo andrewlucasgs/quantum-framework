@@ -557,7 +557,7 @@ function getRelevantRoadmapPoints(data) {
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="physical_logical_ratio">Physical to Logical Qubit
                         Ratio</label>
-                    <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering error
+                    <p class="text-xs text-gray-600">The number of physical qubits per logical qubit considering error
                         correction.</p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
@@ -578,6 +578,32 @@ function getRelevantRoadmapPoints(data) {
                             v-model="model.ratioImprovementRate" min="-90" max="90" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="ratio_improvement_rate" v-model="model.ratioImprovementRate" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-sm" for="costFactor">Cost Factor</label>
+                    <p class="text-xs text-gray-600">The factor describing how much more expensive a quantum computer
+                        is than a classical computer which is comparably as fast.
+                    </p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="costFactor"
+                            v-model="model.costFactor" min="1" max="5000" step="100" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="costFactor" v-model="model.costFactor" />
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-sm" for="ratio_improvement_rate">Cost Improvement Rate
+                        (%)</label>
+                    <p class="text-xs text-gray-600">The percentage which the cost factor is reduced
+                        by each
+                        year.</p>
+                    <div class="flex items-center justify-between w-full gap-2">
+                        <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
+                            v-model="model.costImprovementRate" min="-90" max="90" />
+                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
+                            id="ratio_improvement_rate" v-model="model.costImprovementRate" />
                     </div>
                 </div>
             </div>

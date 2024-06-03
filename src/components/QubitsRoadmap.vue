@@ -1,6 +1,7 @@
 
 <script setup>
 import { Chart } from 'highcharts-vue'
+import { number } from 'mathjs';
 import { defineProps, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -19,6 +20,12 @@ function simpleLinearRegression(x, y) {
     }
     let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
     let intercept = (sumY - slope * sumX) / n;
+    // console.log("printing year probably")
+    // console.log(x)
+    // console.log("printing log qubits?")
+    // console.log(y)
+    // console.log("slope intercept")
+    // console.log(slope, intercept)
     return { slope, intercept };
 }
 
@@ -82,28 +89,141 @@ const interpolationFunctions = {
     exponential: exponentialInterpolation
 }
 
+// a map containing serialized strings of the inputs to the linear regression function mapped to their output regression
+const linearRegressions = {}
+
 function getPhysicalQubits(year, roadmap) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap).map(x => Math.log10(x))
+    // let qubits = Object.values(roadmap).map(x => Math.log10(x))
+    let qubits = Object.values(roadmap).map(Number)
 
+    //actual value of the number of physical qubits
     let numberOfPhysicalQubits;
-    if (roadmap.hasOwnProperty(Number(year))) {
-        numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
+    //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
+    let logOfPhysicalQubits;
+    if (roadmap.hasOwnProperty(year)) {
+        // logOfPhysicalQubits = Math.log10(roadmap[year])
+        numberOfPhysicalQubits = roadmap[year]
+        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
+
     } else if (year > Math.max(...years)) {
-        let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2));
         if (props.extrapolationType === 'linear') {
+            let key = JSON.stringify([years.slice(-2), qubits.slice(-2)]);
+            let regression;
+            if (linearRegressions.hasOwnProperty(key)) {
+                console.log("cached")
+                regression = linearRegressions[key]
+            }
+            else{
+                console.log("new")
+                regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2));
+                linearRegressions[key] = regression
+            }
+
+            // console.log("slope, intercept")
+            // console.log(regression.slope, regression.intercept)
             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+            logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
         } else {
-            numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+            let key = JSON.stringify([years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]);
+            let regression;
+            if (linearRegressions.hasOwnProperty(key)) {
+                console.log("cached")
+                regression = linearRegressions[key]
+            }
+            else{
+                console.log("new")
+                regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+                linearRegressions[key] = regression
+            }
+            //exponential regression is just linear regression in log space
+            // let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+            // console.log("slope, intercept in logspace")
+            // console.log(regression.slope, regression.intercept)
+            // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
+            logOfPhysicalQubits = regression.slope * year + regression.intercept;
+
         }
 
     } else {
+        console.log("interpolation")
         numberOfPhysicalQubits = interpolationFunctions[props.extrapolationType](years, qubits, year)
-
+        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
     }
-    return (numberOfPhysicalQubits)
+
+
+    return logOfPhysicalQubits
 }
+
+// function getPhysicalQubits(year, roadmap) {
+//     year = parseFloat(year);
+//     let years = Object.keys(roadmap).map(Number);
+//     // let qubits = Object.values(roadmap).map(x => Math.log10(x))
+//     let qubits = Object.values(roadmap).map(Number)
+
+//     //actual value of the number of physical qubits
+//     let numberOfPhysicalQubits;
+//     //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
+//     let logOfPhysicalQubits;
+//     if (roadmap.hasOwnProperty(year)) {
+//         // logOfPhysicalQubits = Math.log10(roadmap[year])
+//         numberOfPhysicalQubits = roadmap[year]
+//         logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
+
+//     } else if (year > Math.max(...years)) {
+//         if (props.extrapolationType === 'linear') {
+//             let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2));
+//             // console.log("slope, intercept")
+//             // console.log(regression.slope, regression.intercept)
+//             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+//             logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
+//         } else {
+//             //exponential regression is just linear regression in log space
+//             let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+//             // let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+//             // console.log("slope, intercept in logspace")
+//             // console.log(regression.slope, regression.intercept)
+//             // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
+//             logOfPhysicalQubits = regression.slope * year + regression.intercept;
+
+//         }
+
+//     } else {
+//         console.log("interpolation")
+//         numberOfPhysicalQubits = interpolationFunctions[props.extrapolationType](years, qubits, year)
+//         logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
+//     }
+
+
+//     return logOfPhysicalQubits
+// }
+
+// function getPhysicalQubits(year, roadmap) {
+//     year = parseFloat(year);
+//     let years = Object.keys(roadmap).map(Number);
+//     let qubits = Object.values(roadmap).map(x => Math.log10(x))
+//     // let qubits = Object.values(roadmap).map(Number)
+
+//     let numberOfPhysicalQubits;
+//     if (roadmap.hasOwnProperty(Number(year))) {
+//         numberOfPhysicalQubits = roadmap[Number(year)]
+
+//     } else if (year > Math.max(...years)) {
+//         let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2));
+//         if (props.extrapolationType === 'linear') {
+//             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+//         } else {
+//             numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+//         }
+        
+//     } else {
+//         numberOfPhysicalQubits = interpolationFunctions[props.extrapolationType](years, qubits, year)
+//     }
+
+//     let logPhysicalQubits = Math.log10(numberOfPhysicalQubits)
+//     return logPhysicalQubits
+// }
 
 const physicalQubits = ref(Array.from({
     length: Math.max(Math.max(...Object.keys(props.data)) + 10, 2024 + 10) - 2024
