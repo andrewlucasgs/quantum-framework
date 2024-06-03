@@ -112,11 +112,11 @@ function getPhysicalQubits(year, roadmap) {
             let key = JSON.stringify([years.slice(-2), qubits.slice(-2)]);
             let regression;
             if (linearRegressions.hasOwnProperty(key)) {
-                console.log("cached")
+                // console.log("cached")
                 regression = linearRegressions[key]
             }
             else{
-                console.log("new")
+                // console.log("new")
                 regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2));
                 linearRegressions[key] = regression
             }
@@ -129,11 +129,11 @@ function getPhysicalQubits(year, roadmap) {
             let key = JSON.stringify([years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]);
             let regression;
             if (linearRegressions.hasOwnProperty(key)) {
-                console.log("cached")
+                // console.log("cached")
                 regression = linearRegressions[key]
             }
             else{
-                console.log("new")
+                // console.log("new")
                 regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
                 linearRegressions[key] = regression
             }
