@@ -6,21 +6,15 @@ import highchartsAnnotations from 'highcharts/modules/annotations';
 highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
-
 import { ref, defineProps, watch } from 'vue';
+import * as utils from "../store/utils"
+
 
 const props = defineProps({
     data: Object,
 })
 
-
 const key = ref(0);
-
-
-function round(number) {
-    return Math.round(number * 100) / 100;
-}
-
 
 const chartOptions = {
     chart: {
@@ -39,7 +33,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `<b>${this.series.name}</b><br/>Year: ${round(this.x)}<br/>Problem Size: 10<sup>${round(this.y)}</sup>`
+            return `<b>${this.series.name}</b><br/>Year: ${utils.round(this.x)}<br/>Problem Size: 10<sup>${utils.round(this.y)}</sup>`
         }
     },
     xAxis: {
@@ -64,7 +58,7 @@ const chartOptions = {
         labels: {
             useHTML: true,
             formatter: function () {
-                return `10<sup>${this.value}</sup>`;
+                return utils.toBase10HTML(this.value);
             }
         },
         min: 0,
@@ -80,41 +74,14 @@ const chartOptions = {
                 symbol: 'circle'
             }
         },
-
     ]
 }
-
-
 
 watch(() => props.data, async () => {
     updateGraph()
 
     key.value += 1;
 }, { immediate: true, deep: true })
-
-function yearToQuarter(yearFloat) {
-    const year = Math.floor(yearFloat); // Extracts the year part
-    const fraction = yearFloat - year; // Gets the fractional part of the year
-    const quarter = Math.floor(fraction * 4) + 1; // Calculates the quarter
-
-    return `${year} Q${quarter}`;
-}
-
-function yearToMonth(yearFloat) {
-    const year = Math.floor(yearFloat); // Extracts the year part
-    const fraction = yearFloat - year; // Gets the fractional part of the year
-    const monthIndex = Math.floor(fraction * 12); // Calculates the month index (0-11)
-
-    // Array of month abbreviations
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    // Select the correct month abbreviation using the month index
-    const monthAbbreviation = months[monthIndex];
-
-    return `${year} ${monthAbbreviation}`;
-}
-
-
 
 function updateGraph() {  
     const currentYear = new Date().getFullYear()
@@ -126,8 +93,8 @@ function updateGraph() {
             if (lastYear - currentYear > 3)
                 return this.value.toFixed(0);
             if (lastYear - currentYear > 1)
-                return yearToQuarter(this.value);
-            return yearToMonth(this.value);
+                return utils.yearToQuarter(this.value);
+            return utils.yearToMonth(this.value);
         }
     }
 
@@ -144,7 +111,6 @@ function updateGraph() {
                 symbol: 'circle'
             }
         },
-       
     ]
 }
 

@@ -1,36 +1,22 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Chart } from 'highcharts-vue'
-
+import * as utils from "../store/utils"
 
 const props = defineProps({
     data: Object
 });
 const key = ref(0);
 
-function drawDashLine(chart, point, dashLine) {
-    const xAxis = chart.xAxis[0]
-    const yAxis = chart.yAxis[0]
-
-    const x = Math.round(xAxis.toPixels(point[0]))
-    const y = Math.round(yAxis.toPixels(point[1]))
-    const d = ['M', xAxis.left, y, 'L', x, y, 'L', x, yAxis.top + yAxis.height]
-
-    return dashLine
-        ? dashLine.attr({ d })
-        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'rgba(255,0,0,0.3)', 'stroke-width': 2, zIndex: 1 }).add()
-}
-
-
 const chartOptions = {
     chart: {
         type: 'spline',
         events: {
             load: function () {
-                this.dashLines = [[props.data.nStar, props.data.costStar]].map(point => drawDashLine(this, point))
+                this.dashLines = [[props.data.nStar, props.data.costStar]].map(point => utils.drawDashLine(this, point))
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => drawDashLine(this, [[props.data.nStar, props.data.costStar]][i], line))
+                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.nStar, props.data.costStar]][i], line))
             }
         }
     },
@@ -46,7 +32,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `Problem Size: ${toBase10HTML(this.x)}<br/>Cost: ${toBase10HTML(this.y)}`;
+            return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Cost: ${utils.toBase10HTML(this.y)}`;
         }
     },
     xAxis: {
@@ -57,7 +43,7 @@ const chartOptions = {
         labels: {
             useHTML: true,
             formatter: function () {
-                return toBase10HTML(this.value);
+                return utils.toBase10HTML(this.value);
             }
         },
         tickPositions: [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2],
@@ -73,7 +59,7 @@ const chartOptions = {
 
             useHTML: true,
             formatter: function () {
-                return toBase10HTML(this.value);
+                return utils.toBase10HTML(this.value);
             }
         },
         min: 0
@@ -82,12 +68,7 @@ const chartOptions = {
 
 }
 
-// let lastQueryString = ""
-
-
 watch(() => props.data, async () => {
-
-
     updateGraphData();
     key.value += 1;
 }, { immediate: true, deep: true})
@@ -142,7 +123,7 @@ function updateGraphData() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `$10<sup>${Math.round((props.data.costStar) * 100) / 100}</sup>`,
+                    text: utils.toBase10HTML(props.data.costStar),
 
                 },
             ]
@@ -164,27 +145,13 @@ function updateGraphData() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `10<sup>${Math.round((props.data.nStar) * 100) / 100}</sup>`,
+                    text: utils.toBase10HTML(props.data.nStar),
 
                 },
             ]
         },
-
     ]
 }
-
-
-function toBase10HTML(number) {
-    // Calculate the base 10 logarithm of the number.
-    var exponent = number
-    if (exponent === -Infinity) {
-        return '10<sup>0</sup>';
-    }
-
-
-    return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
-}
-
 
 </script>
 

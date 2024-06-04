@@ -7,33 +7,15 @@ import highchartsAnnotations from 'highcharts/modules/annotations';
 highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
-
-
+import * as utils from "../store/utils"
 import { useGraphStore } from '../store/graph.js';
 import { max } from 'mathjs';
+
 
 const props = defineProps(["hardwareIndex"])
 
 const inputStore = useInputStore();
 const graphStore = useGraphStore();
-
-
-function drawDashLine(chart, point, dashLine) {
-    console.log('djlkajdlkajldsk')
-    console.log(point)
-
-
-    const xAxis = chart.xAxis[0]
-    const yAxis = chart.yAxis[0]
-
-    const x = Math.round(xAxis.toPixels(point[0]))
-    const y = Math.round(yAxis.toPixels(Math.log10(point[1])))
-    const d = ['M', xAxis.left, y, 'L', x, y, 'L', x, yAxis.top + yAxis.height]
-
-    return dashLine
-        ? dashLine.attr({ d })
-        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'rgba(255,0,0,0.3)', 'stroke-width': 2, zIndex: 1 }).add()
-}
 
 const chartOptions = {
     chart: {
@@ -41,10 +23,10 @@ const chartOptions = {
         width: 500,
         events: {
             load: function () {
-                this.dashLines = [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]].map(point => drawDashLine(this, point))
+                this.dashLines = [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]].map(point => utils.drawDashLine(this, point))
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => drawDashLine(this, [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]][i], line))
+                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar, graphStore.quantumEconomicAdvantage[props.hardwareIndex].nStar]][i], line))
             }
         },
 
@@ -61,7 +43,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `<b>${this.series.name}</b><br/>Year: ${round(this.x)}<br/>Problem Size: 10<sup>${round(this.y)}</sup>`
+            return `<b>${this.series.name}</b><br/>Year: ${utils.round(this.x)}<br/>Problem Size: 10<sup>${utils.round(this.y)}</sup>`
         }
     },
     xAxis: {
@@ -88,8 +70,8 @@ const chartOptions = {
 
             useHTML: true,
             formatter: function () {
-                // return toBase10HTML(this.value);
-                return `10<sup>${this.value}</sup>`;
+                // return `10<sup>${this.value}</sup>`;
+                return utils.toBase10HTML(this.value);
             }
         },
         min: 1,
@@ -305,7 +287,7 @@ async function updateGraphData() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `${Math.round(graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar * 100) / 100}`,
+                    text: `${utils.round(graphStore.quantumEconomicAdvantage[props.hardwareIndex].tStar * 100)}`,
                     
                 },
             ]
@@ -317,26 +299,7 @@ async function updateGraphData() {
 
 }
 
-// rounds input value to two decimal digits
-function round(number) {
-    return Math.round(number * 100) / 100;
-}
-
-function toBase10HTML(number) { //??? if this exact function exists elsewhere, it may be best to call them both from a single place
-    // Calculate the base 10 logarithm of the number.
-    var exponent = Math.log10(number);
-    if (exponent === -Infinity) {
-        return '10<sup>0</sup>';
-    }
-
-    return `10<sup>${Math.round(exponent * 100) / 100}</sup>`;
-}
-
-
-
 const key = ref(0);
-
-
 
 </script>
 

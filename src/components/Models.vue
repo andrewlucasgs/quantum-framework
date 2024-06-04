@@ -1,5 +1,7 @@
 <script setup>
 import { watch, ref, defineAsyncComponent } from 'vue';
+import * as utils from "../store/utils"
+
 const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
 const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
 const LogicalQubitsGraph = defineAsyncComponent(() => import('./LogicalQubitsGraph.vue'));
@@ -49,73 +51,6 @@ function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
     return c;
 }
 
-// Implement simpleLinearRegression and linearInterpolation functions based on your needs
-function simpleLinearRegression(x, y) {
-    let n = x.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-    for (let i = 0; i < n; i++) {
-        sumX += x[i];
-        sumY += y[i];
-        sumXY += x[i] * y[i];
-        sumXX += x[i] * x[i];
-    }
-    let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    let intercept = (sumY - slope * sumX) / n;
-    return { slope, intercept };
-}
-
-function linearInterpolation(xValues, yValues, x) {
-    let i = 0;
-    for (; i < xValues.length - 1; i++) {
-        if (x <= xValues[i + 1]) break;
-    }
-    let x1 = xValues[i], y1 = yValues[i];
-    let x2 = xValues[i + 1], y2 = yValues[i + 1];
-    return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
-}
-
-
-function exponentialRegression(x, y) {
-    let n = x.length;
-    let sumX = 0, sumLogY = 0, sumXLogY = 0, sumXX = 0;
-    for (let i = 0; i < n; i++) {
-        // Compute sums for the regression, taking log of y values
-        sumX += x[i];
-        sumLogY += Math.log(y[i]);
-        sumXLogY += x[i] * Math.log(y[i]);
-        sumXX += x[i] * x[i];
-    }
-    let b = (n * sumXLogY - sumX * sumLogY) / (n * sumXX - sumX * sumX);
-    let a = (sumLogY - b * sumX) / n;
-
-    // Convert 'a' back to the original scale
-    a = Math.exp(a);
-
-    return { a, b }; // Returns the coefficients of y = ae^(bx)
-}
-
-function exponentialInterpolation(xValues, yValues, x) {
-    let i = 0;
-    // Find the interval [x[i], x[i+1]] where the value x lies
-    for (; i < xValues.length - 1; i++) {
-        if (x <= xValues[i + 1]) break;
-    }
-
-    let x1 = xValues[i], y1 = yValues[i];
-    let x2 = xValues[i + 1], y2 = yValues[i + 1];
-
-    // Compute the logarithms of y1 and y2 for the interpolation in log-space
-    let logY1 = Math.log(y1);
-    let logY2 = Math.log(y2);
-
-    // Perform linear interpolation in log-space
-    let logY = logY1 + (logY2 - logY1) * (x - x1) / (x2 - x1);
-
-    // Convert the interpolated value back to the original scale
-    return Math.exp(logY);
-}
-
-
 //returns log_10 of the problem size where qa is reached
 function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
     let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
@@ -134,9 +69,9 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         if (penalty === "log(n)") {
             let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
             let result = bisectionMethod(f, 4, 10**100); //starts at 4 because of function behavior
-            if (year > 2100) {
+            // if (year > 2100) {
                 // console.log(year, adjustmentFactor, result, Math.log10(result))
-            }
+            // }
             // console.log("printing penalty n")
             // console.log(Math.log10(result))
             if (result === null) {
@@ -374,58 +309,11 @@ function calculateCurrentAdvantage(model) {
     }
 }
 
-const regressionFunctions = {
-    linear: simpleLinearRegression,
-    exponential: exponentialRegression
-}
-
-const interpolationFunctions = {
-    linear: linearInterpolation,
-    exponential: exponentialInterpolation
-}
-
 
 //returns the log_10 of the amount of logical qubits available with the given parameters
 function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
-    // console.log(year)
-    year = parseFloat(year);
-    let years = Object.keys(roadmap).map(Number);
-    // let qubits = Object.values(roadmap).map(x => Math.log10(x))
-    let qubits = Object.values(roadmap).map(Number)
-
-    //actual value of the number of physical qubits
-    let numberOfPhysicalQubits;
-    //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
-    let logOfPhysicalQubits;
-    if (roadmap.hasOwnProperty(year)) {
-        // logOfPhysicalQubits = Math.log10(roadmap[year])
-        numberOfPhysicalQubits = roadmap[year]
-        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
-
-    } else if (year > Math.max(...years)) {
-        if (props.model.extrapolationType === 'linear') {
-            let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2));
-            // console.log("slope, intercept")
-            // console.log(regression.slope, regression.intercept)
-            numberOfPhysicalQubits = regression.slope * year + regression.intercept;
-            logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
-        } else {
-            //exponential regression is just linear regression in log space
-            let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
-            // let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
-            // console.log("slope, intercept in logspace")
-            // console.log(regression.slope, regression.intercept)
-            // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
-            logOfPhysicalQubits = regression.slope * year + regression.intercept;
-
-        }
-
-    } else {
-        // console.log("interpolation")
-        numberOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
-        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
-    }
-
+    const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, props.model.extrapolationType)
+    
     //log_10 of the PLQR including the ratio improvement rate
     let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
@@ -440,40 +328,6 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
 
     return logLogicalQubits
 }
-
-// //returns the log_10 of the amount of logical qubits available with the given parameters
-// function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
-//     year = parseFloat(year);
-//     let years = Object.keys(roadmap).map(Number);
-//     let qubits = Object.values(roadmap).map(x => Math.log10(x))
-
-//     //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
-//     let logOfPhysicalQubits;
-//     if (roadmap.hasOwnProperty(year)) {
-//         logOfPhysicalQubits = Math.log10(roadmap[year])
-//     } else if (year > Math.max(...years)) {
-//         let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2));
-//         if (props.model.extrapolationType === 'linear') {
-//             logOfPhysicalQubits = regression.slope * year + regression.intercept;
-//         } else {
-//             logOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
-//         }
-
-//     } else {
-//         logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
-//     }
-
-//     //log_10 of the PLQR including the ratio improvement rate
-//     let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
-//     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
-//         adjustedPLQR = Math.log10(3)
-//     }
-
-//     //logLogicalQubits has the log_10 of the true number of logical qubits
-//     // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
-//     let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
-//     return logLogicalQubits
-// }
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
 function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
