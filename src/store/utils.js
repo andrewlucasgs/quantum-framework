@@ -199,3 +199,37 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
 
     return logOfPhysicalQubits
 }
+
+// find when f(x) = 0
+export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
+    let fa = f(a);
+    let fb = f(b);
+    if (fa * fb >= 0) {
+        console.log("null problem")
+        console.log(a, b, fa, fb)
+        return null;
+    }
+
+    let c = a;
+    for (let i = 0; i < maxIter; i++) {
+        c = (a + b) / 2;
+        let fc = f(c);
+        // if (fc === 0 || (b - a) / 2 < tol) {
+        if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
+            // if ((b - a) / 2 < tol) {
+            //     console.log("binary search range tolerance reached before value tolerance. function is very sensitive.")
+            // }
+            return c;
+        }
+        if (fa * fc < 0) {
+            b = c;
+            fb = fc;
+        } else {
+            a = c;
+            fa = fc;
+        }
+    }
+
+    console.log("couldn't converge during binary search")
+    return c;
+}

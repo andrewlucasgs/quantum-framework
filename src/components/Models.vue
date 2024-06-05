@@ -16,69 +16,25 @@ const props = defineProps({
     modelIndex: Number
 });
 
-
-// find when f(x) = 0
-function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
-    let fa = f(a);
-    let fb = f(b);
-    if (fa * fb >= 0) {
-        console.log("null problem")
-        console.log(a, b, fa, fb)
-        return null;
-    }
-
-    let c = a;
-    for (let i = 0; i < maxIter; i++) {
-        c = (a + b) / 2;
-        let fc = f(c);
-        // if (fc === 0 || (b - a) / 2 < tol) {
-        if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
-            if ((b - a) / 2 < tol) {
-                console.log("binary search range tolerance reached before value tolerance. function is very sensitive.")
-            }
-            return c;
-        }
-        if (fa * fc < 0) {
-            b = c;
-            fb = fc;
-        } else {
-            a = c;
-            fa = fc;
-        }
-    }
-
-    console.log("couldn't converge during binary search")
-    return c;
-}
-
 //returns log_10 of the problem size where qa is reached
 function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
     let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
     if (adjustmentFactor <= 0) { //if adjustmentFactor is ever 0, then there is no hardware slowdown, so any problem should be QEA
         return 0;
     }
-    // console.log("Inside QA")
-    
-    
 
     //assumes the penalty is log(n) or nothing
     if (problemName === "Database Search")  {
-        // console.log("Inside DS")
-        // console.log(penalty)
-
         if (penalty === "log(n)") {
             let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
-            let result = bisectionMethod(f, 4, 10**100); //starts at 4 because of function behavior
+            let result = utils.bisectionMethod(f, 4, 10**100); //starts at 4 because of function behavior
             // if (year > 2100) {
                 // console.log(year, adjustmentFactor, result, Math.log10(result))
             // }
-            // console.log("printing penalty n")
-            // console.log(Math.log10(result))
             if (result === null) {
                 console.log("null returned!!!!")
                 return 0
             }
-            // console.log(Math.log10(result))
             return Math.log10(result)
         }
         else {
@@ -88,7 +44,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
     else if (problemName === "Machine Learning")  {
         if (penalty === "log(n)") {
             let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
-            let result = bisectionMethod(f, 2, 10**100);
+            let result = utils.bisectionMethod(f, 2, 10**100);
             if (result === null) {
                 console.log("null returned!!!!")
                 return 0
@@ -102,7 +58,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
     else if (problemName === "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)") {
         if (penalty === "log(n)") {
             let f = n => 2 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
-            let result = bisectionMethod(f, 2, 10**100);
+            let result = utils.bisectionMethod(f, 2, 10**100);
             if (result === null) {
                 console.log("null returned!!!!")
                 return 0
@@ -116,7 +72,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
     else if (problemName === "Linear Algebra") {
         if (penalty === "log(n)") {
             let f = n => 0.627 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
-            let result = bisectionMethod(f, 2, 10**100);
+            let result = utils.bisectionMethod(f, 2, 10**100);
             if (result === null) {
                 console.log("null returned!!!!")
                 return 0
@@ -135,7 +91,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         else {
             f = n => 2 * Math.log10(n) - adjustmentFactor - n * Math.log10(0.89)
         }
-        let result = bisectionMethod(f, 2, 2000); //hardware slowdown of 10 ** (100) would yield an nstar of around 1700, plenty of buffer
+        let result = utils.bisectionMethod(f, 2, 2000); //hardware slowdown of 10 ** (100) would yield an nstar of around 1700, plenty of buffer
         if (result === null) {
             console.log("null returned!!!!")
             return 0
@@ -150,8 +106,8 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         else {
             f = n => (64 * n / 9) ** (1/3) * (Math.log(n) ** (2/3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
         }
-        // let result = bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
-        let result = bisectionMethod(f, 2, 1000);
+        // let result = utils.bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
+        let result = utils.bisectionMethod(f, 2, 1000);
         if (result === null) {
             console.log("null returned!!!!")
             return 0
@@ -167,7 +123,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         else {
             f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10)
         }
-        let result = bisectionMethod(f, 2, 60);
+        let result = utils.bisectionMethod(f, 2, 60);
         if (result === null) {
             console.log("null returned!!!!")
             return 0
@@ -179,14 +135,6 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
     console.log("this should never print")
 
     return 0
-
-    // function toSolve(n) {
-    //     return classicalRuntime(n) - (quantumRuntime(n) + adjustmentFactor)
-    // }
-    // let result = bisectionMethod(toSolve, 0, 100000);
-    // if (result >= 99999) return Infinity
-    // if (result === null) return 0
-    // return result
 }
 
 
@@ -251,9 +199,6 @@ function calculateMoneyAlgorithmicAdvantage(model) {
 }
 
 function calculateCurrentAdvantage(model) {
-    // console.log("right hereerer")
-    // console.log(model.hardwareSlowdown)
-    // console.log(model.quantumImprovementRate)
     
     let problemName = model.problemName;
     let penalty = model.penalty;
@@ -310,62 +255,6 @@ function calculateCurrentAdvantage(model) {
 }
 
 
-//returns the log_10 of the amount of logical qubits available with the given parameters
-function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
-    const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, props.model.extrapolationType)
-    
-    //log_10 of the PLQR including the ratio improvement rate
-    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
-    if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
-        adjustedPLQR = Math.log10(3)
-    }
-
-    //logLogicalQubits has the log_10 of the true number of logical qubits
-    // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
-    let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
-
-    // console.log(year, logLogicalQubits)
-
-    return logLogicalQubits
-}
-
-//function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
-function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
-    //logLogicalQubits has the log_10 of the true number of logical qubits
-    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate)
-    // logicalQubitsList.value.push(logLogicalQubits)
-
-    if (qubitToProblemSize == "2^{# of qubits}") {
-        // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
-        let problemSize = (logLogicalQubits + Math.log10(Math.log10(2)))
-        return 10 ** problemSize;
-    }
-    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
-        // let problemSize = Math.pow(2, Math.pow(10, logOfPhysicalQubits) / physicalLogicalQubitsRatio) * Math.log10(2)
-        let problemSize = Math.pow(2, Math.pow(10, logLogicalQubits)) * Math.log10(2)
-        return problemSize;
-    }
-    else if (qubitToProblemSize == "{# of qubits}") {
-        // let problemSize = logOfPhysicalQubits -  Math.log10(physicalLogicalQubitsRatio)
-        let problemSize = logLogicalQubits
-        return problemSize;
-    }
-    else if (qubitToProblemSize == "log({# of qubits})") {
-        // let problemSize = Math.log10(logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)) - Math.log10(Math.log10(2))
-        let problemSize = Math.log10(logLogicalQubits) - Math.log10(Math.log10(2))
-        
-        //true if logLogicalQubits is negative
-        //(Amount of physical qubits is less than the ratio to achieve a single logical qubit))
-        if (isNaN(problemSize)) {
-            return 0;
-        }
-        
-        return problemSize;
-    }
-}
-
-
-
 function calculateMoneyEconomicAdvantage(model) {
 
     // let quantumRuntime = model.quantumRuntime;
@@ -409,7 +298,7 @@ function calculateMoneyEconomicAdvantage(model) {
 
     } else {
 
-        const tStar = bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
+        const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
 
         let range = []
 
@@ -418,13 +307,10 @@ function calculateMoneyEconomicAdvantage(model) {
                 range.push(i);
             }
             let nStar = quantumFeasible(tStar)
-            // logicalQubitsList.value = []
 
             let quantumFeasibleList = range.map(i => [year + i, quantumFeasible(year + i)])
             let quantumAdvantageList = range.map(i => [year + i, quantumAdvantage(year + i)])
 
-            // console.log(logicalQubitsList)
-            // console.log(quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]))
             moneyEconomicData.value = {
                 tStar: tStar,
                 nStar: nStar,
@@ -448,7 +334,7 @@ function calculateMoneyEconomicAdvantage(model) {
 }
 
 function calculateQuantumEconomicAdvantage(model) {
-    
+
     // let quantumRuntime = model.quantumRuntime;
     let problemName = model.problemName;
     let penalty = model.penalty;
@@ -463,7 +349,7 @@ function calculateQuantumEconomicAdvantage(model) {
     function qf(roadmap) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize)
     }
-    
+
     function qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
         return year => getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
     }
@@ -487,14 +373,13 @@ function calculateQuantumEconomicAdvantage(model) {
             tStar: -1,
             qStar: -1,
             quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
-            // quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
             quantumAdvantage: range.map(i => [year + i, Infinity])
         }
 
         
     } else {
 
-        const tStar = bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
+        const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
 
         let range = []
 
@@ -503,13 +388,10 @@ function calculateQuantumEconomicAdvantage(model) {
                 range.push(i);
             }
             let nStar = quantumFeasible(tStar)
-            // logicalQubitsList.value = []
 
             let quantumFeasibleList = range.map(i => [year + i, quantumFeasible(year + i)])
             let quantumAdvantageList = range.map(i => [year + i, quantumAdvantage(year + i)])
 
-            // console.log(logicalQubitsList)
-            // console.log(quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]))
             quantumEconomicAdvantageData.value = {
                 tStar: tStar,
                 nStar: nStar,
@@ -544,7 +426,56 @@ function calculateQuantumEconomicAdvantage(model) {
 
         }
     }
-    console.log("out")
+}
+
+//returns the log_10 of the amount of logical qubits available with the given parameters
+function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
+    const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, props.model.extrapolationType)
+    
+    //log_10 of the PLQR including the ratio improvement rate
+    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+    if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
+        adjustedPLQR = Math.log10(3)
+    }
+
+    //logLogicalQubits has the log_10 of the true number of logical qubits
+    let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
+
+    return logLogicalQubits
+}
+
+//function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
+function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
+    //logLogicalQubits has the log_10 of the true number of logical qubits
+    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate)
+
+    if (qubitToProblemSize == "2^{# of qubits}") {
+        // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
+        let problemSize = (logLogicalQubits + Math.log10(Math.log10(2)))
+        return 10 ** problemSize;
+    }
+    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
+        // let problemSize = Math.pow(2, Math.pow(10, logOfPhysicalQubits) / physicalLogicalQubitsRatio) * Math.log10(2)
+        let problemSize = Math.pow(2, Math.pow(10, logLogicalQubits)) * Math.log10(2)
+        return problemSize;
+    }
+    else if (qubitToProblemSize == "{# of qubits}") {
+        // let problemSize = logOfPhysicalQubits -  Math.log10(physicalLogicalQubitsRatio)
+        let problemSize = logLogicalQubits
+        return problemSize;
+    }
+    else if (qubitToProblemSize == "log({# of qubits})") {
+        // let problemSize = Math.log10(logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)) - Math.log10(Math.log10(2))
+        let problemSize = Math.log10(logLogicalQubits) - Math.log10(Math.log10(2))
+        
+        //true if logLogicalQubits is negative
+        //(Amount of physical qubits is less than the ratio to achieve a single logical qubit))
+        if (isNaN(problemSize)) {
+            return 0;
+        }
+        
+        return problemSize;
+    }
 }
 
 //returns the amount of logical qubits needed to achieve said problem size using the function specified by qubitToProblemSize
