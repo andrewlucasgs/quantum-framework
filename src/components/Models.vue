@@ -1,4 +1,5 @@
 <script setup>
+import { re } from 'mathjs';
 import { watch, ref, defineAsyncComponent } from 'vue';
 const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
 const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
@@ -336,6 +337,8 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
     } else {
         logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
     }
+
+    if(props.model.roadmapUnit === 'logical') return logOfPhysicalQubits;
 
     //log_10 of the PLQR including the ratio improvement rate
     let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);

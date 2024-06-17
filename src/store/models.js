@@ -17,15 +17,7 @@ const modelTemplate = {
         2029: 200,
         2033: 2000,
     },
-    // roadmap: {
-    //     2021: 127,
-    //     2022: 433,
-    //     2023: 1121,
-    //     2024: 1386,
-    //     2025: 4158,
-    //     2033: 100000
-
-    // },
+    roadmapUnit: "physical",
     extrapolationType: 'exponential',
     hardwareSlowdown: 3.78,
     // hardwareSlowdown: 6,

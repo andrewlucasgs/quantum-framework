@@ -34,12 +34,19 @@
                             <option value="exponential">Exponential</option>
                         </select>
                     </div>
-                    <label class="text-xs  text-gray-600" for="extrapolationType">Roadmap</label>
+                    <div class="my-2 w-full">
+                        <label class="text-xs text-gray-600" for="extrapolationType">Roadmap Unit</label>
+                        <select v-model="roadmapUnit" class="w-full p-1 ring-1 ring-slate-200">
+                            <option value="physical">Physical Qubits</option>
+                            <option value="logical">Logical Qubits</option>
+                        </select>
+                    </div>
+                    <label class="text-xs  text-gray-600" for="roadmap">Roadmap</label>
                     <table class=" text-sm  w-full border-collapse border-spacing-2 border border-slate-500">
                         <thead class="border rounded-xl">
                             <tr class="text-gray-700">
                                 <th class="border border-slate-200 p-1">Year</th>
-                                <th class="border border-slate-200 p-1"># of Physical Qubits</th>
+                                <th class="border border-slate-200 p-1"># of {{ roadmapUnit}} Qubits</th>
                                 <th class="border border-slate-200 p-1"></th>
                             </tr>
                         </thead>
@@ -97,11 +104,13 @@ const roadmapData = ref(null);
 const props = defineProps({
     name: String,
     roadmap: Object,
-    extrapolationType: String
+    extrapolationType: String,
+    roadmapUnit: String
 });
 
 const dataToGraph = ref([])
 const extrapolationType = ref(props.extrapolationType);
+const roadmapUnit = ref(props.roadmapUnit);
 
 watch(roadmapData, (newVal) => {
     dataToGraph.value = Object.fromEntries(newVal.filter(roadmap => roadmap.year && roadmap.qubits).map(roadmap => ([Number(roadmap.year), roadmap.qubits])))
@@ -109,6 +118,7 @@ watch(roadmapData, (newVal) => {
 
 function updateValues() {
     extrapolationType.value = props.extrapolationType;
+    roadmapUnit.value = props.roadmapUnit;
     roadmapData.value = Object.entries(props.roadmap).map(([key, value]) => {
         return {
             year: key,
@@ -128,7 +138,8 @@ function save() {
 
     emit("updateRoadmap", {
         roadmap: newRoadmap,
-        extrapolationType: extrapolationType.value
+        extrapolationType: extrapolationType.value,
+        roadmapUnit: roadmapUnit.value
     });
     dialog.value.closeModal();
 }
