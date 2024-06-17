@@ -316,26 +316,46 @@ const interpolationFunctions = {
     exponential: exponentialInterpolation
 }
 
+
 //returns the log_10 of the amount of logical qubits available with the given parameters
 function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
+    // console.log(year)
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap).map(x => Math.log10(x))
+    // let qubits = Object.values(roadmap).map(x => Math.log10(x))
+    let qubits = Object.values(roadmap).map(Number)
 
+    //actual value of the number of physical qubits
+    let numberOfPhysicalQubits;
     //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
     let logOfPhysicalQubits;
     if (roadmap.hasOwnProperty(year)) {
-        logOfPhysicalQubits = Math.log10(roadmap[year])
+        // logOfPhysicalQubits = Math.log10(roadmap[year])
+        numberOfPhysicalQubits = roadmap[year]
+        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
+
     } else if (year > Math.max(...years)) {
-        let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2));
         if (props.model.extrapolationType === 'linear') {
-            logOfPhysicalQubits = regression.slope * year + regression.intercept;
+            let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2));
+            // console.log("slope, intercept")
+            // console.log(regression.slope, regression.intercept)
+            numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+            logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
         } else {
-            logOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+            //exponential regression is just linear regression in log space
+            let regression = regressionFunctions["linear"](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+            // let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2).map(x => Math.log10(x)));
+            // console.log("slope, intercept in logspace")
+            // console.log(regression.slope, regression.intercept)
+            // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
+            logOfPhysicalQubits = regression.slope * year + regression.intercept;
+
         }
 
     } else {
-        logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
+        // console.log("interpolation")
+        numberOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
+        logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
     }
 
     if(props.model.roadmapUnit === 'logical') return logOfPhysicalQubits;
@@ -349,8 +369,45 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
     //logLogicalQubits has the log_10 of the true number of logical qubits
     // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
     let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
+
+    // console.log(year, logLogicalQubits)
+
     return logLogicalQubits
 }
+
+// //returns the log_10 of the amount of logical qubits available with the given parameters
+// function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
+//     year = parseFloat(year);
+//     let years = Object.keys(roadmap).map(Number);
+//     let qubits = Object.values(roadmap).map(x => Math.log10(x))
+
+//     //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
+//     let logOfPhysicalQubits;
+//     if (roadmap.hasOwnProperty(year)) {
+//         logOfPhysicalQubits = Math.log10(roadmap[year])
+//     } else if (year > Math.max(...years)) {
+//         let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2));
+//         if (props.model.extrapolationType === 'linear') {
+//             logOfPhysicalQubits = regression.slope * year + regression.intercept;
+//         } else {
+//             logOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+//         }
+
+//     } else {
+//         logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
+//     }
+
+//     //log_10 of the PLQR including the ratio improvement rate
+//     let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+//     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
+//         adjustedPLQR = Math.log10(3)
+//     }
+
+//     //logLogicalQubits has the log_10 of the true number of logical qubits
+//     // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
+//     let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
+//     return logLogicalQubits
+// }
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
 function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
