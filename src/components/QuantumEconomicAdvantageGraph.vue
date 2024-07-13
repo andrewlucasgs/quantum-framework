@@ -7,7 +7,7 @@ highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
 
-import { ref, defineProps, watch } from 'vue';
+import { ref, defineProps, watch, onMounted } from 'vue';
 
 const props = defineProps({
     data: Object,
@@ -190,9 +190,12 @@ const chartOptions = {
 
 }
 
-
+onMounted(() => {
+  console.log("mounted")
+})
 
 watch(() => props.data, async () => {
+    console.log("data changed")
     updateGraph()
 
     key.value += 1;
@@ -395,6 +398,7 @@ function updateGraph() {
 
 <template>
     <div>
+        
         <Chart :key="key" :options="chartOptions" />
     </div>
 </template>

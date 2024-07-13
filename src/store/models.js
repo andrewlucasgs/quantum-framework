@@ -4,8 +4,8 @@ import { ref, toRaw } from 'vue'
 const modelTemplate = {
     id: 1,
     problemName: "Database Search",
-    classicalRuntime: (n) => n,
-    quantumRuntime: (n) => n / 2,
+    "classicalRuntime": 'n',
+    "quantumRuntime": 'n**(1/2)',
     classicalRuntimeLabel: "O(n)",
     quantumRuntimeLabel: "O(\\sqrt{n})",
     hardwareName: 'IBM (Superconducting)',
@@ -26,7 +26,7 @@ const modelTemplate = {
     ratioImprovementRate: 10,
     qubitToProblemSize: "2^{# of qubits}",
     // qubitToProblemSize: "{# of qubits}",
-    penalty: "log(n)",
+    penalty: "log(n,2)",
     quantumOnly: false,
 
 }

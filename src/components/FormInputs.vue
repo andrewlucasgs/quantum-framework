@@ -11,7 +11,7 @@ const inputStore = useInputStore();
 const mostCommonRuntimes = [
     "1",
     "n",
-    "log(n)",
+    "log(n,2)",
     "sqrt(n)",
     "n*log(n)",
     "n^2",
