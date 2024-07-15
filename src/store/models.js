@@ -28,7 +28,7 @@ const modelTemplate = {
     // },
     extrapolationType: 'exponential',
     hardwareSlowdown: 3.78,
-    costFactor: 1000,
+    costFactor: '8',
     // hardwareSlowdown: 6,
     quantumImprovementRate: 10,
     physicalLogicalQubitsRatio: 1000,

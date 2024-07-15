@@ -588,9 +588,15 @@ function getRelevantRoadmapPoints(data) {
                     </p>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="costFactor"
-                            v-model="model.costFactor" min="1" max="5000" step="100" />
-                        <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                            id="costFactor" v-model="model.costFactor" />
+                        min="0" max="16" step="0.5"
+                            v-model="model.costFactor"  />
+                            <div class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
+                                <span class="pr-2">10 </span>
+                                <input class="w-1/3 bg-transparent  absolute t-0 l-0 ml-12 mb-4 text-xs"  type="number"
+                                 min="0" max="16" step="0.5"
+                                    id="costFactor" v-model="model.costFactor" />
+
+                            </div>
                     </div>
                 </div>
                 <div class="flex flex-col">

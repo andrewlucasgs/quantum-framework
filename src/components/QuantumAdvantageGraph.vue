@@ -8,16 +8,19 @@ const props = defineProps({
 });
 const key = ref(0);
 
-
+console.log(props.data.quantumCostSteps)
 const chartOptions = {
     chart: {
         type: 'spline',
         events: {
             load: function () {
                 this.dashLines = [[props.data.nStar, props.data.stepStar]].map(point => utils.drawDashLine(this, point))
+                this.dashLines = [[props.data.nCostStar, props.data.stepCostStar]].map(point => utils.drawDashLine(this, point, '','rgba(255, 165, 0, 0.3)'))
+
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.nStar, props.data.stepStar]][i], line))
+                // this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.nStar, props.data.stepStar]][i], line))
+                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.nCostStar, props.data.stepCostStar]][i], line, '','rgba(255, 165, 0, 0.3)'))
             }
         }
     },
@@ -33,6 +36,12 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
+            if(this.series.name === "Quantum Cost" || this.series.name === "Quantum Cost Advantage"){
+                return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Cost: ${utils.toBase10HTML(this.y)}`;
+            } else if (this.series.name === "Classical"){
+                return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Steps: ${utils.toBase10HTML(this.y)}<br/>Cost: ${utils.toBase10HTML(this.y)}`;
+            }
+
             return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Steps: ${utils.toBase10HTML(this.y)}`;
         }
     },
@@ -98,12 +107,36 @@ function updateGraphData() {
             }
         },
         {
+            name: 'Quantum Cost',
+            data: props.data.quantumCostSteps,
+            color: 'orange',
+            marker: {
+                enabled: false
+            }
+        },
+        {
+            name: 'Quantum Cost Advantage',
+            data: [[props.data.nCostStar, props.data.stepCostStar]],
+            color: 'orange',
+            type: 'scatter',
+            maxPointWidth: 1,
+            marker: {
+                enabled: true,
+                symbol: 'circle'
+            },
+            showInLegend: false
+        },
+        {
             name: 'Quantum Advantage',
             data: [[props.data.nStar, props.data.stepStar]],
             color: 'red',
             type: 'scatter',
-            dashStyle: 'dash',
-            showInLegend: false,
+            maxPointWidth: 1,
+            marker: {
+                enabled: true,
+                symbol: 'circle'
+            },
+            showInLegend: false
         }
     ]
 
@@ -129,6 +162,8 @@ function updateGraphData() {
                 },
             ]
         },
+
+
         {
             draggable: "",
             labelOptions: {
@@ -151,6 +186,30 @@ function updateGraphData() {
                 },
             ]
         },
+        {
+            draggable: "",
+            labelOptions: {
+                backgroundColor: "#ffffffdd",
+                borderColor: "orange",
+                // color: "red",
+                shape: "rect"
+            },
+            labels: [
+                {
+                    point: {
+                        x: props.data.nCostStar * 1.1,
+                        y: chartOptions.yAxis.min,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    useHTML: true,
+                    text: utils.toBase10HTML(props.data.nCostStar),
+
+                },  
+            ]
+        },  
+
+
 
     ]
 }

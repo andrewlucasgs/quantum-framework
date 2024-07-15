@@ -6,7 +6,7 @@ export function round(number, decimalDigits=2) {
     return Math.round(number * factor) / factor
 }
 
-export function drawDashLine(chart, point, dashLine) {
+export function drawDashLine(chart, point, dashLine, color='rgba(255,0,0,0.3)') {
     const xAxis = chart.xAxis[0]
     const yAxis = chart.yAxis[0]
 
@@ -16,7 +16,7 @@ export function drawDashLine(chart, point, dashLine) {
 
     return dashLine
         ? dashLine.attr({ d })
-        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': 'rgba(255,0,0,0.3)', 'stroke-width': 2, zIndex: 1 }).add()
+        : chart.renderer.path(d).attr({ 'stroke-dasharray': '8,4', 'stroke': color, 'stroke-width': 2, zIndex: 1 }).add()
 }
 
 //returns a string representing the year and quarter ("2024 Q2") of the input year
