@@ -11,6 +11,30 @@ const props = defineProps({
 });
 
 
+
+// function getPhysicalQubits(year, roadmap) {
+//     year = parseFloat(year);
+//     let years = Object.keys(roadmap).map(Number);
+//     let qubits = Object.values(roadmap).map(x => Math.log10(x))
+
+//     let numberOfPhysicalQubits;
+//     if (roadmap.hasOwnProperty(Number(year))) {
+//         numberOfPhysicalQubits = Math.log10(roadmap[Number(year)])
+//     } else if (year > Math.max(...years)) {
+//         let regression = regressionFunctions[props.extrapolationType](years.slice(-2), qubits.slice(-2));
+//         if (props.extrapolationType === 'linear') {
+//             numberOfPhysicalQubits = regression.slope * year + regression.intercept;
+//         } else {
+//             numberOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+//         }
+
+//     } else {
+//         numberOfPhysicalQubits = interpolationFunctions[props.extrapolationType](years, qubits, year)
+
+//     }
+//     return (numberOfPhysicalQubits)
+// }
+
 const physicalQubits = ref(Array.from({
     length: Math.max(Math.max(...Object.keys(props.data)) + 10, 2024 + 10) - 2024
 }, (_, i) => [

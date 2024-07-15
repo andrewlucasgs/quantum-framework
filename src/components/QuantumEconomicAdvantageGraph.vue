@@ -22,10 +22,10 @@ function getAreaData() {
 
     console.log(tStar, nStar, tCostStar, nCostStar)
 
-    const filteredQuantumAdvantage = quantumAdvantage.filter(point => point[0] >= tStar & point[0] >= tCostStar);
-    const filteredQuantumFeasible = quantumFeasible.filter(point => point[0] >= tStar & point[0] >= tCostStar);
-    const filteredQuantumCostAdvantage = quantumCostAdvantage.filter(point => point[0] >= tStar & point[0] >= tCostStar);
-    const filteredQuantumCostFeasible = quantumCostFeasible.filter(point => point[0] >= tStar & point[0] >= tCostStar);
+    const filteredQuantumAdvantage = quantumAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
+    const filteredQuantumFeasible = quantumFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
+    const filteredQuantumCostAdvantage = quantumCostAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
+    const filteredQuantumCostFeasible = quantumCostFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
 
     const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
         const costAdvantagePoint = filteredQuantumCostAdvantage[i];

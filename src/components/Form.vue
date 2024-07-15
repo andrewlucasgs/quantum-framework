@@ -77,57 +77,6 @@ const problems = ref([
         qubitToProblemSize: "{# of qubits}",
         penalty: "log(n)",
     },
-    // {
-    //     problemName: "Linear Algebra",
-    //     classicalRuntime: (n) => 3 * n,
-    //     quantumRuntime: (n) => 2.373 * n,
-    //     classicalRuntimeLabel: "O(n^3)",
-    //     quantumRuntimeLabel: "O(n^{2.373})",
-    //     qubitToProblemSize: "2^{# of qubits}",
-    //     penalty: "log(n)",
-
-    // },
-    // {
-    //     problemName: "Machine Learning",
-    //     classicalRuntime: (n) => 2 * n,
-    //     quantumRuntime: (n) => 1.5 * n,
-    //     classicalRuntimeLabel: "O(n^2)",
-    //     quantumRuntimeLabel: "O(n^{1.5})",
-    //     qubitToProblemSize: "2^{# of qubits}",
-    // },
-
-    // {
-    //     // classicalRuntime: (n) => n + Math.log10(n) - Math.log10(Math.log10(2)),
-    //     problemName: "Sorting",
-    //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
-    //     // classicalRuntime: (n) => Math.log10(n * Math.log2(n)),
-    //     quantumRuntime: (n) => n,
-    //     classicalRuntimeLabel: "O(n \\log_2 n)",
-    //     quantumRuntimeLabel: "O(n)",
-    // },
-    // {
-    //     problemName: "Integer Factorization",
-    //     classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
-    //     quantumRuntime: (n) => n / 3,
-    //     // classicalRuntime: (n) => Math.sqrt(n * Math.log10(n)) * Math.log10(Math.E),
-    //     quantumRuntime: (n) => n/3,
-    //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
-    //     quantumRuntimeLabel: "O(n^{1/5})",
-    // },
-    // {
-    //     problemName: "Sorting",
-    //     classicalRuntime: (n) => n + Math.log10(n) / Math.log10(2),
-    //     quantumRuntime: (n) => n,
-    //     classicalRuntimeLabel: "O(n \\log_2 n)",
-    //     quantumRuntimeLabel: "O(n)",
-    // },
-    // {
-    //     problemName: "Integer Factorization",
-    //     classicalRuntime: (n) => Math.sqrt(Math.log10(n) * Math.log10(Math.log10(n))),
-    //     quantumRuntime: (n) => n / 3,
-    //     classicalRuntimeLabel: "O(e^{\\sqrt{\\log n \\cdot \\log \\log n}})",
-    //     quantumRuntimeLabel: "O(n^{1/5})",
-    // },
 ]);
 
 
@@ -146,6 +95,7 @@ const hardwares = ref([
             2029: 200,
             2033: 2000,
         },
+        roadmapUnit: "physical",
         extrapolationType: "exponential",
     },
     {
@@ -167,7 +117,8 @@ const hardwares = ref([
             2026: 4096,
             2027: 12288,
             2028: 32768,
-        },
+            },
+        roadmapUnit: "physical",
         extrapolationType: "exponential",
     },
     {
@@ -181,55 +132,9 @@ const hardwares = ref([
             2025: 3000,
             2026: 10000,
         },
+        roadmapUnit: "physical",
         extrapolationType: "exponential",
     },
-    // {
-    //     hardwareName: "IBM",
-    //     hardwareSlowdown: 6,
-    //     quantumImprovementRate: 10,
-    //     physicalLogicalQubitsRatio: 1000,
-    //     roadmap: {
-    //         2021: 127,
-    //         2022: 433,
-    //         2023: 1121,
-    //         2024: 1386,
-    //         2025: 4158,
-    //         2033: 100000
-    //     },
-    //     extrapolationType: "exponential",
-    // },
-    // {
-    //     hardwareName: "Intel",
-    //     hardwareSlowdown: 5,
-    //     quantumImprovementRate: 10,
-    //     physicalLogicalQubitsRatio: 1000,
-    //     roadmap: {
-    //         2021: 127,
-    //         2022: 4333,
-    //         2023: 1121,
-    //         2024: 1386,
-    //         2025: 4158,
-    //         2026: 5158,
-    //         2027: 5158,
-
-    //     },
-    //     extrapolationType: "linear",
-    // },
-    // {
-    //     hardwareName: "IQM",
-    //     hardwareSlowdown: 7,
-    //     quantumImprovementRate: 10,
-    //     physicalLogicalQubitsRatio: 1000,
-    //     roadmap: {
-    //         2021: 127,
-    //         2022: 433,
-    //         2023: 1121,
-    //         2024: 1386,
-    //         2025: 4158,
-    //     },
-    //     extrapolationType: "linear",
-    // },
-
 ]);
 
 
@@ -252,6 +157,8 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
     model.value.quantumImprovementRate = hardware.quantumImprovementRate;
     model.value.roadmap = hardware.roadmap;
+    model.value.roadmapUnit = hardware.roadmapUnit;
+    model.value.extrapolationType = hardware.extrapolationType;
     model.value.ratioImprovementRate = hardware.ratioImprovementRate;
 
 }, { deep: true });
@@ -278,6 +185,7 @@ const editMode = ref(true);
 function updateRoadmap(value) {
     model.value.roadmap = value.roadmap;
     model.value.extrapolationType = value.extrapolationType;
+    model.value.roadmapUnit = value.roadmapUnit;
 }
 
 function removeModel() {
@@ -458,6 +366,7 @@ function getRelevantRoadmapPoints(data) {
                     </div>
                     <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                        :roadmapUnit="model.roadmapUnit"
                         v-slot="{ openModal }">
                         <button
                             class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
@@ -472,7 +381,7 @@ function getRelevantRoadmapPoints(data) {
                     <thead class="bg-gray-100">
                         <tr class="text-left">
                             <th>Year</th>
-                            <th># of Physical Qubits</th>
+                            <th># of {{ model.roadmapUnit }} Qubits</th>
                         </tr>
                     </thead>
                     <tbody class="text-left">
@@ -485,6 +394,7 @@ function getRelevantRoadmapPoints(data) {
                             <td colspan="2" class="p-1 text-center">
                                 <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                                     :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                                    :roadmapUnit="model.roadmapUnit"
                                     v-slot="{ openModal }">
                                     <button
                                         class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -653,6 +563,7 @@ function getRelevantRoadmapPoints(data) {
             </div>
             <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                 :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                :roadmapUnit="model.roadmapUnit"
                 v-slot="{ openModal }">
                 <button
                     class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
@@ -667,7 +578,7 @@ function getRelevantRoadmapPoints(data) {
             <thead class="bg-gray-100">
                 <tr class="text-left">
                     <th>Year</th>
-                    <th># of Physical Qubits</th>
+                    <th># of {{ model.roadmapUnit }} Qubits</th>
                 </tr>
             </thead>
             <tbody class="text-left">
@@ -680,6 +591,7 @@ function getRelevantRoadmapPoints(data) {
                     <td colspan="2" class="p-1 text-center">
                         <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                             :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                            :roadmapUnit="model.roadmapUnit"
                             v-slot="{ openModal }">
                             <button
                                 class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"

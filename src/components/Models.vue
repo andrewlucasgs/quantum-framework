@@ -1,4 +1,5 @@
 <script setup>
+import { re } from 'mathjs';
 import { watch, ref, defineAsyncComponent } from 'vue';
 import * as utils from "../store/utils"
 
@@ -41,7 +42,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
             return 2 * adjustmentFactor
         }
     }
-    else if (problemName === "Machine Learning")  {
+    else if (problemName === "Machine Learning") {
         if (penalty === "log(n)") {
             let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
             let result = utils.bisectionMethod(f, 2, 10**100);
@@ -53,7 +54,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         }
         else {
             return 2 * adjustmentFactor
-        }    
+        }
     }
     else if (problemName === "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)") {
         if (penalty === "log(n)") {
@@ -67,7 +68,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         }
         else {
             return 0.5 * adjustmentFactor
-        } 
+        }
     }
     else if (problemName === "Linear Algebra") {
         if (penalty === "log(n)") {
@@ -81,7 +82,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
         }
         else {
             return adjustmentFactor / 0.627
-        } 
+        }
     }
     else if (problemName === "Traveling Salesman") {
         let f;
@@ -104,7 +105,7 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
             f = n => (64 * n / 9) ** (1 / 3) * (Math.log(n) ** (2 / 3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n)) - Math.log10(Math.log2(n))
         }
         else {
-            f = n => (64 * n / 9) ** (1/3) * (Math.log(n) ** (2/3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
+            f = n => (64 * n / 9) ** (1 / 3) * (Math.log(n) ** (2 / 3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
         }
         // let result = utils.bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
         let result = utils.bisectionMethod(f, 2, 1000);
@@ -426,6 +427,13 @@ function calculateQuantumEconomicAdvantage(model) {
             quantumFeasible: quantumFeasibleList,
             quantumAdvantage: range.map(i => [year + i, Infinity])
         }
+        logicalQubitsData.value = {
+            tStar: -1,
+            qStar: -1,
+            quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
+            // quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
+            quantumAdvantage: range.map(i => [year + i, Infinity])
+        }
        
         
     } else {
@@ -449,6 +457,12 @@ function calculateQuantumEconomicAdvantage(model) {
                 quantumFeasible: quantumFeasibleList,
                 quantumAdvantage: quantumAdvantageList
             }
+            logicalQubitsData.value = {
+                tStar: tStar,
+                qStar: problemSizeToQubits(nStar, qubitToProblemSize),
+                quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
+                quantumAdvantage: quantumAdvantageList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)])
+            }
         } else {
             console.log("tstar is null")
             for (let i = 0; i < (2030 - year) * 2; i += (2030 - year) / 100) {
@@ -461,6 +475,12 @@ function calculateQuantumEconomicAdvantage(model) {
                 nStar: 0,
                 quantumFeasible: quantumFeasibleList,
                 quantumAdvantage: quantumAdvantageList
+            }
+            logicalQubitsData.value = {
+                tStar: 0,
+                qStar: 0,
+                quantumFeasible: quantumFeasibleList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)]),
+                quantumAdvantage: quantumAdvantageList.map(point => [point[0], problemSizeToQubits(point[1], qubitToProblemSize)])
             }
         }
     }
@@ -527,6 +547,7 @@ function calculateQuantumEconomicAdvantage(model) {
     quantumEconomicAdvantageData.value = quantumEconomicAdvantageDataAux
 }
 
+
 //returns the log_10 of the amount of logical qubits available with the given parameters
 function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
     const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, props.model.extrapolationType)
@@ -542,6 +563,40 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
 
     return logLogicalQubits
 }
+
+// //returns the log_10 of the amount of logical qubits available with the given parameters
+// function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate) {
+//     year = parseFloat(year);
+//     let years = Object.keys(roadmap).map(Number);
+//     let qubits = Object.values(roadmap).map(x => Math.log10(x))
+
+//     //logOfPhysicalQubits variable holds log_{10} of the true number of physical qubits
+//     let logOfPhysicalQubits;
+//     if (roadmap.hasOwnProperty(year)) {
+//         logOfPhysicalQubits = Math.log10(roadmap[year])
+//     } else if (year > Math.max(...years)) {
+//         let regression = regressionFunctions[props.model.extrapolationType](years.slice(-2), qubits.slice(-2));
+//         if (props.model.extrapolationType === 'linear') {
+//             logOfPhysicalQubits = regression.slope * year + regression.intercept;
+//         } else {
+//             logOfPhysicalQubits = regression.a * Math.exp(regression.b * year);
+//         }
+
+//     } else {
+//         logOfPhysicalQubits = interpolationFunctions[props.model.extrapolationType](years, qubits, year)
+//     }
+
+//     //log_10 of the PLQR including the ratio improvement rate
+//     let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+//     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
+//         adjustedPLQR = Math.log10(3)
+//     }
+
+//     //logLogicalQubits has the log_10 of the true number of logical qubits
+//     // let logLogicalQubits = logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)
+//     let logLogicalQubits = logOfPhysicalQubits - adjustedPLQR
+//     return logLogicalQubits
+// }
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
 function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize) {
@@ -566,13 +621,13 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImpr
     else if (qubitToProblemSize == "log({# of qubits})") {
         // let problemSize = Math.log10(logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)) - Math.log10(Math.log10(2))
         let problemSize = Math.log10(logLogicalQubits) - Math.log10(Math.log10(2))
-        
+
         //true if logLogicalQubits is negative
         //(Amount of physical qubits is less than the ratio to achieve a single logical qubit))
         if (isNaN(problemSize)) {
             return 0;
         }
-        
+
         return problemSize;
     }
 }
@@ -601,10 +656,10 @@ function problemSizeToQubits(logSize, qubitToProblemSize) {
 
 function addPenalty(quantumRuntime, penalty) {
     // console.log(penalty)
-    
+
     if (penalty == "log(n)") {
         // console.log('log penalty applied')
-        return (n) => quantumRuntime(n) +  Math.log10(n) + Math.log10(Math.log2(10))
+        return (n) => quantumRuntime(n) + Math.log10(n) + Math.log10(Math.log2(10))
     }
     else if (penalty == "n") {
         return (n) => quantumRuntime(n) + n;
@@ -639,8 +694,8 @@ watch(() => props.model, (model) => {
             <Form :modelId="model.id" />
         </div>
         <template v-if="!model.quantumOnly">
-            <div class="md:flex gap-4 px-8 py-2"  >
-                
+            <div class="md:flex gap-4 px-8 py-2">
+
                 <QuantumAdvantageGraph :data="currentAdvantageData" />
                 <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
             </div>
@@ -650,17 +705,24 @@ watch(() => props.model, (model) => {
                 <MoneyEconomicGraph :data="moneyEconomicData" />
             </div>
             <div class="md:flex gap-4 px-8 py-2 justify-center">
-                
+
                 <LogicalQubitsGraph :data="logicalQubitsData" />
             </div> -->
         </template>
         <template v-else>
-            <div class="md:flex gap-4 px-8 py-2"  >
+            <div class="md:flex gap-4 px-8 py-2">
+                <LogicalQubitsOnlyGraph :data="{
+                    ...logicalQubitsData, quantumFeasible: logicalQubitsData.quantumFeasible.filter(
+                        point => point[0] <= 2034
+                    ),
+                }" />
 
-            <LogicalQubitsOnlyGraph :data="{...logicalQubitsData, tStar: 2034}" />
-
-<QuantumFeasibilityGraph :data="{...quantumEconomicAdvantageData, tStar: 2034}" />
-</div>
+                <QuantumFeasibilityGraph :data="{
+                    ...quantumEconomicAdvantageData, quantumFeasible: quantumEconomicAdvantageData.quantumFeasible.filter(
+                        point => point[0] <= 2034
+                    )
+                }" />
+            </div>
 
         </template>
 
