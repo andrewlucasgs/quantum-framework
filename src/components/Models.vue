@@ -1,10 +1,14 @@
 <script setup>
 import { watch, ref, defineAsyncComponent } from 'vue';
+import * as utils from "../store/utils"
+
 const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
 const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
 const LogicalQubitsGraph = defineAsyncComponent(() => import('./LogicalQubitsGraph.vue'));
 const LogicalQubitsOnlyGraph = defineAsyncComponent(() => import('./LogicalQubitsOnlyGraph.vue'));
 const QuantumFeasibilityGraph = defineAsyncComponent(() => import('./QuantumFeasibilityGraph.vue'));
+const MoneyAlgorithmGraph = defineAsyncComponent(() => import('./MoneyAlgorithmGraph.vue'));
+const MoneyEconomicGraph = defineAsyncComponent(() => import('./MoneyEconomicGraph.vue'));
 const Form = defineAsyncComponent(() => import('./Form.vue'));
 
 const props = defineProps({
@@ -94,6 +98,7 @@ watch(() => props.model, (model) => {
             <!-- <div class="md:flex gap-4 px-8 py-2 justify-center">
 
                 <LogicalQubitsGraph :data="logicalQubitsData" />
+            </div> -->
             </div> -->
         </template>
         <!-- <template v-else>

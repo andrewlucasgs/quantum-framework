@@ -1,58 +1,29 @@
 <script setup>
 
-import Highcharts, { color } from 'highcharts'
+import Highcharts from 'highcharts'
 import highchartsMore from 'highcharts/highcharts-more';
 import highchartsAnnotations from 'highcharts/modules/annotations';
 highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
+import { ref, defineProps, watch } from 'vue';
+import * as utils from "../store/utils"
 
-import { ref, defineProps, watch, onMounted } from 'vue';
 
 const props = defineProps({
     data: Object,
 })
 
-const roadmap = {
-    2020: 27,
-    2024: 133,
-    2033: 2000
-}
 
 const key = ref(0);
 
-
 function getAreaData() {
-    const { tStar, nStar, tCostStar, nCostStar, quantumAdvantage, quantumFeasible, quantumCostAdvantage, quantumCostFeasible } = props.data;
-
-    console.log(tStar, nStar, tCostStar, nCostStar)
-
-    const filteredQuantumAdvantage = quantumAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-    const filteredQuantumFeasible = quantumFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-    const filteredQuantumCostAdvantage = quantumCostAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-    const filteredQuantumCostFeasible = quantumCostFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-
-    const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
-        const costAdvantagePoint = filteredQuantumCostAdvantage[i];
-        const feasiblePoint = filteredQuantumFeasible[i];
-        const costFeasiblePoint = filteredQuantumCostFeasible[i];
-
-        const maxFeasible = Math.max(feasiblePoint[1], costFeasiblePoint[1]);
-        const maxAdvantage = Math.max(point[1], costAdvantagePoint[1]);
-
-        return [point[0], maxFeasible, maxAdvantage];
-    });
-
-
-
-    return [[tStar > tCostStar ? tStar : tCostStar, nStar > nCostStar ? nStar : nCostStar, nStar > nCostStar ? nStar : nCostStar]].concat(
-        maxAreaData
-
-
-    );
+    // >= tstar
+    const quantumAdvantage = props.data.quantumAdvantage.filter(point => point[0] >= props.data.tStar)
+    const quantumFeasible = props.data.quantumFeasible.filter(point => point[0] >= props.data.tStar)
+    const areaData = quantumAdvantage.map((point, i) => [point[0], quantumFeasible[i][1], point[1]])
+    return [[props.data.tStar, props.data.nStar, props.data.nStar]].concat(areaData)
 }
-
-console.log(getAreaData())
 
 const chartOptions = {
     chart: {
@@ -65,13 +36,14 @@ const chartOptions = {
                     if (this.dashLines && this.dashLines.length > 0)
                         this.dashLines.forEach((line, i) => line.destroy())
                 } else {
+
                     this.dashLines = [[props.data.tStar, props.data.nStar]].map(point => utils.drawDashLine(this, point))
-                    this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '', 'rgba(255, 165, 0, 0.3)'))
                 }
+
+
             },
             redraw: function () {
                 this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tStar, props.data.nStar]][i], line))
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '', 'rgba(255, 165, 0, 0.3)'))
             }
         },
     },
@@ -79,7 +51,7 @@ const chartOptions = {
         enabled: false
     },
     title: {
-        text: 'Economic Advantage of Quantum Computing',
+        text: 'Cost Advantage',
         style: {
             fontSize: '14px'
         }
@@ -144,7 +116,7 @@ const chartOptions = {
             }
         },
         {
-            name: 'Quantum Advantage',
+            name: 'Cost Advantage',
             data: props.data.quantumAdvantage,
             color: 'blue',
             dashStyle: 'dash',
@@ -173,7 +145,7 @@ const chartOptions = {
             showInLegend: false
         },
         {
-            name: 'Quantum Economic Advantage',
+            name: 'Cost Advantage Region',
             type: 'areasplinerange',
             data: getAreaData(),
             showInLegend: false,
@@ -183,17 +155,14 @@ const chartOptions = {
                 enabled: false,
                 symbol: 'circle'
             },
-        },
 
+        }
     ]
 }
 
-onMounted(() => {
-  console.log("mounted")
-})
+
 
 watch(() => props.data, async () => {
-    console.log("data changed")
     updateGraph()
 
     key.value += 1;
@@ -247,7 +216,7 @@ function updateGraph() {
             }
         },
         {
-            name: 'Quantum Advantage',
+            name: 'Cost Advantage',
             data: props.data.quantumAdvantage,
             color: 'blue',
             dashStyle: 'dash',
@@ -264,40 +233,6 @@ function updateGraph() {
             }
         },
         {
-            name: 'Quantum Cost Advantage',
-            data: props.data.quantumCostAdvantage,
-            color: 'orange',
-            dashStyle: 'dash',
-            zoneAxis: 'x',
-            zones: [{
-                value: props.data.tCostStar,
-            }, {
-                dashStyle: 'solid'
-            }],
-
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            }
-        },
-
-
-
-        {
-            name: 'Quantum Economic Advantage',
-            type: 'areasplinerange',
-            data: getAreaData(),
-            showInLegend: false,
-            enableMouseTracking: false,
-            fillOpacity: 0.5,
-
-            // hide points
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            },
-        },
-        {
             name: 'Intersection',
             data: [[props.data.tStar, (props.data.nStar)]],
             color: 'red',
@@ -310,24 +245,24 @@ function updateGraph() {
             showInLegend: false
         },
         {
-            name: 'Intersection',
-            data: [[props.data.tCostStar, (props.data.nCostStar)]],
-            color: 'orange',
-            type: 'scatter',
-            maxPointWidth: 1,
+            name: 'Quantum Economic Advantage',
+            type: 'areasplinerange',
+            data: getAreaData(),
+            showInLegend: false,
+            enableMouseTracking: false,
+            // hide points
             marker: {
-                enabled: true,
+                enabled: false,
                 symbol: 'circle'
             },
-            showInLegend: false
-        },
 
+        }
     ]
     chartOptions.annotations = [
         {
             draggable: "",
             labelOptions: {
-
+                
                 backgroundColor: "#ffffff55",
                 shape: "rect",
                 borderColor: "transparent",
@@ -341,14 +276,14 @@ function updateGraph() {
             labels: [
                 {
                     point: {
-                        x: ((props.data.tStar < props.data.tCostStar) ? props.data.tStar : props.data.tCostStar) + lastYear / 2,
-                        y: (props.data.nStar < props.data.nCostStar) ? props.data.nStar : props.data.nCostStar,
+                        x: (props.data.tStar + lastYear) / 2,
+                        y: props.data.nStar,
                         xAxis: 0,
                         yAxis: 0
                     },
                     useHTML: true,
                     formatter: function () {
-                        return `<p class="text-center">QUANTUM ECONOMIC ADVANTAGE</p>`
+                        return `<p class="text-center">COST ADVANTAGE REGION</p>`
                     },
                 },
             ]
@@ -365,7 +300,7 @@ function updateGraph() {
                 {
                     point: {
                         x: chartOptions.xAxis.min,
-                        y: props.data.nStar / 1.1,
+                        y: props.data.nStar /1.1,
                         xAxis: 0,
                         yAxis: 0
                     },
@@ -393,6 +328,7 @@ function updateGraph() {
                     },
                     useHTML: true,
                     text: `${utils.round(props.data.tStar)}`,
+
                 },
             ]
         },
@@ -403,7 +339,6 @@ function updateGraph() {
 
 <template>
     <div>
-        
         <Chart :key="key" :options="chartOptions" />
     </div>
 </template>
