@@ -14,6 +14,12 @@ const props = defineProps({
     data: Object,
 })
 
+const roadmap = {
+    2020: 27,
+    2024: 133,
+    2033: 2000
+}
+
 const key = ref(0);
 
 
@@ -61,12 +67,12 @@ const chartOptions = {
                         this.dashLines.forEach((line, i) => line.destroy())
                 } else {
                     this.dashLines = [[props.data.tStar, props.data.nStar]].map(point => utils.drawDashLine(this, point))
-                    this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '','rgba(255, 165, 0, 0.3)'))
+                    this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '', 'rgba(255, 165, 0, 0.3)'))
                 }
             },
             redraw: function () {
                 this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tStar, props.data.nStar]][i], line))
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '','rgba(255, 165, 0, 0.3)'))
+                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '', 'rgba(255, 165, 0, 0.3)'))
             }
         },
     },
@@ -272,7 +278,7 @@ function updateGraph() {
         },
 
 
-        
+
         {
             name: 'Quantum Economic Advantage',
             type: 'areasplinerange',

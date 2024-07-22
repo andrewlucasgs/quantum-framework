@@ -82,6 +82,10 @@ const problems = ref([
 
 const hardwares = ref([
     {
+        category: "IBM",
+        options: [
+        {
+        category: "IBM",
         hardwareName: "IBM (Superconducting)",
         hardwareSlowdown: 3.78,
         quantumImprovementRate: 10,
@@ -99,6 +103,30 @@ const hardwares = ref([
         extrapolationType: "exponential",
     },
     {
+        category: "IBM",
+        hardwareName: "IBM (2022)",
+        hardwareSlowdown: 3.78,
+        quantumImprovementRate: 10,
+        physicalLogicalQubitsRatio: 1000,
+        ratioImprovementRate: 10,
+        roadmap: {
+            2020: 27,
+            2021: 127,
+            2022: 433,
+            2023: 1121,
+            2024: 1386,
+            2025: 4158,
+        },
+        roadmapUnit: "physical",
+        extrapolationType: "exponential",
+    },
+        ]
+
+    },
+    {
+        category: "Others",
+        options: [
+        {
         hardwareName: "IonQ (Trapped Ion)",
         hardwareSlowdown: 6.7,
         quantumImprovementRate: 10,
@@ -109,10 +137,7 @@ const hardwares = ref([
             2022: 25,
             2023: 29,
             2024: 35,
-            // 2021: 352,
-            // 2022: 400,
-            // 2023: 464,
-            // 2024: 560,
+
             2025: 1024,
             2026: 4096,
             2027: 12288,
@@ -135,6 +160,10 @@ const hardwares = ref([
         roadmapUnit: "physical",
         extrapolationType: "exponential",
     },
+        ]
+    }
+   
+    
 ]);
 
 
@@ -146,7 +175,7 @@ function updateSlowdown(value) {
 }
 
 const selectedProblem = ref(problems.value.find(p => p.problemName === model.value.problemName));
-const selectedHardware = ref(hardwares.value.find(h => h.hardwareName === model.value.hardwareName));
+const selectedHardware = ref(hardwares.value.reduce((acc, h) => acc.concat(h.options), []).find(h => h.hardwareName === model.value.hardwareName));
 onMounted(() => {
     model.value = Object.assign({}, models.models.find(m => m.id === props.modelId))
 });
@@ -304,6 +333,7 @@ function getRelevantRoadmapPoints(data) {
                 </div>
 
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+                    group-label="category" group-values="options"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
                     :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
@@ -374,6 +404,7 @@ function getRelevantRoadmapPoints(data) {
                     </EditRoadmap>
                 </div>
                 <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
+                    group-label="category" group-values="options"
                     v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
                     :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
@@ -541,8 +572,9 @@ function getRelevantRoadmapPoints(data) {
         </div>
 
         <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
-            v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-            :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
+                    group-label="category" group-values="options"
+                    v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
     </div>
 
@@ -571,8 +603,9 @@ function getRelevantRoadmapPoints(data) {
             </EditRoadmap>
         </div>
         <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
-            v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
-            :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
+                    group-label="category" group-values="options"
+                    v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider"></multiselect>
 
         <table class="w-full table-auto mt-4 text-xs">
             <thead class="bg-gray-100">
