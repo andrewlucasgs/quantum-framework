@@ -410,7 +410,7 @@ function calculateQuantumEconomicAdvantage(model) {
     }
     let quantumFeasible = qf(model.roadmap);
     let quantumAdvantage = qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
-    let quantumCostAdvantage = qa(problemName, '', classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate);
+    let quantumCostAdvantage = qa(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate);
 
     let quantumEconomicAdvantageDataAux = {}
     // when there is no quantum advantage
