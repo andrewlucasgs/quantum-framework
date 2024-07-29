@@ -36,6 +36,9 @@ async function getData(model) {
         // logical_to_problem_size: model.qubitToProblemSize,
         logical_to_problem_size: '2**q',
         quantum_improvement_rate: model.quantumImprovementRate / 100,
+        cost_factor: 10 ** model.costFactor,
+        cost_improvement_rate: model.costImprovementRate / 100,
+        roadmap_type: model.roadmapUnit,
     }
     const url = 'http://localhost:8000/calculate/'
     await fetch(url, {
@@ -50,18 +53,27 @@ async function getData(model) {
             console.log(data)
             quantumEconomicAdvantageData.value = {
                 tStar: Number(data.economic_advantage.year_star), 
-
                 nStar: Math.log10(data.economic_advantage.n_star_star),
+
+                tCostStar: Number(data.economic_advantage.cost_year_star),
+                nCostStar: Math.log10(data.economic_advantage.n_cost_star_star),
+
                 quantumFeasible: data.economic_advantage.feasibility.map((step, i) => [Number(data.economic_advantage.years[i]), Math.log10(step)]),
                 quantumAdvantage: data.economic_advantage.advantage.map((step, i) => [Number(data.economic_advantage.years[i]), Math.log10(step)]),
+                quantumCostAdvantage: data.economic_advantage.cost_advantage.map((step, i) => [Number(data.economic_advantage.years[i]), Math.log10(step)]),
             }
 
             console.log(quantumEconomicAdvantageData.value)
             currentAdvantageData.value = {
                 nStar: Math.log10(data.minimum_problem_size.n_star),
                 stepStar: Math.log10(data.minimum_problem_size.step_star),
+
+                nCostStar: Math.log10(data.minimum_problem_size.n_cost_star),
+                stepCostStar: Math.log10(data.minimum_problem_size.cost_star),
+
                 quantumSteps: data.minimum_problem_size.quantum_steps.map((step, i) => [Math.log10(data.minimum_problem_size.problem_size[i]), Math.log10(step)]),
                 classicalSteps: data.minimum_problem_size.classical_steps.map((step, i) => [Math.log10(data.minimum_problem_size.problem_size[i]), Math.log10(step)]),
+                quantumCostSteps: data.minimum_problem_size.quantum_costs.map((step, i) => [Math.log10(data.minimum_problem_size.problem_size[i]), Math.log10(step)]),
             }
 
             
@@ -95,28 +107,9 @@ watch(() => props.model, (model) => {
                 <QuantumAdvantageGraph :data="currentAdvantageData" />
                 <QuantumEconomicAdvantageGraph v-if="quantumEconomicAdvantageData.tStar > 0" :data="quantumEconomicAdvantageData" />
             </div>
-            <!-- <div class="md:flex gap-4 px-8 py-2 justify-center">
-
-                <LogicalQubitsGraph :data="logicalQubitsData" />
-            </div> -->
-            </div> -->
+        
         </template>
-        <!-- <template v-else>
-            <div class="md:flex gap-4 px-8 py-2">
-                <LogicalQubitsOnlyGraph :data="{
-                    ...logicalQubitsData, quantumFeasible: logicalQubitsData.quantumFeasible.filter(
-                        point => point[0] <= 2034
-                    ),
-                }" />
-
-                <QuantumFeasibilityGraph :data="{
-                    ...quantumEconomicAdvantageData, quantumFeasible: quantumEconomicAdvantageData.quantumFeasible.filter(
-                        point => point[0] <= 2034
-                    )
-                }" />
-            </div>
-
-        </template> -->
+   
 
     </div>
 </template>

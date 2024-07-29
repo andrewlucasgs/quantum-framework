@@ -6,6 +6,7 @@ import highchartsAnnotations from 'highcharts/modules/annotations';
 highchartsAnnotations(Highcharts);
 highchartsMore(Highcharts);
 import { Chart } from 'highcharts-vue'
+import * as utils from "../store/utils"
 
 import { ref, defineProps, watch, onMounted } from 'vue';
 
@@ -30,14 +31,11 @@ function getAreaData() {
     const filteredQuantumAdvantage = quantumAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
     const filteredQuantumFeasible = quantumFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
     const filteredQuantumCostAdvantage = quantumCostAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-    const filteredQuantumCostFeasible = quantumCostFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
 
     const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
         const costAdvantagePoint = filteredQuantumCostAdvantage[i];
         const feasiblePoint = filteredQuantumFeasible[i];
-        const costFeasiblePoint = filteredQuantumCostFeasible[i];
-
-        const maxFeasible = Math.max(feasiblePoint[1], costFeasiblePoint[1]);
+        const maxFeasible = feasiblePoint[1]
         const maxAdvantage = Math.max(point[1], costAdvantagePoint[1]);
 
         return [point[0], maxFeasible, maxAdvantage];
