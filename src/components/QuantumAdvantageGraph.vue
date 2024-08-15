@@ -88,6 +88,7 @@ function updateGraphData() {
         chartOptions.xAxis.tickPositions = [0, 25, 50, 75, 100]
     } else {
         chartOptions.xAxis.tickPositions = [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2]
+        chartOptions.xAxis.tickPositions = chartOptions.xAxis.tickPositions.map(point => Math.floor(point))
     }
     chartOptions.series = [
         {
@@ -141,27 +142,27 @@ function updateGraphData() {
     ]
 
     chartOptions.annotations = [
-        {
-            draggable: "",
-            labelOptions: {
-                backgroundColor: "transparent",
-                borderColor: "red",
-                shape: "rect"
-            },
-            labels: [
-                {
-                    point: {
-                        x: chartOptions.xAxis.min,
-                        y: props.data.stepStar / 1.1,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    text: utils.toBase10HTML(props.data.stepStar),
+        // {
+        //     draggable: "",
+        //     labelOptions: {
+        //         backgroundColor: "transparent",
+        //         borderColor: "red",
+        //         shape: "rect"
+        //     },
+        //     labels: [
+        //         {
+        //             point: {
+        //                 x: chartOptions.xAxis.min,
+        //                 y: props.data.stepStar / 1.1,
+        //                 xAxis: 0,
+        //                 yAxis: 0
+        //             },
+        //             useHTML: true,
+        //             text: utils.toBase10HTML(props.data.stepStar),
 
-                },
-            ]
-        },
+        //         },
+        //     ]
+        // },
 
 
         {
@@ -181,7 +182,7 @@ function updateGraphData() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: utils.toBase10HTML(props.data.nStar),
+                    text: utils.toBase10HTML(props.data.nStar.toFixed(1)),
 
                 },
             ]

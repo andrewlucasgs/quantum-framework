@@ -26,7 +26,7 @@ const key = ref(0);
 function getAreaData() {
     const { tStar, nStar, tCostStar, nCostStar, quantumAdvantage, quantumFeasible, quantumCostAdvantage, quantumCostFeasible } = props.data;
 
-    console.log(tStar, nStar, tCostStar, nCostStar)
+    console.log(tStar, nStar, tCostStar, nCostStar);
 
     const filteredQuantumAdvantage = quantumAdvantage.filter(point => point[0] >= tStar && point[0] >= tCostStar);
     const filteredQuantumFeasible = quantumFeasible.filter(point => point[0] >= tStar && point[0] >= tCostStar);
@@ -41,13 +41,11 @@ function getAreaData() {
         return [point[0], maxFeasible, maxAdvantage];
     });
 
+    // Ensure initial values are correct
+    const initialTStar = Math.max(tStar, tCostStar);
+    const initialNStar = Math.max(nStar, nCostStar);
 
-
-    return [[tStar > tCostStar ? tStar : tCostStar, nStar > nCostStar ? nStar : nCostStar, nStar > nCostStar ? nStar : nCostStar]].concat(
-        maxAreaData
-
-
-    );
+    return [[initialTStar, initialNStar, initialNStar]].concat(maxAreaData);
 }
 
 console.log(getAreaData())
@@ -63,13 +61,13 @@ const chartOptions = {
                     if (this.dashLines && this.dashLines.length > 0)
                         this.dashLines.forEach((line, i) => line.destroy())
                 } else {
-                    this.dashLines = [[props.data.tStar, props.data.nStar]].map(point => utils.drawDashLine(this, point))
-                    this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '', 'rgba(255, 165, 0, 0.3)'))
+                    this.dashLines = [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point))
+                    // this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '', 'rgba(255, 165, 0, 0.3)'))
                 }
             },
             redraw: function () {
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tStar, props.data.nStar]][i], line))
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '', 'rgba(255, 165, 0, 0.3)'))
+                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]][i], line))
+                // this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '', 'rgba(255, 165, 0, 0.3)'))
             }
         },
     },
@@ -246,6 +244,18 @@ function updateGraph() {
         },
         {
             name: 'Quantum Advantage',
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                x: 5,
+                formatter: function () {
+                    // Only show label for the last data point
+                    if (this.point.index === this.series.data.length - 1) {
+                        return 'Quantum Advantage';
+                    }
+                    return null;
+                }
+            },
             data: props.data.quantumAdvantage,
             color: 'blue',
             dashStyle: 'dash',
@@ -259,7 +269,8 @@ function updateGraph() {
             marker: {
                 enabled: false,
                 symbol: 'circle'
-            }
+            },
+
         },
         {
             name: 'Quantum Cost Advantage',
@@ -276,7 +287,19 @@ function updateGraph() {
             marker: {
                 enabled: false,
                 symbol: 'circle'
-            }
+            },
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                x: 5,
+                formatter: function () {
+                    // Only show label for the last data point
+                    if (this.point.index === this.series.data.length - 1) {
+                        return 'Quantum Cost Advantage';
+                    }
+                    return null;
+                }
+            },
         },
 
 
@@ -297,7 +320,7 @@ function updateGraph() {
         },
         {
             name: 'Intersection',
-            data: [[props.data.tStar, (props.data.nStar)]],
+            data: [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]],
             color: 'red',
             type: 'scatter',
             maxPointWidth: 1,
@@ -307,18 +330,18 @@ function updateGraph() {
             },
             showInLegend: false
         },
-        {
-            name: 'Intersection',
-            data: [[props.data.tCostStar, (props.data.nCostStar)]],
-            color: 'orange',
-            type: 'scatter',
-            maxPointWidth: 1,
-            marker: {
-                enabled: true,
-                symbol: 'circle'
-            },
-            showInLegend: false
-        },
+        // {
+        //     name: 'Intersection',
+        //     data: [[props.data.tCostStar, (props.data.nCostStar)]],
+        //     color: 'orange',
+        //     type: 'scatter',
+        //     maxPointWidth: 1,
+        //     marker: {
+        //         enabled: true,
+        //         symbol: 'circle'
+        //     },
+        //     showInLegend: false
+        // },
 
     ]
     chartOptions.annotations = [
@@ -352,27 +375,27 @@ function updateGraph() {
             ]
         },
 
-        {
-            draggable: "",
-            labelOptions: {
-                backgroundColor: "#ffffffdd",
-                borderColor: " red",
-                shape: "rect"
-            },
-            labels: [
-                {
-                    point: {
-                        x: chartOptions.xAxis.min,
-                        y: props.data.nStar / 1.1,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    text: utils.toBase10HTML(props.data.nStar),
+        // {
+        //     draggable: "",
+        //     labelOptions: {
+        //         backgroundColor: "#ffffffdd",
+        //         borderColor: " red",
+        //         shape: "rect"
+        //     },
+        //     labels: [
+        //         {
+        //             point: {
+        //                 x: chartOptions.xAxis.min,
+        //                 y: props.data.nStar / 1.1,
+        //                 xAxis: 0,
+        //                 yAxis: 0
+        //             },
+        //             useHTML: true,
+        //             text: utils.toBase10HTML(props.data.nStar),
 
-                },
-            ]
-        },
+        //         },
+        //     ]
+        // },
         {
             draggable: "",
             labelOptions: {
@@ -390,7 +413,7 @@ function updateGraph() {
                         yAxis: 0
                     },
                     useHTML: true,
-                    text: `${utils.round(props.data.tStar)}`,
+                    text: `${utils.round(props.data.tStar.toFixed(0))}`,
                 },
             ]
         },
