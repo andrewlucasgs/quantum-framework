@@ -42,8 +42,11 @@ const chartOptions = {
     },
     tooltip: {
         useHTML: true,
+        shared: true,
+        crosshairs: true,
+        snap: 50,
         formatter: function () {
-            return `<b>${this.series.name}</b><br/>Year: ${utils.round(this.x)}<br/>Problem Size: 10<sup>${utils.round(this.y)}</sup>`
+            return `<b>${this.series.name}</b><br/>Year: ${utils.round(this.x)}<br/>Problessm Size: 10<sup>${utils.round(this.y)}</sup>`
         }
     },
     xAxis: {

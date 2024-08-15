@@ -214,7 +214,7 @@ function calculateCurrentAdvantage(model) {
 
 
     let advantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
-    let costAdvantage = getQuantumAdvantage(problemName, '', classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate, year);
+    let costAdvantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate, year);
     
     // console.log(advantage)
     // range from 0 to double of the advantage with 200 ticks
@@ -222,7 +222,7 @@ function calculateCurrentAdvantage(model) {
     let currentAdvantageDataAux = {}
 
     if (advantage === Infinity) {
-        for (let i = 0; i < 300; i += 300 / 100) {
+        for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
@@ -234,7 +234,7 @@ function calculateCurrentAdvantage(model) {
         }
     }
     else if (advantage === 0) {
-        for (let i = 0; i < 300; i += 300 / 100) {
+        for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
@@ -248,7 +248,7 @@ function calculateCurrentAdvantage(model) {
 
     } else {
 
-        for (let i = 0; i < advantage * 2; i += advantage / 100) {
+        for (let i = 0; i < ((advantage + costAdvantage)/2) * 2; i += ((advantage + costAdvantage)/2) / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
@@ -261,40 +261,40 @@ function calculateCurrentAdvantage(model) {
 
 
     if (costAdvantage === Infinity) {
-        for (let i = 0; i < 300; i += 300 / 100) {
+        for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             ...currentAdvantageDataAux,
             nCostStar: -1,
             stepCostStar: -1,
-            quantumCostSteps: range.map((i) => [i, model.quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
             classicalCostSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
         }
     }
     else if (costAdvantage === 0) {
-        for (let i = 0; i < 300; i += 300 / 100) {
+        for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             ...currentAdvantageDataAux,
             nCostStar: 0,
             stepCostStar: classicalRuntime(0),
-            quantumCostSteps: range.map((i) => [i, model.quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
             classicalCostSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? 0 : y])
         }
 
 
     } else {
 
-        for (let i = 0; i < costAdvantage * 2; i += costAdvantage / 100) {
+        for (let i = 0; i < ((advantage + costAdvantage)/2) * 2; i += ((advantage + costAdvantage)/2) / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             ...currentAdvantageDataAux,
             nCostStar: costAdvantage,
             stepCostStar: classicalRuntime(costAdvantage),
-            quantumCostSteps: range.map((i) => [i, model.quantumRuntime(i) + costFactor]),
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]),
             classicalCostSteps: range.map((i) => [i, classicalRuntime(i)])
         }
     }
