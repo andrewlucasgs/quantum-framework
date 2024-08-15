@@ -77,6 +77,15 @@ const problems = ref([
         qubitToProblemSize: "{# of qubits}",
         penalty: "log(n,2)",
     },
+    {
+        problemName: "Sorting",
+        "classicalRuntime": 'n*log(n)',
+        "quantumRuntime": 'n*log(n)',
+        classicalRuntimeLabel: "O(n*\\log{n})",
+        quantumRuntimeLabel: "O(n*\\log{n})",
+        qubitToProblemSize: "{# of qubits}",
+        penalty: "log(n,2)",
+    },
 ]);
 
 

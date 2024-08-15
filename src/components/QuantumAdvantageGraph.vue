@@ -56,7 +56,6 @@ const chartOptions = {
                 return utils.toBase10HTML(this.value);
             }
         },
-        tickPositions: [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2],
         startOnTick: true,
         endOnTick: true,
     },
@@ -87,8 +86,8 @@ function updateGraphData() {
     if(props.data.nStar  <= 0){
         chartOptions.xAxis.tickPositions = [0, 25, 50, 75, 100]
     } else {
-        chartOptions.xAxis.tickPositions = [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2]
-        chartOptions.xAxis.tickPositions = chartOptions.xAxis.tickPositions.map(point => Math.floor(point))
+        // chartOptions.xAxis.tickPositions = [0, props.data.nStar / 2, props.data.nStar, props.data.nStar * 3 / 2, props.data.nStar * 2]
+        // chartOptions.xAxis.tickPositions = chartOptions.xAxis.tickPositions.map(point => Math.floor(point))
     }
     chartOptions.series = [
         {
