@@ -26,32 +26,32 @@ const key = ref(0);
 function getAreaData() {
     const { tStar, nStar, tCostStar, nCostStar, quantumAdvantage, quantumFeasible, quantumCostAdvantage, quantumCostFeasible } = props.data;
 
-console.log(tStar, nStar, tCostStar, nCostStar);
+    console.log(tStar, nStar, tCostStar, nCostStar);
 
-// Filter points based on tStar and tCostStar
-const filterPoints = (points) => points.filter(point => point[0] >= tStar && point[0] >= tCostStar);
+    // Filter points based on tStar and tCostStar
+    const filterPoints = (points) => points.filter(point => point[0] >= tStar && point[0] >= tCostStar);
 
-const filteredQuantumAdvantage = filterPoints(quantumAdvantage);
-const filteredQuantumFeasible = filterPoints(quantumFeasible);
-const filteredQuantumCostAdvantage = filterPoints(quantumCostAdvantage);
-const filteredQuantumCostFeasible = filterPoints(quantumCostFeasible);
+    const filteredQuantumAdvantage = filterPoints(quantumAdvantage);
+    const filteredQuantumFeasible = filterPoints(quantumFeasible);
+    const filteredQuantumCostAdvantage = filterPoints(quantumCostAdvantage);
+    const filteredQuantumCostFeasible = filterPoints(quantumCostFeasible);
 
-const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
-    const costAdvantagePoint = filteredQuantumCostAdvantage[i] || [0, 0];
-    const feasiblePoint = filteredQuantumFeasible[i] || [0, 0];
-    const costFeasiblePoint = filteredQuantumCostFeasible[i] || [0, 0];
+    const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
+        const costAdvantagePoint = filteredQuantumCostAdvantage[i] || [0, 0];
+        const feasiblePoint = filteredQuantumFeasible[i] || [0, 0];
+        const costFeasiblePoint = filteredQuantumCostFeasible[i] || [0, 0];
 
-    const maxFeasible = Math.max(feasiblePoint[1], costFeasiblePoint[1]);
-    const maxAdvantage = Math.max(point[1], costAdvantagePoint[1]);
+        const maxFeasible = Math.max(feasiblePoint[1], costFeasiblePoint[1]);
+        const maxAdvantage = Math.max(point[1], costAdvantagePoint[1]);
 
-    return [point[0], maxFeasible, maxAdvantage];
-});
+        return [point[0], maxFeasible, maxAdvantage];
+    });
 
-// Ensure initial values are correct
-const initialTStar = Math.max(tStar, tCostStar);
-const initialNStar = Math.max(nStar, nCostStar);
+    // Ensure initial values are correct
+    const initialTStar = Math.max(tStar, tCostStar);
+    const initialNStar = Math.max(nStar, nCostStar);
 
-return [[initialTStar, initialNStar, initialNStar]].concat(maxAreaData);
+    return [[initialTStar, initialNStar, initialNStar]].concat(maxAreaData);
 }
 
 console.log(getAreaData())
@@ -245,6 +245,18 @@ function updateGraph() {
         },
         {
             name: 'Quantum Advantage',
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                x: 5,
+                formatter: function () {
+                    // Only show label for the last data point
+                    if (this.point.index === this.series.data.length - 1) {
+                        return 'Quantum Advantage';
+                    }
+                    return null;
+                }
+            },
             data: props.data.quantumAdvantage,
             color: 'blue',
             dashStyle: 'dash',
@@ -258,7 +270,8 @@ function updateGraph() {
             marker: {
                 enabled: false,
                 symbol: 'circle'
-            }
+            },
+
         },
         {
             name: 'Quantum Cost Advantage',
@@ -275,7 +288,19 @@ function updateGraph() {
             marker: {
                 enabled: false,
                 symbol: 'circle'
-            }
+            },
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                x: 5,
+                formatter: function () {
+                    // Only show label for the last data point
+                    if (this.point.index === this.series.data.length - 1) {
+                        return 'Quantum Cost Advantage';
+                    }
+                    return null;
+                }
+            },
         },
 
 
