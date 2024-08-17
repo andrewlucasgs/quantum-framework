@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { Chart } from 'highcharts-vue'
 import * as utils from "../store/utils"
+import { split } from 'postcss/lib/list';
 
 const props = defineProps({
     data: Object
@@ -41,7 +42,6 @@ let data = processDataToGraph(props.data)
 console.log(data)
 const chartOptions = {
     chart: {
-        marginTop: 60,
         marginRight: 60,
     },
     credits: {
@@ -57,16 +57,25 @@ const chartOptions = {
         useHTML: true,
         shared: true,
         crosshairs: true,
-       
-        // formatter: function () {
-        //     if(this.series.name === "Quantum Cost" || this.series.name === "Quantum Cost Advantage"){
-        //         return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Cost: ${utils.toBase10HTML(this.y)}`;
-        //     } else if (this.series.name === "Classical"){
-        //         return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Steps: ${utils.toBase10HTML(this.y)}<br/>Cost: ${utils.toBase10HTML(this.y)}`;
-        //     }
-
-        //     return `Problem Size: ${utils.toBase10HTML(this.x)}<br/>Steps: ${utils.toBase10HTML(this.y)}`;
-        // }
+        shadow: false,
+        backgroundColor: 'transparent',
+        formatter: function () {
+            const problemSize = utils.toBase10HTML(this.points[0].x)
+           
+            
+         console.log(this)
+            return `
+            <div class="flex flex-col gap-1 bg-white p-2 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-1 font-bold">Problem Size: <span >${problemSize}</span></p>
+                ${
+                    this.points.map(point => `<div class="flex items-center gap-1">
+                        <span class="w-4 h-[2px]" style="background-color: ${point.series.color};"></span>
+                        <span class="flex-1 gap-1 flex justify-between" >${point.series.name === 'Classical' ? 'Classical Steps/Cost' : point.series.name}: <span class="min-w-[5ch] text-gray-700 font-bold">${utils.toBase10HTML(point.y)}</span></span>
+                        </div>`).join('')
+                }
+            </div>
+            `
+        }
     },
     xAxis: {
         title: {
@@ -96,7 +105,7 @@ const chartOptions = {
     legend: false,
     yAxis: {
         title: {
-            text: 'Classical Time Steps'
+            text: 'Classical Time Steps / Cost'
         },
         type: 'linear',
         labels: {
@@ -114,13 +123,14 @@ const chartOptions = {
 
         min: 0,
         max: data.maxY,
-        endOnTick: true,
+        endOnTick: false,
     },
     plotOptions: {
         series: {
             label: {
                 connectorAllowed: false
             },
+            lineWidth: 2,
         }
     },
     series: []
@@ -144,29 +154,40 @@ function updateGraphData() {
 
     chartOptions.xAxis.plotBands.push({
         from: data.nStar,
-        to: data.maxX,
-        color: '#FFA50055',
+        to: data.nStar > data.nCostStar ? data.maxX : data.nCostStar,
         color: {
             linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
             stops: [
-                [0, 'rgba(0,190,255,0.25)'],
-                [0.25, 'rgba(0,255,255,0.25)'],
-                [1, 'rgba(0,190,255,0.25)'],
+                [0, 'rgba(219,234,254,.2)'],
+                [1, 'rgba(0,45,157,.3)'],
             ]
         },
     })
     chartOptions.xAxis.plotBands.push({
         from: data.nCostStar,
-        to: data.maxX,
+        to: data.nStar <= data.nCostStar ? data.maxX : data.nStar,
         color: '#0000FF55',
         color: {
             linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
             stops: [
-                [0, 'rgba(100,190,0,0.25)'],
-                [0.5, 'rgba(0,255,0,0.25)'],
-                [1, 'rgba(100,190,0,0.25)'],
+                [0, 'rgba(219,234,254,.2)'],
+                [1, 'rgba(0,45,255,.3)'],
             ]
         },
+    })
+    chartOptions.xAxis.plotLines = []
+    chartOptions.xAxis.plotLines.push({
+        value: data.nStar,
+        width: 1,
+        color: 'rgba(0,45,157,.5)',
+
+       
+    })
+    chartOptions.xAxis.plotLines.push({
+        value: data.nCostStar,
+        width: 1,
+        color: 'rgba(0,45,255,.5)',
+        
     })
 
     chartOptions.series = [
@@ -184,7 +205,7 @@ function updateGraphData() {
                     color: 'green',
                     shadow: false,
                     style: {
-                        fontSize: '10px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         textOutline: 'none'
                     }
@@ -196,12 +217,13 @@ function updateGraphData() {
             })],
             color: 'green',
             marker: {
-                enabled: false
-            },
+                enabled: false,
+                symbol: 'circle'
+            }
 
         },
         {
-            name: 'Quantum',
+            name: 'Quantum Steps',
             data: [...data.quantumSteps, ({
                 dataLabels: {
                     enabled: true,
@@ -210,23 +232,26 @@ function updateGraphData() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    format: '{series.name}',
-                    color: 'blue',
+                    color: '#002D9D',
                     shadow: false,
                     style: {
-                        fontSize: '10px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         textOutline: 'none'
+                    },
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Quantum<br/>Steps</div>';
                     }
-
                 },
                 x: data.quantumSteps[data.quantumSteps.length - 1][0],
                 y: data.quantumSteps[data.quantumSteps.length - 1][1],
 
             })],
-            color: 'blue',
+            color: '#002D9D',
             marker: {
-                enabled: false
+                enabled: false,
+                symbol: 'circle'
             }
         },
         {
@@ -240,10 +265,10 @@ function updateGraphData() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    color: 'orange',
+                    color: 'blue',
                     shadow: false,
                     style: {
-                        fontSize: '10px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         textOutline: 'none'
                     },
@@ -261,86 +286,46 @@ function updateGraphData() {
             type: 'spline',
             style: {
                 linewidth: 22,
-                color: 'orange'
+                color: 'blue'
             },
-            color: 'orange',
+            color: 'blue',
             marker: {
-                enabled: false
+                enabled: false,
+                symbol: 'circle'
             }
         },
 
         {
             name: 'Quantum Cost Advantage',
             data: [[data.nCostStar, data.stepCostStar]],
-            color: 'orange',
+            color: 'blue',
             type: 'scatter',
             maxPointWidth: 1,
             marker: {
                 enabled: true,
                 symbol: 'circle'
             },
+           
             showInLegend: false
         },
         {
             name: 'Quantum Advantage',
             data: [[data.nStar, data.stepStar]],
-            color: 'red',
+            color: '#002D9D',
             type: 'scatter',
             maxPointWidth: 1,
             marker: {
                 enabled: true,
                 symbol: 'circle'
             },
+            
             showInLegend: false
-        }
+        },
     ]
 
     chartOptions.annotations = [
 
-        {
-            draggable: "",
-            labelOptions: {
-                backgroundColor: "#ffffffdd",
-                borderColor: "red",
-                // color: "red",
-                shape: "rect"
-            },
-            labels: [
-                {
-                    point: {
-                        x: data.nStar + data.maxX * 0.05,
-                        y: chartOptions.yAxis.max,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    text: utils.toBase10HTML(data.nStar.toFixed(1)),
-
-                },
-            ]
-        },
-        {
-            draggable: "",
-            labelOptions: {
-                backgroundColor: "#ffffffdd",
-                borderColor: "orange",
-                // color: "red",
-                shape: "rect"
-            },
-            labels: [
-                {
-                    point: {
-                        x: data.nCostStar + data.maxX * 0.05,
-                        y: chartOptions.yAxis.max,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    text: utils.toBase10HTML(data.nCostStar.toFixed(1)),
-
-                },
-            ]
-        },
+       
         {
             draggable: "",
             labelOptions: {
@@ -348,24 +333,29 @@ function updateGraphData() {
                 borderColor: "transparent",
                 color: "black",
                 shape: "rect",
-                fontSize: '10px',
+                fontSize: '12px',
                 fontColor: 'black',
-                rotation: -25
+                zIndex: 0,
 
             },
             labels: [
                 {
                     point: {
-                        x: data.nCostStar + data.maxX * 0.05,
+                        x: data.nCostStar,
                         y: 0,
                         xAxis: 0,
                         yAxis: 0
                     },
+                    align: data.nStar > data.nCostStar ? 'right' : 'left',
                     color: 'black',
                     useHTML: true,
-                    text: 'Cheaper',
+                    text:utils.toBase10HTML(data.nCostStar.toFixed(1)) +'<br>Cheaper',
+
                     style: {
-                        color: 'black',  // Sets the text color to black
+                        fontSize: '12px',
+
+                        color: 'rgba(0,45,255,.9)',  // Sets the text color to black
+                        textAlign: data.nStar > data.nCostStar ? 'right' : 'left',
                     },
                 },
             ]
@@ -377,7 +367,7 @@ function updateGraphData() {
                 borderColor: "transparent",
                 color: "black",
                 shape: "rect",
-                fontSize: '10px',
+                fontSize: '12px',
                 fontColor: 'black',
                 rotation: -25
 
@@ -385,16 +375,22 @@ function updateGraphData() {
             labels: [
                 {
                     point: {
-                        x: data.nStar + data.maxX * 0.05,
+                        x: data.nStar,
                         y: 0,
                         xAxis: 0,
                         yAxis: 0
                     },
                     color: 'black',
+                    align: data.nStar <= data.nCostStar ? 'right' : 'left',
+
                     useHTML: true,
-                    text: 'Faster',
+                    text:utils.toBase10HTML(data.nStar.toFixed(1)) +'<br>Faster',
                     style: {
-                        color: 'black',  // Sets the text color to black
+                        fontSize: '12px',
+
+                        color: 'rgba(0,45,157,.9)',  // Sets the text color to black
+                        textAlign: data.nStar <= data.nCostStar ? 'right' : 'left',
+
                     },
                 },
             ]

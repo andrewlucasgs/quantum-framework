@@ -49,7 +49,7 @@ export function toBase10HTML(exponent) {
         return '10<sup>0</sup>';
     }
 
-    return `10<sup>${round(exponent)}</sup>`;
+    return `10<sup>${round(exponent, 1)}</sup>`;
 }
 
 export function applyLogRules(node) {
@@ -205,8 +205,6 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
     let fa = f(a);
     let fb = f(b);
     if (fa * fb >= 0) {
-        console.log("null problem")
-        console.log(a, b, fa, fb)
         return null;
     }
 

@@ -1,6 +1,6 @@
 <script setup>
 
-import Highcharts, { color } from 'highcharts'
+import Highcharts, { Legend, color } from 'highcharts'
 import highchartsMore from 'highcharts/highcharts-more';
 import highchartsAnnotations from 'highcharts/modules/annotations';
 highchartsAnnotations(Highcharts);
@@ -14,68 +14,63 @@ const props = defineProps({
     data: Object,
 })
 
-const roadmap = {
-    2020: 27,
-    2024: 133,
-    2033: 2000
+console.log(props.data)
+function processDataToGraph(data) {
+    // data contains classicalCostSteps, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar
+    // the steps ara list of lists of the form [problem size, step]
+    // I want to round the problem sizes to 2 decimal places, and remove duplicates
+    let nStar = utils.round(data.nStar, 2)
+    let nCostStar = utils.round(data.nCostStar, 2)
+    let tStar = utils.round(data.tStar, 2)
+    let tCostStar = utils.round(data.tCostStar, 2)
+
+    const midY = (nCostStar + nStar) / 2
+    const midX = (tStar + tCostStar) / 2
+
+    const maxY = (midY * 2)
+    const maxX = midX + (midX - 2024)
+    console.log(maxX, maxY)
+
+    let quantumAdvantage = data.quantumAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY)
+    let quantumCostAdvantage = data.quantumCostAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY)
+    let quantumFeasible = data.quantumFeasible.filter(step => step[0] <= maxX && step[1] <= maxY)
+
+    let quantumAdvantageArea = data.quantumAdvantage.filter(step => step[0] >= tStar)
+    let quantumCostAdvantageArea = data.quantumCostAdvantage.filter(step => step[0] >= tCostStar)
+    const quantumFeasibleAux = Object.fromEntries(data.quantumFeasible.map(step => [step[0], step[1]]))
+    const quantumCostAdvantageAux = Object.fromEntries(data.quantumCostAdvantage.map(step => [step[0], step[1]]))
+    const quantumAdvantageAux = Object.fromEntries(data.quantumAdvantage.map(step => [step[0], step[1]]))
+
+    quantumAdvantageArea = quantumAdvantageArea.map(step => [step[0], step[1], Math.min(
+        nStar >= nCostStar ? maxY : quantumCostAdvantageAux[step[0]], quantumFeasibleAux[step[0]])])
+    quantumCostAdvantageArea = quantumCostAdvantageArea.map(step => [step[0], step[1], Math.min(
+        nCostStar > nStar ? maxY : quantumAdvantageAux[step[0]], quantumFeasibleAux[step[0]])])
+
+    const advantageAreaXMid = quantumAdvantageArea[0][0] + (quantumAdvantageArea[quantumAdvantageArea.length - 1][0] - quantumAdvantageArea[0][0]) / 2
+    const advantageAreaYMid = quantumAdvantageArea[0][1] + (quantumAdvantageArea[quantumAdvantageArea.length - 1][1] - quantumAdvantageArea[0][1]) / 2
+    const costAdvantageAreaXMid = quantumCostAdvantageArea[0][0] + (quantumCostAdvantageArea[quantumCostAdvantageArea.length - 1][0] - quantumCostAdvantageArea[0][0]) / 2
+    const costAdvantageAreaYMid = quantumCostAdvantageArea[0][1] + (quantumCostAdvantageArea[quantumCostAdvantageArea.length - 1][1] - quantumCostAdvantageArea[0][1]) / 2
+
+    const advantageAreaMid = [ advantageAreaXMid, advantageAreaYMid]
+    const costAdvantageAreaMid = [ costAdvantageAreaXMid, costAdvantageAreaYMid]
+
+
+    return { quantumAdvantage, quantumCostAdvantage, quantumFeasible, tStar, nStar, tCostStar, nCostStar, maxY, maxX, quantumAdvantageArea, quantumCostAdvantageArea, advantageAreaXMid, advantageAreaYMid, costAdvantageAreaXMid, costAdvantageAreaYMid, advantageAreaMid, costAdvantageAreaMid }
 }
+
+let data = processDataToGraph(props.data)
 
 const key = ref(0);
 
 
-function getAreaData() {
-    const { tStar, nStar, tCostStar, nCostStar, quantumAdvantage, quantumFeasible, quantumCostAdvantage, quantumCostFeasible } = props.data;
-
-    console.log(tStar, nStar, tCostStar, nCostStar);
-
-    // Filter points based on tStar and tCostStar
-    const filterPoints = (points) => points.filter(point => point[0] >= tStar && point[0] >= tCostStar);
-
-    const filteredQuantumAdvantage = filterPoints(quantumAdvantage);
-    const filteredQuantumFeasible = filterPoints(quantumFeasible);
-    const filteredQuantumCostAdvantage = filterPoints(quantumCostAdvantage);
-    const filteredQuantumCostFeasible = filterPoints(quantumCostFeasible);
-
-    const maxAreaData = filteredQuantumAdvantage.map((point, i) => {
-        const costAdvantagePoint = filteredQuantumCostAdvantage[i] || [0, 0];
-        const feasiblePoint = filteredQuantumFeasible[i] || [0, 0];
-        const costFeasiblePoint = filteredQuantumCostFeasible[i] || [0, 0];
-
-        const maxFeasible = Math.max(feasiblePoint[1], costFeasiblePoint[1]);
-        const maxAdvantage = Math.max(point[1], costAdvantagePoint[1]);
-
-        return [point[0], maxFeasible, maxAdvantage];
-    });
-
-    // Ensure initial values are correct
-    const initialTStar = Math.max(tStar, tCostStar);
-    const initialNStar = Math.max(nStar, nCostStar);
-
-    return [[initialTStar, initialNStar, initialNStar]].concat(maxAreaData);
-}
-
-console.log(getAreaData())
 
 const chartOptions = {
     chart: {
-        type: 'spline',
-        events: {
-            load: function () {
+        // zooming: {
+        //     type: 'xy'
+        // }
 
-                if (props.data.tStar <= 0) {
-                    // delete the line
-                    if (this.dashLines && this.dashLines.length > 0)
-                        this.dashLines.forEach((line, i) => line.destroy())
-                } else {
-                    this.dashLines = [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point))
-                    // this.dashLines = [[props.data.tCostStar, props.data.nCostStar]].map(point => utils.drawDashLine(this, point, '', 'rgba(255, 165, 0, 0.3)'))
-                }
-            },
-            redraw: function () {
-                this.dashLines.forEach((line, i) => utils.drawDashLine(this, [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]][i], line))
-                // this.dashLines.forEach((line, i) => utils.drawDashLine(this, [[props.data.tCostStar, props.data.nCostStar]][i], line, '', 'rgba(255, 165, 0, 0.3)'))
-            }
-        },
+        marginRight: 80,
     },
     credits: {
         enabled: false
@@ -86,10 +81,30 @@ const chartOptions = {
             fontSize: '14px'
         }
     },
+    legend: false,
     tooltip: {
         useHTML: true,
+        shared: true,
+        crosshairs: true,
+        shadow: false,
+        backgroundColor: 'transparent',
         formatter: function () {
-            return `<b>${this.series.name}</b><br/>Year: ${utils.round(this.x)}<br/>Problem Size: 10<sup>${utils.round(this.y)}</sup>`
+            
+            const year = utils.round(this.points[0].x, data.maxX - 2024 <= 5 ? 1 : 0)
+           
+            
+         console.log(this)
+            return `
+            <div class="flex flex-col gap-1 bg-white p-2 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-1 font-bold"><span >${year}</span></p>
+                ${
+                    this.points.map(point => `<div class="flex items-center gap-1">
+                        <span class="w-4 h-[2px]" style="background-color: ${point.series.color};"></span>
+                        <span class="flex-1 gap-1 flex justify-between" >${point.series.name === 'Classical' ? 'Classical Steps/Cost' : point.series.name}: <span class="min-w-[5ch] text-gray-700 font-bold">${utils.toBase10HTML(point.y)}</span></span>
+                        </div>`).join('')
+                }
+            </div>
+            `
         }
     },
     xAxis: {
@@ -105,6 +120,7 @@ const chartOptions = {
             }
         },
         min: 2024,
+        max: data.maxX,
     },
     yAxis: {
         title: {
@@ -120,23 +136,44 @@ const chartOptions = {
             }
         },
         min: 0,
-        // max: 10**20,
+        max: data.maxY,
+        gridLineWidth: 1,
+        gridLineColor: 'rgba(250,250,250,1)',
+        endOnTick: false,
+
     },
     plotOptions: {
         areaspline: {
             fillOpacity: 0.5,
             threshold: 20
+        },
+        series: {
+            labels: {
+                connectorAllowed: false
+            },
+            lineWidth: 2,
+        },
+        scatter: {
+            dataLabels: {
+                color: 'black',
+                verticalAlign: 'bottom',
+                enabled: true
+            },
+            enableMouseTracking: false,
+            marker: {
+                enabled: false
+            }
         }
     },
     series: [
         {
             name: 'Feasibility',
-            data: props.data.quantumFeasible,
-            color: 'green',
+            data: data.quantumFeasible,
+            color: 'gray',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: props.data.tStar,
+                value: data.tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -147,12 +184,12 @@ const chartOptions = {
         },
         {
             name: 'Quantum Advantage',
-            data: props.data.quantumAdvantage,
-            color: 'blue',
+            data: data.quantumAdvantage,
+            color: '#002D9D',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: props.data.tStar,
+                value: data.tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -162,35 +199,13 @@ const chartOptions = {
                 symbol: 'circle'
             }
         },
-        {
-            name: 'Intersection',
-            data: [[props.data.tStar, (props.data.nStar)]],
-            color: 'red',
-            type: 'scatter',
-            maxPointWidth: 1,
-            marker: {
-                enabled: true,
-                symbol: 'circle'
-            },
-            showInLegend: false
-        },
-        {
-            name: 'Quantum Economic Advantage',
-            type: 'areasplinerange',
-            data: getAreaData(),
-            showInLegend: false,
-            enableMouseTracking: false,
-            // hide points
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            },
-        },
 
     ]
 }
 
 watch(() => props.data, async () => {
+    console.log(props.data)
+    data = processDataToGraph(props.data)
     updateGraph()
 
     key.value += 1;
@@ -198,14 +213,15 @@ watch(() => props.data, async () => {
 
 
 function updateGraph() {
-    if (props.data.tStar <= 0) {
+    if (data.tStar <= 0) {
         chartOptions.yAxis.max = 100
     } else {
-        chartOptions.yAxis.max = Math.max(props.data.nStar * 2, 2)
+        chartOptions.yAxis.max = data.maxY
     }
+    chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
-    const lastYear = Math.max(...props.data.quantumFeasible.map(point => point[0]))
-    const tStar = parseInt(props.data.tStar)
+    const lastYear = data.maxX
+    const tStar = parseInt(data.tStar)
     chartOptions.xAxis.tickPositions = [
         currentYear,
         (currentYear + tStar) / 2,
@@ -228,13 +244,81 @@ function updateGraph() {
 
     chartOptions.series = [
         {
-            name: 'Feasibility',
-            data: props.data.quantumFeasible,
-            color: 'green',
+            name: 'Quantum Speed Advantage',
+            type: 'areasplinerange',
+            data: data.quantumAdvantageArea,
+            showInLegend: false,
+            enableMouseTracking: false,
+            color: {
+                linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+                stops: [
+                [0, 'rgba(219,234,254,.2)'],
+                [0.7, 'rgba(0,45,157,.3)'],
+                [1, 'rgba(0,45,157,.3)'],
+                ]
+            },
+            // hide points
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            },
+
+        },
+        {
+            name: 'Quantum Cost Advantage',
+            type: 'areasplinerange',
+            data: data.quantumCostAdvantageArea,
+            showInLegend: false,
+            enableMouseTracking: false,
+            color: {
+                linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+                stops: [
+                [0, 'rgba(219,234,254,.2)'],
+                [0.7, 'rgba(0,45,255,.3)'],
+                [1, 'rgba(0,45,255,.3)'],
+                ]
+            },
+
+            // hide points
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            },
+        },
+
+        {
+            name: 'Quantum Feasibility',
+            data: [...data.quantumFeasible, ({
+                dataLabels: {
+                    enabled: true,
+                    align: 'left',
+                    x: 3,
+                    verticalAlign: 'middle',
+                    overflow: false,
+                    crop: false,
+                    color: 'darkred',
+                    shadow: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    // breakline
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Quantum<br>Feasibility</div>';
+                    }
+
+                },
+                x: data.quantumFeasible[data.quantumFeasible.length - 1][0],
+                y: data.quantumFeasible[data.quantumFeasible.length - 1][1],
+
+            })],
+            color: 'darkred',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: props.data.tStar,
+                value: data.tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -245,24 +329,37 @@ function updateGraph() {
         },
         {
             name: 'Quantum Advantage',
-            dataLabels: {
-                enabled: true,
-                align: 'right',
-                x: 5,
-                formatter: function () {
-                    // Only show label for the last data point
-                    if (this.point.index === this.series.data.length - 1) {
-                        return 'Quantum Advantage';
+            data: [...data.quantumAdvantage, ({
+                dataLabels: {
+                    enabled: true,
+                    align: 'left',
+                    x: 3,
+                    verticalAlign: 'middle',
+                    overflow: true,
+                    crop: false,
+                    color: '#002D9D',
+                    shadow: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    // breakline
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Speed<br/>Advantage</div>';
                     }
-                    return null;
-                }
-            },
-            data: props.data.quantumAdvantage,
-            color: 'blue',
+
+                },
+                x: data.quantumAdvantage[data.quantumAdvantage.length - 1][0],
+                y: data.quantumAdvantage[data.quantumAdvantage.length - 1][1],
+
+            })],
+            color: '#002D9D',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: props.data.tStar,
+                value: data.tStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -275,12 +372,37 @@ function updateGraph() {
         },
         {
             name: 'Quantum Cost Advantage',
-            data: props.data.quantumCostAdvantage,
-            color: 'orange',
+            data: [...data.quantumCostAdvantage, ({
+                dataLabels: {
+                    enabled: true,
+                    align: 'left',
+                    x: 3,
+                    verticalAlign: 'middle',
+                    overflow: true,
+                    crop: false,
+                    color: 'blue',
+                    shadow: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    // breakline
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Cost<br/>Advantage</div>';
+                    }
+
+                },
+                x: data.quantumCostAdvantage[data.quantumCostAdvantage.length - 1][0],
+                y: data.quantumCostAdvantage[data.quantumCostAdvantage.length - 1][1],
+
+            })],
+            color: 'blue',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
-                value: props.data.tCostStar,
+                value: data.tCostStar,
             }, {
                 dashStyle: 'solid'
             }],
@@ -301,124 +423,134 @@ function updateGraph() {
                     return null;
                 }
             },
-        },
-
-
-
-        {
-            name: 'Quantum Economic Advantage',
-            type: 'areasplinerange',
-            data: getAreaData(),
-            showInLegend: false,
-            enableMouseTracking: false,
-            fillOpacity: 0.5,
-
-            // hide points
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            },
-        },
-        {
-            name: 'Intersection',
-            data: [props.data.tStar >= props.data.tCostStar ? [props.data.tStar, props.data.nStar] : [props.data.tCostStar, props.data.nCostStar]],
-            color: 'red',
+        }, {
+            name: 'Quantum Cost Advantage',
+            data: [[data.tCostStar, data.nCostStar,]],
+            color: 'blue',
             type: 'scatter',
             maxPointWidth: 1,
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                useHTML: true,
+                formatter: function () {
+                    return`
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
+                    `
+                },
+            },
             marker: {
                 enabled: true,
                 symbol: 'circle'
             },
             showInLegend: false
         },
-        // {
-        //     name: 'Intersection',
-        //     data: [[props.data.tCostStar, (props.data.nCostStar)]],
-        //     color: 'orange',
-        //     type: 'scatter',
-        //     maxPointWidth: 1,
-        //     marker: {
-        //         enabled: true,
-        //         symbol: 'circle'
-        //     },
-        //     showInLegend: false
-        // },
+        {
+            name: 'Quantum Advantage',
+            data: [[data.tStar, data.nStar]],
+            color: '#002D9D',
+            type: 'scatter',
+            maxPointWidth: 1,
+            dataLabels: {
+                enabled: true,
+                align: 'right',
+                useHTML: true,
+                
+                formatter: function () {
+                    return `
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
+                    `
+                },
+            },
+            marker: {
+                enabled: true,
+                symbol: 'circle'
+            },
+            showInLegend: false
+        }
+
+
+
+
+
+
 
     ]
     chartOptions.annotations = [
+
+    {
+    draggable: "",
+    labelOptions: {
+        backgroundColor: "transparent",
+        borderColor: "transparent",
+        color: "black",
+        shape: "",
+        fontSize: '12px',
+        fontColor: 'black',
+        rotation: -25
+
+    },
+    labels: [
         {
-            draggable: "",
-            labelOptions: {
-
-                backgroundColor: "#ffffff55",
-                shape: "rect",
-                borderColor: "transparent",
-                style: {
-                    border: 0,
-                    color: "black",
-                    fontSize: "9px",
-                    text: "center",
-                }
+            point: {
+                x: data.costAdvantageAreaMid[0],
+                y: data.costAdvantageAreaMid[1],
+                xAxis: 0,
+                yAxis: 0
             },
-            labels: [
-                {
-                    point: {
-                        x: ((props.data.tStar < props.data.tCostStar) ? props.data.tStar : props.data.tCostStar) + lastYear / 2,
-                        y: (props.data.nStar < props.data.nCostStar) ? props.data.nStar : props.data.nCostStar,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    formatter: function () {
-                        return `<p class="text-center">QUANTUM ECONOMIC ADVANTAGE</p>`
-                    },
-                },
-            ]
-        },
+            color: 'black',
+            align: 'center-right',
 
-        // {
-        //     draggable: "",
-        //     labelOptions: {
-        //         backgroundColor: "#ffffffdd",
-        //         borderColor: " red",
-        //         shape: "rect"
-        //     },
-        //     labels: [
-        //         {
-        //             point: {
-        //                 x: chartOptions.xAxis.min,
-        //                 y: props.data.nStar / 1.1,
-        //                 xAxis: 0,
-        //                 yAxis: 0
-        //             },
-        //             useHTML: true,
-        //             text: utils.toBase10HTML(props.data.nStar),
+            useHTML: true,
+            text: data.tStar <= data.tCostStar ? '<b class="text-gray-700">Quantum Economic Advantage</b><br>Faster and Cheaper' : 'Quantum cheaper',
+            style: {
+                color: 'rgba(0,45,255,.9)',  // Sets the text color to black
+                fontSize: '12px',
 
-        //         },
-        //     ]
-        // },
-        {
-            draggable: "",
-            labelOptions: {
-                backgroundColor: "#ffffffdd",
-                borderColor: "red",
-                // color: "red",
-                shape: "rect"
+                textAlign: 'center',
+
             },
-            labels: [
-                {
-                    point: {
-                        x: props.data.tStar + (lastYear - props.data.tStar) / 9,
-                        y: chartOptions.yAxis.min,
-                        xAxis: 0,
-                        yAxis: 0
-                    },
-                    useHTML: true,
-                    text: `${utils.round(props.data.tStar.toFixed(0))}`,
-                },
-            ]
         },
     ]
+},
+{
+    draggable: "",
+    labelOptions: {
+        backgroundColor: "transparent",
+        borderColor: "transparent",
+        color: "black",
+        shape: "",
+        fontSize: '12px',
+        fontColor: 'black',
+        zIndex: 0,
+
+    },
+    labels: [
+        {
+            point: {
+                x: data.advantageAreaMid[0],
+                y: data.advantageAreaMid[1],
+                xAxis: 0,
+                yAxis: 0
+            },
+            align: 'center-right',
+            color: 'black',
+            useHTML: true,
+            text: data.tStar >= data.tCostStar ? '<b class="text-gray-700">Quantum Economic Advantage</b><br>Faster and Cheaper' : 'Quantum faster',
+
+            style: {
+                fontSize: '12px',
+                textAlign: 'center',
+                color: 'rgba(0,45,157,.9)',  // Sets the text color to black
+            },
+        },
+    ]
+},
+
+
+
+
+]
 }
 
 </script>
