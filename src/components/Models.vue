@@ -145,10 +145,10 @@ function calculateCurrentAdvantage(model) {
     let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = Number(model.hardwareSlowdown);
-    let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100)
+    let quantumImprovementRate = ((100 + Number(model.quantumImprovementRate)) / 100)
     let year = new Date().getFullYear();
     let costFactor = Number(model.costFactor)
-    let costImprovementRate = ((100 - model.costImprovementRate) / 100);
+    let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
 
     let advantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
@@ -253,13 +253,13 @@ function calculateQuantumEconomicAdvantage(model) {
     let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
-    let ratioImprovementRate = ((100 - model.ratioImprovementRate) / 100);
-    let quantumImprovementRate = ((100 - model.quantumImprovementRate) / 100);
+    let ratioImprovementRate = ((100 +  Number(model.ratioImprovementRate)) / 100);
+    let quantumImprovementRate = ((100 + Number(model.quantumImprovementRate)) / 100);
     let qubitToProblemSize = model.qubitToProblemSize;
     let year = new Date().getFullYear();
 
     let costFactor = (Number(model.costFactor))
-    let costImprovementRate = ((100 - model.costImprovementRate) / 100);
+    let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
 
     function qf(roadmap) {
@@ -521,20 +521,11 @@ watch(() => props.model, (model) => {
             <Form :modelId="model.id" />
         </div>
         <template v-if="!model.quantumOnly">
-            <div class="md:flex gap-4 px-8 py-2">
+            <div class="md:flex gap-4 px-8 py-2 min-h-[00px]">
 
                 <QuantumAdvantageGraph :data="currentAdvantageData" />
                 <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
             </div>
-            <!-- <div class="md:flex gap-4 px-8 py-2">
-
-                <MoneyAlgorithmGraph :data="moneyAlgorithmData" />
-                <MoneyEconomicGraph :data="moneyEconomicData" />
-            </div>
-            <div class="md:flex gap-4 px-8 py-2 justify-center">
-
-                <LogicalQubitsGraph :data="logicalQubitsData" />
-            </div> -->
         </template>
         <template v-else>
             <div class="md:flex gap-4 px-8 py-2">

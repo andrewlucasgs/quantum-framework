@@ -130,6 +130,8 @@ const chartOptions = {
             label: {
                 connectorAllowed: false
             },
+            animation: false,
+
             lineWidth: 2,
         }
     },

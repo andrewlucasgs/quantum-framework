@@ -88,9 +88,9 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "IBM (Superconducting)",
                 hardwareSlowdown: 3.78,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2020: 27,
                     2022: 127,
@@ -106,9 +106,9 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "Google (Superconducting)",
                 hardwareSlowdown: 3.78,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2019: 54,
                     2023: 100,
@@ -122,9 +122,9 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "Rigetti (Superconducting)",
                 hardwareSlowdown: 3.78,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2023: 336,
                     2025: 1000,
@@ -138,9 +138,9 @@ const hardwares = ref([
             {
                 hardwareName: "IonQ (Trapped Ion)",
                 hardwareSlowdown: 6.7,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 32,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2021: 22,
                     2022: 25,
@@ -161,13 +161,13 @@ const hardwares = ref([
     {
         category: "Others",
         options: [
-          
+
             {
                 hardwareName: "QuEra (Neutral Atom)",
                 hardwareSlowdown: 5.1,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2023: 256,
                     2025: 3000,
@@ -180,9 +180,9 @@ const hardwares = ref([
             {
                 hardwareName: "Pasqal (Neutral Atom)",
                 hardwareSlowdown: 5.1,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2022: 200,
                     2024: 1000,
@@ -195,9 +195,9 @@ const hardwares = ref([
             {
                 hardwareName: "Infeqtion (Neutral Atom)",
                 hardwareSlowdown: 5.1,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 800,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2024: 2,
                     2026: 10,
@@ -210,9 +210,9 @@ const hardwares = ref([
             {
                 hardwareName: "Quantum Silicon (Semiconductors)",
                 hardwareSlowdown: 5.1,
-                quantumImprovementRate: 10,
+                quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: 10,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2018: 1,
                     2021: 6,
@@ -303,6 +303,8 @@ function getRelevantRoadmapPoints(data) {
 
     return result;
 }
+
+
 
 
 
@@ -532,60 +534,29 @@ function getRelevantRoadmapPoints(data) {
                             takes
                             a quantum computer to perform one.</p>
                         <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown"
-                                v-model="model.hardwareSlowdown" min="0" max="12" step="0.5" />
-
-                            <div class="   w-1/5">
-                                <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
-                                    <button class="bg-gray-100 p-2  rounded-lg text-center w-full hover:bg-gray-200"
-                                        @click="openModal">10<sup>{{ model.hardwareSlowdown }}</sup></button>
-
-                                </HardwareSlowdownAdvanced>
+                            <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" min="0" max="16"
+                                step="0.5" v-model="model.hardwareSlowdown" />
+                            <div
+                                class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
+                                <span class="pr-2">10 </span>
+                                <input class="w-1/3 bg-transparent hide-arrow absolute t-0 l-0 ml-12 mb-4 text-xs"
+                                    type="number" hide-arrow min="0" max="16" step="0.5" id="hardwareSlowdown"
+                                    v-model="model.hardwareSlowdown" />
 
                             </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <!-- <label class="font-medium text-sm" for="quantum_improvement_rate">Quantum Improvement Rate
-                        (%)</label> -->
-                        <p class="text-xs text-gray-600">The percentage by which the hardware slowdown is reduced by
-                            each
-                            year.</p>
-                        <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="quantum_improvement_rate"
-                                v-model="model.quantumImprovementRate" min="-90" max="90" />
-                            <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="quantum_improvement_rate" v-model="model.quantumImprovementRate" />
-                        </div>
-                    </div>
+                            <div
+                                class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex  items-center justify-center relative">
+                                <input class="w-full bg-transparent hide-arrow text-center"
+                                    type="number" min="-90" max="90" step="1" id="quantum_improvement_rate"
+                                    v-model="model.quantumImprovementRate" />
+                                    <span class="text-sm text-gray-600  right-1">
+                                        %/year
+                                    </span>
 
-                    <div class="flex flex-col">
-                        <label class="font-medium text-s" for="physical_logical_ratio">Physical to Logical Qubit
-                            Ratio</label>
-                        <p class="text-xs text-gray-600">The number of physical qubits per logical qubit considering
-                            error
-                            correction.</p>
-                        <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                                v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
-                            <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
+                            </div>
+                            
                         </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <!-- <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
-                        Improvement Rate
-                        (%)</label> -->
-                        <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is
-                            reduced
-                            by each
-                            year.</p>
-                        <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
-                                v-model="model.ratioImprovementRate" min="-90" max="90" />
-                            <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" />
-                        </div>
+
                     </div>
 
                     <div class="flex flex-col">
@@ -600,25 +571,52 @@ function getRelevantRoadmapPoints(data) {
                             <div
                                 class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                                 <span class="pr-2">10 </span>
-                                <input class="w-1/3 bg-transparent  absolute t-0 l-0 ml-12 mb-4 text-xs" type="number"
-                                    min="0" max="16" step="0.5" id="costFactor" v-model="model.costFactor" />
+                                <input class="w-1/3 bg-transparent hide-arrow absolute t-0 l-0 ml-12 mb-4 text-xs"
+                                    type="number" min="0" max="16" step="0.5" id="costFactor"
+                                    v-model="model.costFactor" />
 
                             </div>
+                            <div
+                                class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex  items-center justify-center relative">
+                                <input class="w-full bg-transparent hide-arrow text-center"
+                                    type="number" min="-90" max="90" step="1" id="costImprovementRate"
+                                    v-model="model.costImprovementRate" />
+                                    <span class="text-sm text-gray-600  right-1">
+                                        %/year
+                                    </span>
+
+                            </div>
+                            
                         </div>
                     </div>
+
                     <div class="flex flex-col">
-                        <!-- <label class="font-medium text-sm" for="ratio_improvement_rate">Cost Improvement Rate
-                        (%)</label> -->
-                        <p class="text-xs text-gray-600">The percentage which the cost factor is reduced
-                            by each
-                            year.</p>
+                        <label class="font-medium text-s" for="physical_logical_ratio">Physical to Logical Qubit
+                            Ratio</label>
+                        <p class="text-xs text-gray-600">The number of physical qubits per logical qubit considering
+                            error
+                            correction.</p>
                         <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
-                                v-model="model.costImprovementRate" min="-90" max="90" />
+                            <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
+                                v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
                             <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="ratio_improvement_rate" v-model="model.costImprovementRate" />
+                                id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
+                                <div
+                                class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex  items-center justify-center relative">
+                                <input class="w-full bg-transparent hide-arrow text-center"
+                                    type="number" min="-90" max="90" step="1" id="ratio_improvement_rate"
+                                    v-model="model.ratioImprovementRate" />
+                                    <span class="text-sm text-gray-600  right-1">
+                                        %/year
+                                    </span>
+
+                            </div>
+                          
                         </div>
                     </div>
+
+                    
+
                 </div>
             </div>
         </template>
@@ -797,5 +795,11 @@ function getRelevantRoadmapPoints(data) {
     transition: all 0.2s ease-in-out;
     z-index: 999 !important;
 
+}
+
+.hide-arrow[type="number"]::-webkit-inner-spin-button,
+.hide-arrow[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 </style>

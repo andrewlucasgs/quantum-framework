@@ -152,6 +152,8 @@ const chartOptions = {
                 connectorAllowed: false
             },
             lineWidth: 2,
+            animation: false,
+
         },
         scatter: {
             dataLabels: {
