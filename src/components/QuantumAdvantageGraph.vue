@@ -351,7 +351,8 @@ function updateGraphData() {
                     text:utils.toBase10HTML(data.nCostStar.toFixed(1)) +'<br>Cheaper',
 
                     style: {
-                        fontSize: '12px',
+                        fontSize: '14px',
+                        
 
                         color: 'rgba(0,45,255,.9)',  // Sets the text color to black
                         textAlign: data.nStar > data.nCostStar ? 'right' : 'left',
@@ -385,7 +386,7 @@ function updateGraphData() {
                     useHTML: true,
                     text:utils.toBase10HTML(data.nStar.toFixed(1)) +'<br>Faster',
                     style: {
-                        fontSize: '12px',
+                        fontSize: '14px',
 
                         color: 'rgba(0,45,157,.9)',  // Sets the text color to black
                         textAlign: data.nStar <= data.nCostStar ? 'right' : 'left',
