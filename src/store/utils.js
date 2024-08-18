@@ -231,3 +231,25 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
     console.log("couldn't converge during binary search")
     return c;
 }
+
+//returns the amount of logical qubits needed to achieve said problem size using the function specified by qubitToProblemSize
+//(logSize parameter is log_10 of the actual problem size)
+export function problemSizeToQubits(logSize, qubitToProblemSize) {
+    let loglogicalQubits = 0;
+    if (qubitToProblemSize == "2^{# of qubits}") {
+        loglogicalQubits = Math.log10(logSize) - Math.log10(Math.log10(2))
+    }
+    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
+        loglogicalQubits = Math.log10(Math.log2(logSize / Math.log10(2)))
+    }
+    else if (qubitToProblemSize == "{# of qubits}") {
+        loglogicalQubits = logSize
+    }
+    else if (qubitToProblemSize == "log({# of qubits})") {
+        loglogicalQubits = Math.pow(10, logSize) * Math.log10(2)
+    }
+    else {
+        console.log("this should never print")
+    }
+    return loglogicalQubits;
+}

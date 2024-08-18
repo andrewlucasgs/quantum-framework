@@ -319,18 +319,6 @@ function getRelevantRoadmapPoints(data) {
             <div class="flex items-center gap-4">
                 <!-- toogle quantum only -->
                 <label class="flex items-center gap-1 cursor-pointer">
-
-                    <Switch v-model="model.quantumOnly" :class="model.quantumOnly ? 'bg-[#002D9D]' : 'bg-gray-400'"
-                        class="relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
-                        <span class="sr-only">Quantum only</span>
-                        <span aria-hidden="true" :class="model.quantumOnly ? 'translate-x-4' : 'translate-x-0'"
-                            class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out" />
-                    </Switch>
-                    <span class="text-sm" :class="model.quantumOnly ? 'text-[#002D9D]' : 'text-gray-400'">
-                        Quantum only
-                    </span>
-                </label>
-                <label class="flex items-center gap-1 cursor-pointer">
                     <Switch v-model="editMode" :class="!editMode ? 'bg-[#002D9D]' : 'bg-gray-400'"
                         class="relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
                         <span class="sr-only">Advanced Options</span>
@@ -363,7 +351,6 @@ function getRelevantRoadmapPoints(data) {
             </div>
         </div>
 
-        <template v-if="!model.quantumOnly">
 
             <!-- transition height -->
             <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
@@ -404,7 +391,8 @@ function getRelevantRoadmapPoints(data) {
 
 
             <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
-                :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
+            v-show="!editMode"
+                :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 hidden': editMode }">
                 <div class="w-1/4">
                     <div class="flex items-center gap-2">
                         <label class="font-medium">Problem </label>
@@ -619,132 +607,7 @@ function getRelevantRoadmapPoints(data) {
 
                 </div>
             </div>
-        </template>
-        <template v-else>
-
-            <!-- transition height -->
-            <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
-                :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
-                <div class="w-full">
-                    <div class="flex items-center gap-2">
-                        <label class="font-medium">Roadmap </label>
-                        <ReferenceDialog title="References" classes="max-w-lg">
-                            <template #content>
-                                <HardwareReferences />
-                            </template>
-                        </ReferenceDialog>
-                    </div>
-
-                    <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
-                        group-label="category" group-values="options" v-model="selectedHardware" :options="hardwares"
-                        :searchable="true" :close-on-select="true" :allowEmpty="false" :show-labels="false"
-                        placeholder="Pick a hardware provider"></multiselect>
-
-                </div>
-
-            </div>
-
-
-            <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out"
-                :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 ': editMode }">
-                <div class="w-1/4">
-                    <div class="flex justify-between mb-1">
-                        <div class="flex items-center gap-2">
-                            <label class="font-medium">Roadmap </label>
-                            <ReferenceDialog title="References" classes="max-w-lg">
-                                <template #content>
-                                    <HardwareReferences />
-                                </template>
-                            </ReferenceDialog>
-                        </div>
-                        <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
-                            :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                            :roadmapUnit="model.roadmapUnit" v-slot="{ openModal }">
-                            <button
-                                class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-                                @click="openModal">Edit roadmap</button>
-                        </EditRoadmap>
-                    </div>
-                    <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
-                        group-label="category" group-values="options" v-model="selectedHardware" :options="hardwares"
-                        :searchable="true" :close-on-select="true" :allowEmpty="false" :show-labels="false"
-                        placeholder="Pick a hardware provider">
-                    </multiselect>
-
-                    <table class="w-full table-auto mt-4 text-xs">
-                        <thead class="bg-gray-100">
-                            <tr class="text-left">
-                                <th>Year</th>
-                                <th># of {{ model.roadmapUnit }} Qubits</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-left">
-                            <tr v-for="(value, key) in getRelevantRoadmapPoints(model.roadmap)" :key="key"
-                                class="border-b">
-                                <td class="p-1">
-                                    {{ key }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="p-1 text-center">
-                                    <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
-                                        :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                                        :roadmapUnit="model.roadmapUnit" v-slot="{ openModal }">
-                                        <button
-                                            class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                            @click="openModal">See more</button>
-                                    </EditRoadmap>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="w-1/4">
-                    <div class="flex flex-col">
-                        <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
-                        <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable
-                            with
-                            the
-                            given number of qubits.</p>
-                        <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
-                            :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
-                            :allowEmpty="false" placeholder="Pick a value"></multiselect>
-                    </div>
-                </div>
-
-                <div class="flex-1">
-
-                    <div class="flex flex-col">
-                        <label class="font-medium text-sm" for="physical_logical_ratio">Physical to Logical Qubit
-                            Ratio</label>
-                        <p class="text-xs text-gray-600">The number of physical qubits per logical qubit, considering
-                            error
-                            correction.</p>
-                        <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                                v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
-                            <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <!-- <label class="font-medium text-sm" for="ratio_improvement_rate">Physical to Logical Ratio
-                Improvement Rate
-                (%)</label> -->
-                        <p class="text-xs text-gray-600">The percentage which the physical to logical qubit ratio is
-                            reduced
-                            by each
-                            year.</p>
-                        <div class="flex items-center justify-between w-full gap-2">
-                            <input class="flex-1 accent-[#002D9D]" type="range" id="ratio_improvement_rate"
-                                v-model="model.ratioImprovementRate" min="-90" max="90" />
-                            <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
+       
 
     </div>
 </template>

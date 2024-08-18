@@ -39,7 +39,6 @@ let data = processDataToGraph(props.data)
 
 
 
-console.log(data)
 const chartOptions = {
     chart: {
         marginRight: 60,
@@ -63,7 +62,6 @@ const chartOptions = {
             const problemSize = utils.toBase10HTML(this.points[0].x)
            
             
-         console.log(this)
             return `
             <div class="flex flex-col gap-1 bg-white p-2 rounded-lg shadow-md">
                 <p class="text-gray-700 mb-1 font-bold">Problem Size: <span >${problemSize}</span></p>
@@ -150,7 +148,6 @@ function updateGraphData() {
 
     chartOptions.xAxis.max = data.maxX
     chartOptions.yAxis.max = data.maxY
-    console.log(data.maxX, data.maxY)
 
     chartOptions.xAxis.plotBands = []
 
