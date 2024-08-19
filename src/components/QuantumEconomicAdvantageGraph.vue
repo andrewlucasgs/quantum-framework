@@ -44,13 +44,22 @@ function processDataToGraph(data) {
     quantumCostAdvantageArea = quantumCostAdvantageArea.map(step => [step[0], step[1], Math.min(
         nCostStar > nStar ? maxY : quantumAdvantageAux[step[0]], quantumFeasibleAux[step[0]])])
 
-    const advantageAreaXMid = quantumAdvantageArea[0][0] + (quantumAdvantageArea[quantumAdvantageArea.length - 1][0] - quantumAdvantageArea[0][0]) / 2
-    const advantageAreaYMid = quantumAdvantageArea[0][1] + (quantumAdvantageArea[quantumAdvantageArea.length - 1][1] - quantumAdvantageArea[0][1]) / 2
-    const costAdvantageAreaXMid = quantumCostAdvantageArea[0][0] + (quantumCostAdvantageArea[quantumCostAdvantageArea.length - 1][0] - quantumCostAdvantageArea[0][0]) / 2
-    const costAdvantageAreaYMid = quantumCostAdvantageArea[0][1] + (quantumCostAdvantageArea[quantumCostAdvantageArea.length - 1][1] - quantumCostAdvantageArea[0][1]) / 2
+    // Calculate the midpoint for quantumAdvantageArea
+    const advantageAreaXSum = quantumAdvantageArea.reduce((sum, step) => sum + step[0], 0);
+    const advantageAreaYSum = quantumAdvantageArea.reduce((sum, step) => sum + step[1], 0);
+    const advantageAreaXMid = advantageAreaXSum / quantumAdvantageArea.length;
+    const advantageAreaYMid = advantageAreaYSum / quantumAdvantageArea.length;
 
-    const advantageAreaMid = [ advantageAreaXMid, advantageAreaYMid]
-    const costAdvantageAreaMid = [ costAdvantageAreaXMid, costAdvantageAreaYMid]
+    // Calculate the midpoint for quantumCostAdvantageArea
+    const costAdvantageAreaXSum = quantumCostAdvantageArea.reduce((sum, step) => sum + step[0], 0);
+    const costAdvantageAreaYSum = quantumCostAdvantageArea.reduce((sum, step) => sum + step[1], 0);
+    const costAdvantageAreaXMid = costAdvantageAreaXSum / quantumCostAdvantageArea.length;
+    const costAdvantageAreaYMid = costAdvantageAreaYSum / quantumCostAdvantageArea.length;
+
+    // Define the midpoints for advantage and cost advantage areas
+    const advantageAreaMid = [advantageAreaXMid, advantageAreaYMid];
+    const costAdvantageAreaMid = [costAdvantageAreaXMid, costAdvantageAreaYMid];
+
 
 
     return { quantumAdvantage, quantumCostAdvantage, quantumFeasible, tStar, nStar, tCostStar, nCostStar, maxY, maxX, quantumAdvantageArea, quantumCostAdvantageArea, advantageAreaXMid, advantageAreaYMid, costAdvantageAreaXMid, costAdvantageAreaYMid, advantageAreaMid, costAdvantageAreaMid }
@@ -87,15 +96,14 @@ const chartOptions = {
         shadow: false,
         backgroundColor: 'transparent',
         formatter: function () {
-            
+
             const year = utils.round(this.points[0].x, data.maxX - 2024 <= 5 ? 1 : 0)
-           
-            
+
+
             return `
             <div class="flex flex-col gap-1 bg-white p-2 rounded-lg shadow-md">
                 <p class="text-gray-700 mb-1 font-bold"><span >${year}</span></p>
-                ${
-                    this.points.map(point => `<div class="flex items-center gap-1">
+                ${this.points.map(point => `<div class="flex items-center gap-1">
                         <span class="w-4 h-[2px]" style="background-color: ${point.series.color};"></span>
                         <span class="flex-1 gap-1 flex justify-between" >${point.series.name === 'Classical' ? 'Classical Steps/Cost' : point.series.name}: <span class="min-w-[5ch] text-gray-700 font-bold">${utils.toBase10HTML(point.y)}</span></span>
                         </div>`).join('')
@@ -249,10 +257,14 @@ function updateGraph() {
             enableMouseTracking: false,
             color: {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
-                stops: [
-                [0, 'rgba(219,234,254,.2)'],
-                [0.7, 'rgba(0,45,157,.3)'],
-                [1, 'rgba(0,45,157,.3)'],
+                stops: data.tStar <= data.tCostStar ? [
+                    [0, 'rgba(219,234,254,.2)'],
+                    [0.7, 'rgba(0,45,157,.3)'],
+                    [1, 'rgba(0,45,157,.3)'],
+                ] : [
+                    [0, 'rgba(219,234,254,.5)'],
+                    [0.7, 'rgba(0,45,157,.5)'],
+                    [1, 'rgba(0,45,157,.5)'],
                 ]
             },
             // hide points
@@ -270,11 +282,16 @@ function updateGraph() {
             enableMouseTracking: false,
             color: {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
-                stops: [
-                [0, 'rgba(219,234,254,.2)'],
-                [0.7, 'rgba(0,45,255,.3)'],
-                [1, 'rgba(0,45,255,.3)'],
-                ]
+                stops: data.tStar <= data.tCostStar ? [
+                    [0, 'rgba(219,234,254,.5)'],
+                    [0.7, 'rgba(0,45,157,.5)'],
+                    [1, 'rgba(0,45,157,.5)'],
+                ]: [
+                    [0, 'rgba(219,234,254,.2)'],
+                    [0.7, 'rgba(0,45,255,.3)'],
+                    [1, 'rgba(0,45,255,.3)'],
+                ] 
+             
             },
 
             // hide points
@@ -432,7 +449,7 @@ function updateGraph() {
                 align: 'right',
                 useHTML: true,
                 formatter: function () {
-                    return`
+                    return `
                     <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
                     `
                 },
@@ -453,7 +470,7 @@ function updateGraph() {
                 enabled: true,
                 align: 'right',
                 useHTML: true,
-                
+
                 formatter: function () {
                     return `
                     <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
@@ -476,79 +493,85 @@ function updateGraph() {
     ]
     chartOptions.annotations = [
 
-    {
-    draggable: "",
-    labelOptions: {
-        backgroundColor: "transparent",
-        borderColor: "transparent",
-        color: "black",
-        shape: "",
-        fontSize: '12px',
-        fontColor: 'black',
-        rotation: -25
-
-    },
-    labels: [
         {
-            point: {
-                x: data.costAdvantageAreaMid[0],
-                y: data.costAdvantageAreaMid[1],
-                xAxis: 0,
-                yAxis: 0
-            },
-            color: 'black',
-            align: 'center-right',
-
-            useHTML: true,
-            text: data.tStar <= data.tCostStar ? '<b class="text-gray-700">Quantum Economic Advantage</b><br>Faster and Cheaper' : 'Quantum cheaper',
-            style: {
-                color: 'rgba(0,45,255,.9)',  // Sets the text color to black
+            draggable: "",
+            labelrank: data.tStar <= data.tCostStar ? 1 : 0,
+            labelOptions: {
+                backgroundColor: "transparent",
+                borderColor: "transparent",
+                color: "black",
+                shape: "",
                 fontSize: '12px',
-
-                textAlign: 'center',
+                fontColor: 'black',
+                rotation: -25
 
             },
-        },
-    ]
-},
-{
-    draggable: "",
-    labelOptions: {
-        backgroundColor: "transparent",
-        borderColor: "transparent",
-        color: "black",
-        shape: "",
-        fontSize: '12px',
-        fontColor: 'black',
-        zIndex: 0,
+            labels: [
+                {
+                    point: {
+                        x: data.costAdvantageAreaMid[0],
+                        y: data.costAdvantageAreaMid[1],
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    color: 'black',
+                   
+                    x: data.maxX * 0.5,
+                    y: data.maxY * 0.1,
+                    useHTML: true,
+                    text: data.tStar <= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum cheaper',
+                    style: {
+                        color: 'rgba(0,45,255,.9)',  // Sets the text color to black
+                        fontSize: '12px',
 
-    },
-    labels: [
+                        textAlign: 'center',
+
+                    },
+                },
+            ]
+        },
         {
-            point: {
-                x: data.advantageAreaMid[0],
-                y: data.advantageAreaMid[1],
-                xAxis: 0,
-                yAxis: 0
-            },
-            align: 'center-right',
-            color: 'black',
-            useHTML: true,
-            text: data.tStar >= data.tCostStar ? '<b class="text-gray-700">Quantum Economic Advantage</b><br>Faster and Cheaper' : 'Quantum faster',
+            draggable: "",
 
-            style: {
+            labelrank: data.tStar > data.tCostStar ? 1 : 0,
+
+            labelOptions: {
+                backgroundColor: "transparent",
+                borderColor: "transparent",
+                color: "black",
+                shape: "",
                 fontSize: '12px',
-                textAlign: 'center',
-                color: 'rgba(0,45,157,.9)',  // Sets the text color to black
+                fontColor: 'black',
+                zIndex: 0,
+
             },
+            labels: [
+                {
+                    point: {
+                        x: data.advantageAreaMid[0],
+                        y: data.advantageAreaMid[1] ,
+                        xAxis: 0,
+                        yAxis: 0
+                    },
+                    x: data.maxX * 0.5,
+                    y: data.maxY * 0.1,
+                    color: 'black',
+                    useHTML: true,
+                    text: data.tStar >= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum faster',
+
+                    style: {
+                        fontSize: '12px',
+                        textAlign: 'center',
+                        color: 'rgba(0,45,157,.9)',  // Sets the text color to black
+                    },
+                },
+            ]
         },
-    ]
-},
 
 
 
 
-]
+    ].sort((a, b) =>  b.labelrank - a.labelrank)
 }
 
 </script>

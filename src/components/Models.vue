@@ -123,10 +123,10 @@ function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRunt
     else if (problemName === "Full Configuration Interaction (Quantum Chemistry)") {
         let f;
         if (penalty === "log(n)") {
-            f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10) - Math.log(Math.log2(n))
+            f = n => Math.log(n) * (n - 5) - n - adjustmentFactor * Math.log(10) - Math.log(Math.log2(n))
         }
         else {
-            f = n => Math.log(n) * (n - 11) - n - adjustmentFactor * Math.log(10)
+            f = n => Math.log(n) * (n - 5) - n - adjustmentFactor * Math.log(10)
         }
         let result = utils.bisectionMethod(f, 2, 60);
         if (result === null) {

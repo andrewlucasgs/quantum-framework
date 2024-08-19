@@ -3,11 +3,13 @@ import { ref, toRaw } from 'vue'
 
 const modelTemplate = {
     id: 1,
-    problemName: "Database Search",
-    classicalRuntime: (n) => n,
-    quantumRuntime: (n) => n / 2,
-    classicalRuntimeLabel: "O(n)",
-    quantumRuntimeLabel: "O(\\sqrt{n})",
+    problemName: "Integer Factorization",
+    classicalRuntime: (n) => 4 / (9 ** (1 / 3)) * (Math.log(10) ** (2 / 3)) * Math.log10(Math.E) * (10 ** (n / 3)) * (n ** (2 / 3)),
+    quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
+    classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
+    quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
+    qubitToProblemSize: "{# of qubits}",
+    penalty: "log(n)",
     hardwareName: 'IBM (Superconducting)',
     roadmap: {
         2020: 27,
@@ -24,11 +26,8 @@ const modelTemplate = {
     // hardwareSlowdown: 6,
     quantumImprovementRate: -10,
     physicalLogicalQubitsRatio: 1000,
-    ratioImprovementRate: -10,
+    ratioImprovementRate: -2,
     costImprovementRate: -10,
-    qubitToProblemSize: "2^{# of qubits}",
-    // qubitToProblemSize: "{# of qubits}",
-    penalty: "log(n)",
 
 }
 

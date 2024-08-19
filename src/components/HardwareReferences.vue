@@ -28,7 +28,7 @@ const references = [
     {
         hardwareName: "IBM (Superconducting)",
         year: 2024,
-        link: "https://www.ibm.com/roadmaps/quantum.pdf",
+        link: "https://www.ibm.com/roadmaps/quantum/2024/",
 
     },
     {
