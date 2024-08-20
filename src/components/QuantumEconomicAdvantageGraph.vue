@@ -60,9 +60,11 @@ function processDataToGraph(data) {
     const advantageAreaMid = [advantageAreaXMid, advantageAreaYMid];
     const costAdvantageAreaMid = [costAdvantageAreaXMid, costAdvantageAreaYMid];
 
+    const problemName = props.data.problemName.split('(')[0]
 
+    const graphTitle = 'Quantum Economic Advantage for ' + (problemName.length > 40 ? '<br>' + problemName : problemName)
 
-    return { quantumAdvantage, quantumCostAdvantage, quantumFeasible, tStar, nStar, tCostStar, nCostStar, maxY, maxX, quantumAdvantageArea, quantumCostAdvantageArea, advantageAreaXMid, advantageAreaYMid, costAdvantageAreaXMid, costAdvantageAreaYMid, advantageAreaMid, costAdvantageAreaMid }
+    return { graphTitle, quantumAdvantage, quantumCostAdvantage, quantumFeasible, tStar, nStar, tCostStar, nCostStar, maxY, maxX, quantumAdvantageArea, quantumCostAdvantageArea, advantageAreaXMid, advantageAreaYMid, costAdvantageAreaXMid, costAdvantageAreaYMid, advantageAreaMid, costAdvantageAreaMid }
 }
 
 let data = processDataToGraph(props.data)
@@ -83,7 +85,7 @@ const chartOptions = {
         enabled: false
     },
     title: {
-        text: 'Economic Advantage of Quantum Computing',
+        text: data.graphTitle,
         style: {
             fontSize: '14px'
         }
@@ -145,6 +147,7 @@ const chartOptions = {
         gridLineWidth: 1,
         gridLineColor: 'rgba(250,250,250,1)',
         endOnTick: false,
+        
 
     },
     plotOptions: {
@@ -173,39 +176,6 @@ const chartOptions = {
         }
     },
     series: [
-        {
-            name: 'Feasibility',
-            data: data.quantumFeasible,
-            color: 'gray',
-            dashStyle: 'dash',
-            zoneAxis: 'x',
-            zones: [{
-                value: data.tStar,
-            }, {
-                dashStyle: 'solid'
-            }],
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            }
-        },
-        {
-            name: 'Quantum Advantage',
-            data: data.quantumAdvantage,
-            color: '#002D9D',
-            dashStyle: 'dash',
-            zoneAxis: 'x',
-            zones: [{
-                value: data.tStar,
-            }, {
-                dashStyle: 'solid'
-            }],
-
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            }
-        },
 
     ]
 }
@@ -224,15 +194,17 @@ function updateGraph() {
     } else {
         chartOptions.yAxis.max = data.maxY
     }
+
+    chartOptions.title.text = data.graphTitle
     chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
     const lastYear = data.maxX
-    const tStar = parseInt(data.tStar)
+    const mid = parseInt((data.maxX - 2024) / 2) + 2024
     chartOptions.xAxis.tickPositions = [
         currentYear,
-        (currentYear + tStar) / 2,
-        tStar,
-        (tStar + lastYear) / 2,
+        (currentYear + mid) / 2,
+        mid,
+        (mid + lastYear) / 2,
         lastYear
     ]
     chartOptions.xAxis.labels = {
@@ -262,9 +234,9 @@ function updateGraph() {
                     [0.7, 'rgba(0,45,157,.3)'],
                     [1, 'rgba(0,45,157,.3)'],
                 ] : [
-                    [0, 'rgba(219,234,254,.5)'],
-                    [0.7, 'rgba(0,45,157,.5)'],
-                    [1, 'rgba(0,45,157,.5)'],
+                    [0, 'rgba(24,102,201,.2)'],
+                    [0.2, 'rgba(24,102,201,0.5)'],
+                    [1, 'rgba(24,102,201,.2)'],
                 ]
             },
             // hide points
@@ -283,15 +255,15 @@ function updateGraph() {
             color: {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
                 stops: data.tStar <= data.tCostStar ? [
-                    [0, 'rgba(219,234,254,.5)'],
-                    [0.7, 'rgba(0,45,157,.5)'],
-                    [1, 'rgba(0,45,157,.5)'],
-                ]: [
+                    [0, 'rgba(24,102,201,.2)'],
+                    [0.2, 'rgba(24,102,201,0.5)'],
+                    [1, 'rgba(24,102,201,0.2)'],
+                ] : [
                     [0, 'rgba(219,234,254,.2)'],
-                    [0.7, 'rgba(0,45,255,.3)'],
-                    [1, 'rgba(0,45,255,.3)'],
-                ] 
-             
+                    [0.7, 'rgba(48,158,244,.3)'],
+                    [1, 'rgba(48,158,244,.3)'],
+                ]
+
             },
 
             // hide points
@@ -352,7 +324,7 @@ function updateGraph() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    color: '#002D9D',
+                    color: 'rgba(0,45,157,1)',
                     shadow: false,
                     style: {
                         fontSize: '12px',
@@ -370,7 +342,7 @@ function updateGraph() {
                 y: data.quantumAdvantage[data.quantumAdvantage.length - 1][1],
 
             })],
-            color: '#002D9D',
+            color: 'rgba(0,45,157,1)',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
@@ -395,7 +367,7 @@ function updateGraph() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    color: 'blue',
+                    color: 'rgba(48,158,244,1)',
                     shadow: false,
                     style: {
                         fontSize: '12px',
@@ -413,7 +385,7 @@ function updateGraph() {
                 y: data.quantumCostAdvantage[data.quantumCostAdvantage.length - 1][1],
 
             })],
-            color: 'blue',
+            color: 'rgba(48,158,244,1)',
             dashStyle: 'dash',
             zoneAxis: 'x',
             zones: [{
@@ -441,7 +413,7 @@ function updateGraph() {
         }, {
             name: 'Quantum Cost Advantage',
             data: [[data.tCostStar, data.nCostStar,]],
-            color: 'blue',
+            color: 'rgba(48,158,244,1)',
             type: 'scatter',
             maxPointWidth: 1,
             dataLabels: {
@@ -463,7 +435,7 @@ function updateGraph() {
         {
             name: 'Quantum Advantage',
             data: [[data.tStar, data.nStar]],
-            color: '#002D9D',
+            color: 'rgba(0,45,157,1)',
             type: 'scatter',
             maxPointWidth: 1,
             dataLabels: {
@@ -492,8 +464,8 @@ function updateGraph() {
 
     ]
     chartOptions.annotations = [
-
         {
+            allowOverlap: true,
             draggable: "",
             labelrank: data.tStar <= data.tCostStar ? 1 : 0,
             labelOptions: {
@@ -504,37 +476,34 @@ function updateGraph() {
                 fontSize: '12px',
                 fontColor: 'black',
                 rotation: -25
-
             },
             labels: [
                 {
-                    point: {
+                                        point: {
                         x: data.costAdvantageAreaMid[0],
                         y: data.costAdvantageAreaMid[1],
                         xAxis: 0,
                         yAxis: 0
                     },
                     color: 'black',
-                   
                     x: data.maxX * 0.5,
                     y: data.maxY * 0.1,
                     useHTML: true,
                     text: data.tStar <= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum cheaper',
                     style: {
-                        color: 'rgba(0,45,255,.9)',  // Sets the text color to black
+                        color: 'rgba(48,158,244,.9)',  // Sets the text color to black
                         fontSize: '12px',
-
+                        fontWeight: 'bold',
                         textAlign: 'center',
-
+                        pointerEvents: 'none'  // Disable pointer events
                     },
                 },
             ]
         },
         {
+            allowOverlap: true,
             draggable: "",
-
             labelrank: data.tStar > data.tCostStar ? 1 : 0,
-
             labelOptions: {
                 backgroundColor: "transparent",
                 borderColor: "transparent",
@@ -542,36 +511,34 @@ function updateGraph() {
                 shape: "",
                 fontSize: '12px',
                 fontColor: 'black',
-                zIndex: 0,
-
+                
             },
             labels: [
                 {
                     point: {
                         x: data.advantageAreaMid[0],
-                        y: data.advantageAreaMid[1] ,
+                        y: data.advantageAreaMid[1],
                         xAxis: 0,
                         yAxis: 0
                     },
+                    
                     x: data.maxX * 0.5,
                     y: data.maxY * 0.1,
                     color: 'black',
                     useHTML: true,
                     text: data.tStar >= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum faster',
-
                     style: {
                         fontSize: '12px',
+                        fontWeight: 'bold',
                         textAlign: 'center',
                         color: 'rgba(0,45,157,.9)',  // Sets the text color to black
+                        pointerEvents: 'none'  // Disable pointer events
                     },
                 },
             ]
         },
+    ].sort((a, b) => b.labelrank - a.labelrank);
 
-
-
-
-    ].sort((a, b) =>  b.labelrank - a.labelrank)
 }
 
 </script>

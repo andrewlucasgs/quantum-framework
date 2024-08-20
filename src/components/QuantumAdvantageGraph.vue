@@ -30,9 +30,11 @@ function processDataToGraph(data) {
     let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY)
     let quantumSteps = data.quantumSteps.filter(step => step[0] <= maxX && step[1] <= maxY)
 
+    const problemName = props.data.problemName.split('(')[0]
+    
+    const graphTitle = problemName + (problemName.length > 40 ? '<br>' : ' ') + 'Problem Sizes'
 
-
-    return { classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX }
+    return { graphTitle, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX }
 }
 
 let data = processDataToGraph(props.data)
@@ -47,7 +49,7 @@ const chartOptions = {
         enabled: false
     },
     title: {
-        text: 'Minimum Problem Size for Quantum Algorithmic Advantage',
+        text: data.graphTitle,
         style: {
             fontSize: '14px'
         }
@@ -144,6 +146,8 @@ watch(() => props.data, async () => {
 }, { immediate: true, deep: true })
 
 function updateGraphData() {
+    chartOptions.title.text = data.graphTitle
+
     chartOptions.plotOptions.series.label.connectorAllowed = false
 
     chartOptions.xAxis.max = data.maxX
@@ -170,7 +174,7 @@ function updateGraphData() {
             linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
             stops: [
                 [0, 'rgba(219,234,254,.2)'],
-                [1, 'rgba(0,45,255,.3)'],
+                [1, 'rgba(48,158,244,.3)'],
             ]
         },
     })
@@ -185,7 +189,7 @@ function updateGraphData() {
     chartOptions.xAxis.plotLines.push({
         value: data.nCostStar,
         width: 1,
-        color: 'rgba(0,45,255,.5)',
+        color: 'rgba(48,158,244,.5)',
         
     })
 
@@ -231,7 +235,7 @@ function updateGraphData() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    color: '#002D9D',
+                    color: 'rgba(0,45,157,1)',
                     shadow: false,
                     style: {
                         fontSize: '12px',
@@ -247,7 +251,7 @@ function updateGraphData() {
                 y: data.quantumSteps[data.quantumSteps.length - 1][1],
 
             })],
-            color: '#002D9D',
+            color: 'rgba(0,45,157,1)',
             marker: {
                 enabled: false,
                 symbol: 'circle'
@@ -264,7 +268,7 @@ function updateGraphData() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    color: 'blue',
+                    color: 'rgba(48,158,244,1)',
                     shadow: false,
                     style: {
                         fontSize: '12px',
@@ -285,9 +289,9 @@ function updateGraphData() {
             type: 'spline',
             style: {
                 linewidth: 22,
-                color: 'blue'
+                color: 'rgba(48,158,244,1)'
             },
-            color: 'blue',
+            color: 'rgba(48,158,244,1)',
             marker: {
                 enabled: false,
                 symbol: 'circle'
@@ -297,7 +301,7 @@ function updateGraphData() {
         {
             name: 'Quantum Cost Advantage',
             data: [[data.nCostStar, data.stepCostStar]],
-            color: 'blue',
+            color: 'rgba(48,158,244,1)',
             type: 'scatter',
             maxPointWidth: 1,
             marker: {
@@ -310,7 +314,7 @@ function updateGraphData() {
         {
             name: 'Quantum Advantage',
             data: [[data.nStar, data.stepStar]],
-            color: '#002D9D',
+            color: 'rgba(0,45,157,1)',
             type: 'scatter',
             maxPointWidth: 1,
             marker: {
@@ -329,9 +333,9 @@ function updateGraphData() {
             draggable: "",
             labelOptions: {
                 backgroundColor: "transparent",
-                borderColor: "transparent",
+                borderColor: "rgba(48,158,244,1)",
                 color: "black",
-                shape: "rect",
+                shape: "connector",
                 fontSize: '12px',
                 fontColor: 'black',
                 zIndex: 0,
@@ -345,17 +349,18 @@ function updateGraphData() {
                         xAxis: 0,
                         yAxis: 0
                     },
-                    align: data.nStar > data.nCostStar ? 'right' : 'left',
+                    align: (data.nStar >= data.nCostStar && (Math.abs(data.nCostStar - data.nStar) / data.maxX) < 0.13) ? 'right' : 'left',
                     color: 'black',
                     useHTML: true,
-                    text:utils.toBase10HTML(data.nCostStar.toFixed(1)) +'<br>Cheaper',
+                    text: '<b>'+utils.toBase10HTML(data.nCostStar.toFixed(1))+'</b>' + (data.nStar >= data.nCostStar ? '<br>Quantum<br>Cheaper' : '<br>Quantum<br>Faster and Cheaper'),
 
                     style: {
                         fontSize: '14px',
                         
+                        pointerEvents: 'none',  // Disable pointer events
 
-                        color: 'rgba(0,45,255,.9)',  // Sets the text color to black
-                        textAlign: data.nStar > data.nCostStar ? 'right' : 'left',
+                        color: 'rgba(48,158,244,1)',  // Sets the text color to black
+                        textAlign: (data.nStar >= data.nCostStar && (Math.abs(data.nCostStar - data.nStar) / data.maxX) < 0.13) ? 'right' : 'left',
                     },
                 },
             ]
@@ -364,12 +369,13 @@ function updateGraphData() {
             draggable: "",
             labelOptions: {
                 backgroundColor: "transparent",
-                borderColor: "transparent",
+                borderColor: "rgba(0,45,157,1)",
                 color: "black",
-                shape: "rect",
+                shape: "connector",
                 fontSize: '12px',
                 fontColor: 'black',
-                rotation: -25
+                rotation: -25,
+                allowOverlap: true
 
             },
             labels: [
@@ -381,15 +387,18 @@ function updateGraphData() {
                         yAxis: 0
                     },
                     color: 'black',
-                    align: data.nStar <= data.nCostStar ? 'right' : 'left',
+                    align: (data.nStar < data.nCostStar && (Math.abs(data.nCostStar - data.nStar) / data.maxX) < 0.13) ? 'right' : 'left',
+
+                    // align: data.nStar <= data.nCostStar ? 'right' : 'left',
 
                     useHTML: true,
-                    text:utils.toBase10HTML(data.nStar.toFixed(1)) +'<br>Faster',
+                    text: '<b>'+utils.toBase10HTML(data.nStar.toFixed(1))+'</b>' + (data.nStar < data.nCostStar ? '<br>Quantum<br>Faster' : '<br>Quantum<br>Faster and Cheaper'),
                     style: {
                         fontSize: '14px',
+                        pointerEvents: 'none',  // Disable pointer events
 
-                        color: 'rgba(0,45,157,.9)',  // Sets the text color to black
-                        textAlign: data.nStar <= data.nCostStar ? 'right' : 'left',
+                        color: 'rgba(0,45,157,1)',  // Sets the text color to black
+                        textAlign: (data.nStar < data.nCostStar && (Math.abs(data.nCostStar - data.nStar) / data.maxX) < 0.13) ? 'right' : 'left',
 
                     },
                 },

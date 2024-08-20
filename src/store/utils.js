@@ -236,16 +236,16 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
 //(logSize parameter is log_10 of the actual problem size)
 export function problemSizeToQubits(logSize, qubitToProblemSize) {
     let loglogicalQubits = 0;
-    if (qubitToProblemSize == "2^{# of qubits}") {
+    if (qubitToProblemSize == "2^{q}") {
         loglogicalQubits = Math.log10(logSize) - Math.log10(Math.log10(2))
     }
-    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
+    else if (qubitToProblemSize == "2^(2^{q})") {
         loglogicalQubits = Math.log10(Math.log2(logSize / Math.log10(2)))
     }
-    else if (qubitToProblemSize == "{# of qubits}") {
+    else if (qubitToProblemSize == "{q}") {
         loglogicalQubits = logSize
     }
-    else if (qubitToProblemSize == "log({# of qubits})") {
+    else if (qubitToProblemSize == "log({q})") {
         loglogicalQubits = Math.pow(10, logSize) * Math.log10(2)
     }
     else {

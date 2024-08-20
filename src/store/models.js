@@ -8,7 +8,7 @@ const modelTemplate = {
     quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
     classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
     quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
-    qubitToProblemSize: "{# of qubits}",
+    qubitToProblemSize: "{q}",
     penalty: "log(n)",
     hardwareName: 'IBM (Superconducting)',
     roadmap: {

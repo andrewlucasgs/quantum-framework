@@ -67,7 +67,7 @@ const chartOptions = {
         enabled: false
     },
     title: {
-        text: 'Quantum Roadmap Characteristics',
+        text: 'Quantum Timelines',
         style: {
             fontSize: '14px'
         }
@@ -113,23 +113,27 @@ const chartOptions = {
         max: data.maxX,
         plotLines: [{
             value: data.tStar,
-            color: '#002D9D',
+            color: 'rgba(0,45,157,1)',
             width: 2,
             label: {
                 text: 'Quantum faster',
                 style: {
-                    color: '#002D9D'
+                    color: 'rgba(0,45,157,1)'
                 }
             }
         },
         {
             value: data.tCostStar,
-            color: 'blue',
+            color: 'rgba(48,158,244,1)',
             width: 2,
+            align: 'left',
+
             label: {
                 text: 'Quantum cheaper',
+                align: 'left',
+
                 style: {
-                    color: 'blue'
+                    color: 'rgba(48,158,244,1)'
                 }
             }
         }, {
@@ -159,11 +163,11 @@ const chartOptions = {
             }
         },
         min: 0,
-        max: data.maxY,
         gridLineWidth: 1,
         gridLineColor: 'rgba(250,250,250,1)',
         gridZIndex: -1,
         endOnTick: false,
+        maxPadding: 0.2,
 
     },
     plotOptions: {
@@ -209,7 +213,6 @@ function updateGraph() {
     if (data.tStar <= 0) {
         chartOptions.yAxis.max = 100
     } else {
-        chartOptions.yAxis.max = data.maxY
     }
     chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
@@ -233,26 +236,34 @@ function updateGraph() {
             return utils.yearToMonth(this.value);
         }
     }
-
+    console.log('adasdasd',Math.abs(data.tCostStar - data.tStar) / data.maxX)
     chartOptions.xAxis.plotLines = [{
         value: data.tStar,
-        color: '#002D9D',
+        color: 'rgba(0,45,157,1)',
         width: 2,
         label: {
-            text: 'Quantum faster',
+            align: (data.tStar < data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? 'right' : 'left',
+            x: (data.tStar < data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? -5 : 5,
+            rotation: 0,
+            text: (data.tStar < data.tCostStar ? '<br>Quantum<br>Faster' : '<br>Quantum<br>Faster and Cheaper'),
             style: {
-                color: '#002D9D'
+                color: 'rgba(0,45,157,1)',
+                textAlign: (data.tStar < data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? 'right' : 'left',
             }
         }
     },
     {
         value: data.tCostStar,
-        color: 'blue',
+        color: 'rgba(48,158,244,1)',
         width: 2,
         label: {
-            text: 'Quantum cheaper',
+            align: (data.tStar >= data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? 'right' : 'left',
+            x: (data.tStar >= data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? -5 : 5,
+            rotation: 0,
+            text: (data.tStar >= data.tCostStar ? '<br>Quantum<br>Cheaper' : '<br>Quantum<br>Faster and Cheaper'),
             style: {
-                color: 'blue'
+                textAlign: (data.tStar >= data.tCostStar && (Math.abs(data.tCostStar - data.tStar) / data.maxX) < 0.0006) ? 'right' : 'left',
+                color: 'rgba(48,158,244,1)'
             }
         }
     }, {
@@ -260,7 +271,8 @@ function updateGraph() {
         color: 'lightgray',
         width: 2,
         label: {
-            text: 'Last Roadmap Data',
+            rotation: 0,
+            text: 'Last Roadmap<br> Data',
             style: {
                 color: 'lightgray'
             }

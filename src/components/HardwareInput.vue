@@ -111,7 +111,7 @@ defineExpose({
         <div class="mt-4 fex gap-4">
             <div class="flex flex-col">
                 <div class="flex gap-2">
-                    <label class="font-medium text-lg" for="hardwareSlowdown">Hardware Slowdown
+                    <label class="font-medium text-lg" for="hardwareSlowdown">Classical Hardware Speed Advantage
                     </label>
                     <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                         <button

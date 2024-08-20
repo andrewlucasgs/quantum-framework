@@ -5,11 +5,6 @@ import * as utils from "../store/utils"
 
 const QuantumAdvantageGraph = defineAsyncComponent(() => import('./QuantumAdvantageGraph.vue'));
 const QuantumEconomicAdvantageGraph = defineAsyncComponent(() => import('./QuantumEconomicAdvantageGraph.vue'));
-const LogicalQubitsGraph = defineAsyncComponent(() => import('./LogicalQubitsGraph.vue'));
-const LogicalQubitsOnlyGraph = defineAsyncComponent(() => import('./LogicalQubitsOnlyGraph.vue'));
-const QuantumFeasibilityGraph = defineAsyncComponent(() => import('./QuantumFeasibilityGraph.vue'));
-const MoneyAlgorithmGraph = defineAsyncComponent(() => import('./MoneyAlgorithmGraph.vue'));
-const MoneyEconomicGraph = defineAsyncComponent(() => import('./MoneyEconomicGraph.vue'));
 const QuantumCharacteristicsGraph = defineAsyncComponent(() => import('./QuantumCharacteristicsGraph.vue'));
 const Form = defineAsyncComponent(() => import('./Form.vue'));
 
@@ -246,7 +241,9 @@ function calculateCurrentAdvantage(model) {
 
 
 
-    currentAdvantageData.value = currentAdvantageDataAux
+    currentAdvantageData.value =  {...currentAdvantageDataAux,
+        problemName: model.problemName,
+    }
 }
 
 
@@ -400,7 +397,11 @@ function calculateQuantumEconomicAdvantage(model) {
     }
 
 
-    quantumEconomicAdvantageData.value = quantumEconomicAdvantageDataAux
+    quantumEconomicAdvantageData.value = {...quantumEconomicAdvantageDataAux,
+        problemName: model.problemName,
+    }
+    
+
     roadmapCharacteristicsData.value = {
         roadmapUnit: roadmapUnit,
         tCostStar: quantumEconomicAdvantageDataAux.tCostStar,
@@ -441,22 +442,22 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImpr
     //logLogicalQubits has the log_10 of the true number of logical qubits
     let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit)
 
-    if (qubitToProblemSize == "2^{# of qubits}") {
+    if (qubitToProblemSize == "2^{q}") {
         // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
         let problemSize = (logLogicalQubits + Math.log10(Math.log10(2)))
         return 10 ** problemSize;
     }
-    else if (qubitToProblemSize == "2^(2^{# of qubits})") {
+    else if (qubitToProblemSize == "2^(2^{q})") {
         // let problemSize = Math.pow(2, Math.pow(10, logOfPhysicalQubits) / physicalLogicalQubitsRatio) * Math.log10(2)
         let problemSize = Math.pow(2, Math.pow(10, logLogicalQubits)) * Math.log10(2)
         return problemSize;
     }
-    else if (qubitToProblemSize == "{# of qubits}") {
+    else if (qubitToProblemSize == "{q}") {
         // let problemSize = logOfPhysicalQubits -  Math.log10(physicalLogicalQubitsRatio)
         let problemSize = logLogicalQubits
         return problemSize;
     }
-    else if (qubitToProblemSize == "log({# of qubits})") {
+    else if (qubitToProblemSize == "log({q})") {
         // let problemSize = Math.log10(logOfPhysicalQubits - Math.log10(physicalLogicalQubitsRatio)) - Math.log10(Math.log10(2))
         let problemSize = Math.log10(logLogicalQubits) - Math.log10(Math.log10(2))
 
@@ -507,7 +508,7 @@ watch(() => props.model, (model) => {
         </div>
         <Disclosure as="div" class="px-8 py-2" v-slot="{ open }" defaultOpen>
             <DisclosureButton class="py-2 bg-gray-100 text-gray-900 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full">
-                Quantum Economic Advantage Graphs
+                Quantum Economic Advantage
                 <span>{{  open ? '-' : '+' }}</span>
             </DisclosureButton>
             <DisclosurePanel class="text-gray-500">
@@ -520,7 +521,7 @@ watch(() => props.model, (model) => {
         </Disclosure>
         <Disclosure as="div" class="px-8 py-2" v-slot="{ open }">
             <DisclosureButton class="py-2 bg-gray-100 text-gray-900 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full">
-                Quantum Roadmap Characteristics Graph
+                Quantum Timelines
                 <span>{{  open ? '-' : '+' }}</span>
             </DisclosureButton>
             <DisclosurePanel class="text-gray-500">

@@ -1,5 +1,5 @@
 <template>
-    <Dialog title="Hardware Slowdown" button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel"
+    <Dialog title="Classical Hardware Speed Advantage" button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel"
         @reset="reset" @openModal="updateValues" classes="max-w-xl">
         <template v-slot:button="{ openModal }">
             <slot :openModal="openModal" />
