@@ -43,7 +43,7 @@ let data = processDataToGraph(props.data)
 
 const chartOptions = {
     chart: {
-        marginRight: 60,
+        marginRight: 70,
     },
     credits: {
         enabled: false
@@ -204,13 +204,17 @@ function updateGraphData() {
                     verticalAlign: 'middle',
                     overflow: true,
                     crop: false,
-                    format: '{series.name}',
+                    // format: '{series.name}',
                     color: 'green',
                     shadow: false,
                     style: {
                         fontSize: '12px',
                         fontWeight: 'bold',
                         textOutline: 'none'
+                    },
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Classical<br/>Algorithm</div>';
                     }
 
                 },
@@ -244,7 +248,7 @@ function updateGraphData() {
                     },
                     useHTML: true,
                     formatter: function () {
-                        return '<div style="text-align: cnter;">Quantum<br/>Steps</div>';
+                        return '<div style="text-align: cnter;">Quantum<br/>Algorithm<br/>Steps</div>';
                     }
                 },
                 x: data.quantumSteps[data.quantumSteps.length - 1][0],
@@ -278,7 +282,7 @@ function updateGraphData() {
                     // breakline
                     useHTML: true,
                     formatter: function () {
-                        return '<div style="text-align: cnter;">Quantum<br/>Cost</div>';
+                        return '<div style="text-align: cnter;">Quantum<br/>Algorithm<br/>Cost</div>';
                     }
 
                 },

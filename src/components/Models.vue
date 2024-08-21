@@ -509,7 +509,7 @@ watch(() => props.model, (model) => {
             <Form :modelId="model.id" />
         </div>
         <Disclosure as="div" class="px-8 py-2" v-slot="{ open }" defaultOpen>
-            <DisclosureButton class="py-2 bg-gray-100 text-gray-900 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full">
+            <DisclosureButton class="py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full border border-gray-200">
                 Quantum Economic Advantage
                 <span>{{  open ? '-' : '+' }}</span>
             </DisclosureButton>
@@ -521,8 +521,8 @@ watch(() => props.model, (model) => {
                 </div>
             </DisclosurePanel>
         </Disclosure>
-        <Disclosure as="div" class="px-8 py-2" v-slot="{ open }">
-            <DisclosureButton class="py-2 bg-gray-100 text-gray-900 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full">
+        <Disclosure as="div" class="px-8 py-2" v-slot="{ open }" defaultOpen>
+            <DisclosureButton class="py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 text-left px-4 rounded-md flex justify-between w-full border border-gray-200">
                 Quantum Timelines
                 <span>{{  open ? '-' : '+' }}</span>
             </DisclosureButton>

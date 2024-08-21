@@ -283,48 +283,7 @@ function updateGraph() {
 
 
     chartOptions.series = [
-        {
-            name: 'Problem Size',
-            data: [...data.problemSize, ({
-                dataLabels: {
-                    enabled: true,
-                    align: 'left',
-                    x: 3,
-                    verticalAlign: 'middle',
-                    overflow: false,
-                    crop: false,
-                    color: 'darkred',
-                    shadow: false,
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        textOutline: 'none'
-                    },
-                    // breakline
-                    useHTML: true,
-                    formatter: function () {
-                        return '<div style="text-align: cnter;">Problem Size</div>';
-                    }
-
-                },
-                x: data.problemSize[data.problemSize.length - 1][0],
-                y: data.problemSize[data.problemSize.length - 1][1],
-
-            })],
-            color: 'darkred',
-            dashStyle: 'solid',
-            zoneAxis: 'x',
-            zones: [{
-                value: data.lastRoadmapPoint,
-            }, {
-                dashStyle: 'dash'
-            }],
-            marker: {
-                enabled: false,
-                symbol: 'circle'
-            }
-        },
-        {
+    {
             name: 'Logical Qubits',
             data: [...data.logicalQubits, ({
                 dataLabels: {
@@ -406,6 +365,48 @@ function updateGraph() {
                 symbol: 'circle'
             }
         },
+        {
+            name: 'Problem Size',
+            data: [...data.problemSize, ({
+                dataLabels: {
+                    enabled: true,
+                    align: 'left',
+                    x: 3,
+                    verticalAlign: 'middle',
+                    overflow: false,
+                    crop: false,
+                    color: 'darkred',
+                    shadow: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    // breakline
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Problem Size</div>';
+                    }
+
+                },
+                x: data.problemSize[data.problemSize.length - 1][0],
+                y: data.problemSize[data.problemSize.length - 1][1],
+
+            })],
+            color: 'darkred',
+            dashStyle: 'solid',
+            zoneAxis: 'x',
+            zones: [{
+                value: data.lastRoadmapPoint,
+            }, {
+                dashStyle: 'dash'
+            }],
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            }
+        },
+        
 
         {
             name: 'Roadmap',

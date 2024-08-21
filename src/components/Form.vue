@@ -380,7 +380,7 @@ function checkLimits() {
             <div class="w-full">
                 <div class="flex items-center gap-2">
                     <label class="font-medium">Problem </label>
-                    <ReferenceDialog title="References" classes="max-w-lg">
+                    <ReferenceDialog title="References" classes="max-w-3xl">
                         <template #content>
                             <ProblemReferences />
                         </template>
@@ -419,7 +419,7 @@ function checkLimits() {
 
                     <div class="flex items-center gap-2">
                         <label class="font-medium">Problem </label>
-                        <ReferenceDialog title="References" classes="max-w-lg">
+                        <ReferenceDialog title="References" classes="max-w-3xl">
                             <template #content>
                                 <ProblemReferences />
                             </template>

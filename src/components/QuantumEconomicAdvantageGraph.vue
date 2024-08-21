@@ -489,11 +489,11 @@ function updateGraph() {
                     x: data.maxX * 0.5,
                     y: data.maxY * 0.1,
                     useHTML: true,
-                    text: data.tStar <= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum cheaper',
+                    text: data.tStar <= data.tCostStar ? '<b class="">Quantum<br>Economic Advantage:</b><br>Faster and Cheaper' : 'Quantum cheaper',
                     style: {
                         color: 'rgba(48,158,244,.9)',  // Sets the text color to black
                         fontSize: '12px',
-                        fontWeight: 'bold',
+                        fontWeight: '',
                         textAlign: 'center',
                         pointerEvents: 'none'  // Disable pointer events
                     },
@@ -526,10 +526,10 @@ function updateGraph() {
                     y: data.maxY * 0.1,
                     color: 'black',
                     useHTML: true,
-                    text: data.tStar >= data.tCostStar ? '<b class="text-gray-700">Quantum<br>Economic Advantage</b><br>Faster and Cheaper' : 'Quantum faster',
+                    text: data.tStar >= data.tCostStar ? '<b class="">Quantum<br>Economic Advantage:</b><br>Faster and Cheaper' : 'Quantum faster',
                     style: {
                         fontSize: '12px',
-                        fontWeight: 'bold',
+                        fontWeight: '',
                         textAlign: 'center',
                         color: 'rgba(0,45,157,.9)',  // Sets the text color to black
                         pointerEvents: 'none'  // Disable pointer events
