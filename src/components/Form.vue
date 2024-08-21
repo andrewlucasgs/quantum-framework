@@ -338,7 +338,7 @@ function checkLimits() {
             <h2 class="text-xl text-center font-medium">{{ model.id }}. {{ model.problemName }} on {{
                 model.hardwareName }}</h2>
 
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap  items-center gap-4">
                 <!-- toogle quantum only -->
                 <label class="flex items-center gap-1 cursor-pointer">
                     <Switch v-model="editMode" :class="!editMode ? 'bg-[#002D9D]' : 'bg-gray-400'"
@@ -376,7 +376,7 @@ function checkLimits() {
 
         <!-- transition height -->
         <div class="px-8  py-2  justify-between items-center gap-8 transition-all duration-500 ease-in-out"
-            :class="{ 'max-h-96 opacity-100 flex': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
+            :class="{ 'max-h-96 opacity-100 flex flex-wrap md:flex-nowrap': editMode, 'max-h-0 opacity-0   hidden ': !editMode }">
             <div class="w-full">
                 <div class="flex items-center gap-2">
                     <label class="font-medium">Problem </label>
@@ -414,7 +414,7 @@ function checkLimits() {
 
         <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out" v-show="!editMode"
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 hidden': editMode }">
-            <div class="grid grid-cols-2 gap-4 w-2/4">
+            <div class="lg:grid grid-cols-2 gap-4 lg:w-2/4">
                 <div>
 
                     <div class="flex items-center gap-2">
@@ -458,7 +458,7 @@ function checkLimits() {
                         </div>
                         <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                             :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                            :roadmapUnit="model.roadmapUnit" v-slot="{ openModal }">
+                            :roadmapUnit="model.roadmapUnit" :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                                 @click="openModal">Edit roadmap</button>
@@ -488,7 +488,7 @@ function checkLimits() {
                                 <td colspan="2" class="p-1 text-center">
                                     <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                                        :roadmapUnit="model.roadmapUnit" v-slot="{ openModal }">
+                                        :roadmapUnit="model.roadmapUnit" :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
                                         <button
                                             class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                             @click="openModal">See more</button>

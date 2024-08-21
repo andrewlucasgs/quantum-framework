@@ -105,7 +105,8 @@ const props = defineProps({
     name: String,
     roadmap: Object,
     extrapolationType: String,
-    roadmapUnit: String
+    roadmapUnit: String,
+    physicalLogicalQubitsRatio: Number
 });
 
 const dataToGraph = ref([])
@@ -122,10 +123,20 @@ function updateValues() {
     roadmapData.value = Object.entries(props.roadmap).map(([key, value]) => {
         return {
             year: key,
-            qubits: value
+            qubits: value 
         }
     });
 }
+
+watch(() => roadmapUnit.value, (newVal) => {
+    roadmapData.value = roadmapData.value.map(roadmap => {
+        return {
+            year: roadmap.year,
+            qubits: roadmap.qubits * (newVal === 'physical' ? props.physicalLogicalQubitsRatio : 1/(props.physicalLogicalQubitsRatio))
+        }
+    })
+})
+   
 
 function save() {
     const newRoadmap = roadmapData.value.sort((a, b) => a.year - b.year)

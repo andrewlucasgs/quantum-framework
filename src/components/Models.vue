@@ -266,6 +266,7 @@ function calculateQuantumEconomicAdvantage(model) {
     let costFactor = (Number(model.costFactor))
     let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
+    console.log('asdasdasd',getLogicalQubits(2032, model.roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit))
 
     function qf(roadmap) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit)
@@ -494,6 +495,7 @@ const roadmapCharacteristicsData = ref({});
 
 // watch problems and hardwareslowdown
 watch(() => props.model, (model) => {
+
     calculateCurrentAdvantage(props.model);
     calculateQuantumEconomicAdvantage(props.model);
 }, { immediate: true, deep: true });
@@ -512,7 +514,7 @@ watch(() => props.model, (model) => {
                 <span>{{  open ? '-' : '+' }}</span>
             </DisclosureButton>
             <DisclosurePanel class="text-gray-500">
-                <div class="md:flex gap-4 py-2 min-h-[400px]">
+                <div class="lg:flex gap-4 py-2 min-h-[400px]">
 
                     <QuantumAdvantageGraph :data="currentAdvantageData" />
                     <QuantumEconomicAdvantageGraph :data="quantumEconomicAdvantageData" />
