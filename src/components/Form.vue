@@ -38,6 +38,9 @@ const problems = ref([
         quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
         classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
         quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
+        classicalRuntimeInput: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
+        quantumRuntimeInput: "n^(2) * log(n, e)",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -47,6 +50,9 @@ const problems = ref([
         quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
+        classicalRuntimeInput: "n",
+        quantumRuntimeInput: "n^(1/2)",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "2^{q}",
         penalty: "log(n)",
     },
@@ -56,6 +62,9 @@ const problems = ref([
         quantumRuntime: (n) => n + 10 ** (n) * Math.log10(1.78),
         classicalRuntimeLabel: "O(n^{3} * 2^{n})",
         quantumRuntimeLabel: "O(n * 1.78^{n})",
+        classicalRuntimeInput: "n^3 * 2^n",
+        quantumRuntimeInput: "n * 1.78^n",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "log({q})",
         penalty: "log(n)",
     },
@@ -65,6 +74,9 @@ const problems = ref([
         quantumRuntime: (n) => n,
         classicalRuntimeLabel: "O(n^{3})",
         quantumRuntimeLabel: "O(n)",
+        classicalRuntimeInput: "n^3",
+        quantumRuntimeInput: "n",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -74,6 +86,9 @@ const problems = ref([
         quantumRuntime: (n) => 5 * n,
         classicalRuntimeLabel: "O(n!)",
         quantumRuntimeLabel: "O(n^{5})",
+        classicalRuntimeInput: "(2 * pi * n)^(1/2) * (n / e)^n",
+        quantumRuntimeInput: "n^5",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -260,6 +275,9 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.quantumRuntime = problem.quantumRuntime;
     model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
     model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
+    model.value.classicalRuntimeInput = problem.classicalRuntimeInput;
+    model.value.quantumRuntimeInput = problem.quantumRuntimeInput;
+    model.value.penaltyInput = problem.penaltyInput;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
     model.value.penalty = problem.penalty;
 }, { deep: true });
@@ -430,17 +448,19 @@ function checkLimits() {
                         :show-labels="false" placeholder="Pick a value"></multiselect>
                     <div class="mt-2">
                         <p class="text-sm font-medium">Classical Runtime</p>
-                        <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                        <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                             <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
-                        </div>
-
-
+                        </div> -->
+                        <input type="text" v-model="model.classicalRuntimeInput">
+                        
+                        
                     </div>
                     <div class="mt-2">
                         <p class="text-sm font-medium">Quantum Runtime</p>
-                        <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                            <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
-                        </div>
+                        <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                            <span v-html="katex.renderToString(model.quantumRuntimeInput)"></span>
+                        </div> -->
+                        <input type="text" v-model="model.quantumRuntimeInput">
 
 
                     </div>
@@ -523,10 +543,12 @@ function checkLimits() {
                     <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
                         connectivity.
                     </p>
-                    <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
+                    <!-- <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
                         :allow-empty="false" :searchable="true" :close-on-select="true" :show-labels="false"
                         placeholder="Pick a value">
-                    </multiselect>
+                    </multiselect> -->
+                    <input type="text" v-model="model.penaltyInput">
+
                 </div>
 
             </div>

@@ -49,7 +49,7 @@ function main() {
 
         // Function to process each node
         function processNode(node, path, parent) {
-            console.log(`Node type: ${node.type}`);
+            console.log(`Node Type: ${node.type}`);
             
             // Log specific properties based on node type
             if (node.isOperatorNode) {
@@ -60,9 +60,11 @@ function main() {
                 console.log(`Symbol name: ${node.name}`);
             } else if (node.isFunctionNode) {
                 console.log(`Function name: ${node.fn.name}`);
+            } else {
+                console.log("other");
             }
     
-            console.log(`Node value: ${node.toString()}`);
+            console.log(`Node String: ${node.toString()}`);
         }
     
         // Traverse the parsed expression

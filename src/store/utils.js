@@ -65,7 +65,7 @@ export function applyLogRules(node) {
             return
         }
         let [numerator, denominator] = node.args
-        return new Math.OperatorNode("-", "subtraction", [
+        return new math.OperatorNode("-", "subtract", [
             applyLogRules(numerator),
             applyLogRules(denominator)
         ])
@@ -89,6 +89,25 @@ export function applyLogRules(node) {
     }
 
     return node;
+}
+
+export function createLoggedFunction(expression) {
+    let loggedTree = applyLogRules(math.parse(expression)).compile();
+    function logged(value) {
+        let scope = {n: value};
+        return loggedTree.evaluate(scope);
+    }
+    return logged;
+}
+
+export function createConvertedFunction(expression) {
+    let replaced = expression.replaceAll("n", "(10^(n))");
+    let convertedTree = applyLogRules(math.parse(replaced)).compile();
+    function converted(value) {
+        let scope = {n: value};
+        return convertedTree.evaluate(scope);
+    }
+    return converted;
 }
 
 function simpleLinearRegression(x, y) {
