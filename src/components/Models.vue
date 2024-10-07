@@ -266,8 +266,6 @@ function calculateQuantumEconomicAdvantage(model) {
     let costFactor = (Number(model.costFactor))
     let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
-    console.log('asdasdasd',getLogicalQubits(2032, model.roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit))
-
     function qf(roadmap) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit)
     }
@@ -477,7 +475,7 @@ function addPenalty(quantumRuntime, penalty) {
 
     if (penalty == "log(n)") {
         // console.log('log penalty applied')
-        return (n) => quantumRuntime(n) + Math.log10(n) + Math.log10(Math.log2(10))
+        return (n) => quantumRuntime(n) + Math.log10(n) - Math.log10(Math.log10(2))
     }
     else if (penalty == "n") {
         return (n) => quantumRuntime(n) + n;

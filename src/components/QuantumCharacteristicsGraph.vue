@@ -14,7 +14,6 @@ const props = defineProps({
     data: Object,
 })
 
-console.log(props.data)
 function processDataToGraph(data) {
     // data contains classicalCostSteps, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar
     // the steps ara list of lists of the form [problem size, step]
@@ -26,22 +25,18 @@ function processDataToGraph(data) {
 
 
     const maxX = Math.max(tCostStar, tStar) + 1
-    console.log(maxX)
     let problemSize = data.quantumFeasible.filter(step => step[0] <= maxX)
     const logicalQubits = problemSize.map(point => [point[0], utils.problemSizeToQubits(point[1], data.qubitToProblemSize)])
     const physicalQubits = problemSize.map(point => [point[0], utils.getPhysicalQubits(point[0], data.roadmap, data.extrapolationType)])
     // last value in quantumFeasible
     const maxY = Math.max(...problemSize.map(point => point[1]), Math.max(...logicalQubits.map(point => point[1])), Math.max(...physicalQubits.map(point => point[1])))
-    console.log(maxX, maxY)
 
     const roadmap = Object.entries(data.roadmap).map(entry => [Number(entry[0]), Math.log10(entry[1])])
 
-    console.log(roadmap)
 
 
     const lastRoadmapPoint = Object.keys(data.roadmap).pop()
 
-    console.log(physicalQubits)
 
 
 
@@ -84,7 +79,6 @@ const chartOptions = {
             const year = utils.round(this.points[0].x, data.maxX - 2024 <= 5 ? 1 : 0)
 
 
-            console.log(this)
             return `
             <div class="flex flex-col gap-1 bg-white p-2 rounded-lg shadow-md">
                 <p class="text-gray-700 mb-1 font-bold"><span >${year}</span></p>
@@ -201,7 +195,6 @@ const chartOptions = {
 }
 
 watch(() => props.data, async () => {
-    console.log(props.data)
     data = processDataToGraph(props.data)
     updateGraph()
 
@@ -236,7 +229,6 @@ function updateGraph() {
             return utils.yearToMonth(this.value);
         }
     }
-    console.log('adasdasd',Math.abs(data.tCostStar - data.tStar) / data.maxX)
     chartOptions.xAxis.plotLines = [{
         value: data.tStar,
         color: 'rgba(0,45,157,1)',

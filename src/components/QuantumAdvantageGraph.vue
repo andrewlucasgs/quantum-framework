@@ -12,30 +12,34 @@ const key = ref(0);
 
 function processDataToGraph(data) {
     // data contains classicalCostSteps, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar
-    // the steps ara list of lists of the form [problem size, step]
-    // I want to round the problem sizes to 2 decimal places, and remove duplicates
-    let stepCostStar = utils.round(data.stepCostStar, 2)
-    let nCostStar = utils.round(data.nCostStar, 2)
-    let stepStar = utils.round(data.stepStar, 2)
-    let nStar = utils.round(data.nStar, 2)
+    // the steps are a list of lists of the form [problem size, step]
+    // Round the problem sizes to 2 decimal places and remove duplicates
+    let stepCostStar = utils.round(data.stepCostStar, 2);
+    let nCostStar = utils.round(data.nCostStar, 2);
+    let stepStar = utils.round(data.stepStar, 2);
+    let nStar = utils.round(data.nStar, 2);
 
-    const midY = (stepCostStar + stepStar) / 2
-    const midX = (nStar + nCostStar) / 2
+    const midY = (stepCostStar + stepStar) / 2;
+    const midX = (nStar + nCostStar) / 2;
 
-    const maxY = midY * 2
-    const maxX = midX * 2
+    // Set maxY and maxX to the minimum values among classicalSteps, quantumSteps, and quantumCostSteps if midY or midX is 0
+    const maxY = (midY === 0)
+        ? Math.min(...[data.classicalSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[1]))))
+        : midY * 2;
+    const maxX = (midX === 0)
+        ? Math.min(...[data.classicalSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[0]))))
+        : midX * 2;
 
+    let classicalSteps = data.classicalSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
+    let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY);
+    let quantumSteps = data.quantumSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
 
-    let classicalSteps = data.classicalSteps.filter(step => step[0] <= maxX && step[1] <= maxY)
-    let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY)
-    let quantumSteps = data.quantumSteps.filter(step => step[0] <= maxX && step[1] <= maxY)
+    const problemName = props.data.problemName.split('(')[0];
+    const graphTitle = problemName + (problemName.length > 40 ? '<br>' : ' ') + 'Problem Sizes';
 
-    const problemName = props.data.problemName.split('(')[0]
-    
-    const graphTitle = problemName + (problemName.length > 40 ? '<br>' : ' ') + 'Problem Sizes'
-
-    return { graphTitle, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX }
+    return { graphTitle, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX };
 }
+
 
 let data = processDataToGraph(props.data)
 
@@ -312,6 +316,8 @@ function updateGraphData() {
                 enabled: true,
                 symbol: 'circle'
             },
+            enableMouseTracking: false,
+
            
             showInLegend: false
         },
@@ -325,7 +331,7 @@ function updateGraphData() {
                 enabled: true,
                 symbol: 'circle'
             },
-            
+            enableMouseTracking: false,
             showInLegend: false
         },
     ]

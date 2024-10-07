@@ -16,33 +16,38 @@ const props = defineProps({
 
 function processDataToGraph(data) {
     // data contains classicalCostSteps, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar
-    // the steps ara list of lists of the form [problem size, step]
-    // I want to round the problem sizes to 2 decimal places, and remove duplicates
-    let nStar = utils.round(data.nStar, 2)
-    let nCostStar = utils.round(data.nCostStar, 2)
-    let tStar = utils.round(data.tStar, 2)
-    let tCostStar = utils.round(data.tCostStar, 2)
+    // the steps are a list of lists of the form [problem size, step]
+    // Round the problem sizes to 2 decimal places and remove duplicates
+    let nStar = utils.round(data.nStar, 2);
+    let nCostStar = utils.round(data.nCostStar, 2);
+    let tStar = utils.round(data.tStar, 2);
+    let tCostStar = utils.round(data.tCostStar, 2);
 
-    const midY = (nCostStar + nStar) / 2
-    const midX = (tStar + tCostStar) / 2
+    const midY = (nCostStar + nStar) / 2;
+    const midX = (tStar + tCostStar) / 2;
 
-    const maxY = (midY * 2)
-    const maxX = midX + (midX - 2024)
+    // Set maxY and maxX to minimum values among quantumAdvantage, quantumCostAdvantage, and quantumFeasible if midY or midX is 0
+    const maxY = (midY === 0)
+        ? Math.min(...[data.quantumAdvantage, data.quantumCostAdvantage, data.quantumFeasible].map(arr => Math.max(...arr.map(step => step[1]))))
+        : midY * 2;
+    const maxX = (midX === 0)
+        ? Math.min(...[data.quantumAdvantage, data.quantumCostAdvantage, data.quantumFeasible].map(arr => Math.max(...arr.map(step => step[0]))))
+        : midX + (midX - 2024);
 
-    let quantumAdvantage = data.quantumAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY)
-    let quantumCostAdvantage = data.quantumCostAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY)
-    let quantumFeasible = data.quantumFeasible.filter(step => step[0] <= maxX && step[1] <= maxY)
+    let quantumAdvantage = data.quantumAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
+    let quantumCostAdvantage = data.quantumCostAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
+    let quantumFeasible = data.quantumFeasible.filter(step => step[0] <= maxX && step[1] <= maxY);
 
-    let quantumAdvantageArea = data.quantumAdvantage.filter(step => step[0] >= tStar)
-    let quantumCostAdvantageArea = data.quantumCostAdvantage.filter(step => step[0] >= tCostStar)
-    const quantumFeasibleAux = Object.fromEntries(data.quantumFeasible.map(step => [step[0], step[1]]))
-    const quantumCostAdvantageAux = Object.fromEntries(data.quantumCostAdvantage.map(step => [step[0], step[1]]))
-    const quantumAdvantageAux = Object.fromEntries(data.quantumAdvantage.map(step => [step[0], step[1]]))
+    let quantumAdvantageArea = data.quantumAdvantage.filter(step => step[0] >= tStar);
+    let quantumCostAdvantageArea = data.quantumCostAdvantage.filter(step => step[0] >= tCostStar);
+    const quantumFeasibleAux = Object.fromEntries(data.quantumFeasible.map(step => [step[0], step[1]]));
+    const quantumCostAdvantageAux = Object.fromEntries(data.quantumCostAdvantage.map(step => [step[0], step[1]]));
+    const quantumAdvantageAux = Object.fromEntries(data.quantumAdvantage.map(step => [step[0], step[1]]));
 
     quantumAdvantageArea = quantumAdvantageArea.map(step => [step[0], step[1], Math.min(
-        nStar >= nCostStar ? maxY : quantumCostAdvantageAux[step[0]], quantumFeasibleAux[step[0]])])
+        nStar >= nCostStar ? maxY : quantumCostAdvantageAux[step[0]], quantumFeasibleAux[step[0]])]);
     quantumCostAdvantageArea = quantumCostAdvantageArea.map(step => [step[0], step[1], Math.min(
-        nCostStar > nStar ? maxY : quantumAdvantageAux[step[0]], quantumFeasibleAux[step[0]])])
+        nCostStar > nStar ? maxY : quantumAdvantageAux[step[0]], quantumFeasibleAux[step[0]])]);
 
     // Calculate the midpoint for quantumAdvantageArea
     const advantageAreaXSum = quantumAdvantageArea.reduce((sum, step) => sum + step[0], 0);
@@ -60,12 +65,31 @@ function processDataToGraph(data) {
     const advantageAreaMid = [advantageAreaXMid, advantageAreaYMid];
     const costAdvantageAreaMid = [costAdvantageAreaXMid, costAdvantageAreaYMid];
 
-    const problemName = props.data.problemName.split('(')[0]
+    const problemName = props.data.problemName.split('(')[0];
+    const graphTitle = 'Quantum Economic Advantage for ' + (problemName.length > 40 ? '<br>' + problemName : problemName);
 
-    const graphTitle = 'Quantum Economic Advantage for ' + (problemName.length > 40 ? '<br>' + problemName : problemName)
-
-    return { graphTitle, quantumAdvantage, quantumCostAdvantage, quantumFeasible, tStar, nStar, tCostStar, nCostStar, maxY, maxX, quantumAdvantageArea, quantumCostAdvantageArea, advantageAreaXMid, advantageAreaYMid, costAdvantageAreaXMid, costAdvantageAreaYMid, advantageAreaMid, costAdvantageAreaMid }
+    return {
+        graphTitle,
+        quantumAdvantage,
+        quantumCostAdvantage,
+        quantumFeasible,
+        tStar,
+        nStar,
+        tCostStar,
+        nCostStar,
+        maxY,
+        maxX,
+        quantumAdvantageArea,
+        quantumCostAdvantageArea,
+        advantageAreaXMid,
+        advantageAreaYMid,
+        costAdvantageAreaXMid,
+        costAdvantageAreaYMid,
+        advantageAreaMid,
+        costAdvantageAreaMid
+    };
 }
+
 
 let data = processDataToGraph(props.data)
 
