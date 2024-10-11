@@ -102,12 +102,7 @@ export function createLoggedFunction(expression) {
 
 export function createConvertedFunction(expression) {
     let replaced = expression.replaceAll("n", "(10^(n))");
-    let convertedTree = applyLogRules(math.parse(replaced)).compile();
-    function converted(value) {
-        let scope = {n: value};
-        return convertedTree.evaluate(scope);
-    }
-    return converted;
+    return createLoggedFunction(replaced);
 }
 
 function simpleLinearRegression(x, y) {

@@ -266,7 +266,7 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.roadmapUnit = hardware.roadmapUnit;
     model.value.extrapolationType = hardware.extrapolationType;
     model.value.ratioImprovementRate = hardware.ratioImprovementRate;
-
+    
 }, { deep: true });
 
 watch(() => selectedProblem.value, (problem) => {
@@ -280,6 +280,10 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.penaltyInput = problem.penaltyInput;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
     model.value.penalty = problem.penalty;
+
+    temporaryClassicalInput = problem.classicalRuntimeInput;
+    temporaryQuantumInput = problem.quantumRuntimeInput;
+    temporaryPenaltyInput = problem.penaltyInput;
 }, { deep: true });
 
 watch(() => model.value, (value) => {
@@ -343,6 +347,17 @@ function checkLimits() {
     else if (model.value.ratioImprovementRate < -90) {
         model.value.ratioImprovementRate = -90;
     }
+}
+
+let temporaryClassicalInput = model.value.classicalRuntimeInput;
+let temporaryQuantumInput = model.value.quantumRuntimeInput;
+let temporaryPenaltyInput = model.value.penaltyInput;
+
+function updateFunctions() {
+    //should probably check for fine input here
+    model.value.classicalRuntimeInput = temporaryClassicalInput;
+    model.value.quantumRuntimeInput = temporaryQuantumInput;
+    model.value.penaltyInput = temporaryPenaltyInput;
 }
 
 
@@ -451,7 +466,8 @@ function checkLimits() {
                         <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                             <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
                         </div> -->
-                        <input type="text" v-model="model.classicalRuntimeInput">
+                        <!-- <input type="text" v-model="model.classicalRuntimeInput"> -->
+                        <input type="text" v-model="temporaryClassicalInput">
                         
                         
                     </div>
@@ -460,7 +476,8 @@ function checkLimits() {
                         <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                             <span v-html="katex.renderToString(model.quantumRuntimeInput)"></span>
                         </div> -->
-                        <input type="text" v-model="model.quantumRuntimeInput">
+                        <!-- <input type="text" v-model="model.quantumRuntimeInput"> -->
+                        <input type="text" v-model="temporaryQuantumInput">
 
 
                     </div>
@@ -520,6 +537,20 @@ function checkLimits() {
                 </div>
 
                 <div class="flex flex-col">
+                    <label class="font-medium text-sm">Connectivity Penalty</label>
+                    <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
+                        connectivity.
+                    </p>
+                    <!-- <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
+                        :allow-empty="false" :searchable="true" :close-on-select="true" :show-labels="false"
+                        placeholder="Pick a value">
+                    </multiselect> -->
+                    <!-- <input type="text" v-model="model.penaltyInput"> -->
+                    <input type="text" v-model="temporaryPenaltyInput">
+
+                </div>
+
+                <div class="flex flex-col">
                     <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
                     <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with
                         the given
@@ -538,18 +569,8 @@ function checkLimits() {
                         </template>
                     </multiselect>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-sm">Connectivity Penalty</label>
-                    <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
-                        connectivity.
-                    </p>
-                    <!-- <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
-                        :allow-empty="false" :searchable="true" :close-on-select="true" :show-labels="false"
-                        placeholder="Pick a value">
-                    </multiselect> -->
-                    <input type="text" v-model="model.penaltyInput">
 
-                </div>
+                <button @click="updateFunctions">Update Functions</button>
 
             </div>
 
