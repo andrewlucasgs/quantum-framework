@@ -1,4 +1,4 @@
-<script setup>
+/*{ <script setup>
 import { re } from 'mathjs';
 import { watch, ref, defineAsyncComponent } from 'vue';
 import * as utils from "../store/utils"
@@ -15,87 +15,172 @@ const props = defineProps({
     modelIndex: Number
 });
 
+// let free = false;
+// let free = true;
+
 import {
     Disclosure,
     DisclosureButton,
     DisclosurePanel,
 } from '@headlessui/vue'
-import { get } from '@vueuse/core';
 
-// returns log_10 of the problem size where qa is reached
-function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, year = 2024) {
-    // let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
-    let adjustmentFactor = Number(hardwareSlowdown) + (year - 2024) * Math.log10(quantumImprovementRate);
-    adjustmentFactor = math.max(adjustmentFactor, 0);
-    // if (adjustmentFactor == 0) {
-    //     console.log("adjustment factor is ", adjustmentFactor, " year is ", year);
-    // }
+// // returns log_10 of the problem size where qa is reached
+// function getQuantumAdvantage(classicalInput, quantumInput, penaltyInput, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
+//     let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
+//     if (adjustmentFactor <= -5) { //if adjustmentFactor is ever 0, then there is no hardware slowdown, so any problem should be QEA
+//         return 0;
+//     }
 
-    function evaluate(n) {
-        let value = logClassicalFunction(n) - logQuantumFunction(n) - logPenaltyFunction(n) - adjustmentFactor;
-        return value;
-    }
+//     console.log(classicalInput)
+//     console.log(quantumInput)
+//     console.log(penaltyInput)
 
-    let upperBound = 10**100;
-    let lowerBound = 2;
-    let lastValue = evaluate(lowerBound);
-    while (lowerBound < 50 && lastValue >= 0) {
-        lowerBound += 0.25;
-        let nextValue = evaluate(lowerBound);
+//     let c = utils.applyLogRules(math.parse(classicalInput)).compile();
+//     let q = utils.applyLogRules(math.parse(quantumInput)).compile();
+//     let p = utils.applyLogRules(math.parse(penaltyInput)).compile();
 
-        lastValue = nextValue;
-        // if (nextValue >= lastValue) {
-        //     console.log("QA function is always positive?! (quantum is always better) ");
-        //     break;
-        // }
-        // else {
-        //     lastValue = nextValue;
-        // }
-    }
-    let result = utils.bisectionMethod(evaluate, lowerBound, upperBound);
+//     function evaluate(value) {
+//         let scope = {n: value};
+//         return c.evaluate(scope) - adjustmentFactor - q.evaluate(scope) - p.evaluate(scope);
+//     }
 
-    if (result === null) {
-        console.log(`null returned!!!! year was ${year} and adjustmentFactor was ${adjustmentFactor}`);
-        console.log("lowerBound:", lowerBound, "upperBound:", upperBound);
-        console.log("f(lowerBound):", evaluate(lowerBound), "f(upperBound):", evaluate(upperBound));
+//     let result = utils.bisectionMethod(evaluate, 2,  10**100);
+//     if (result === null) {
+//         console.log("null returned!!!!");
+//         return 0;
+//     }
+//     return Math.log10(result);
+
+// }
+
+
+// //returns log_10 of the problem size where qa is reached
+function getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate = 0.5, year = 2024) {
+    let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
+    if (adjustmentFactor <= -5) { //if adjustmentFactor is ever 0, then there is no hardware slowdown, so any problem should be QEA
         return 0;
     }
-    else if (lowerBound > 2) {
-        console.log(`Had to guess start for QA bisection more than once, final lowerBound was ${lowerBound}`);
+
+    //assumes the penalty is log(n) or nothing
+    if (problemName === "Database Search") {
+        if (penalty === "log(n)") {
+            let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = utils.bisectionMethod(f, 4, 10 ** 100); //starts at 4 because of function behavior
+            // if (year > 2100) {
+            // console.log(year, adjustmentFactor, result, Math.log10(result))
+            // }
+            if (result === null) {
+                console.log("null returned!!!!")
+                return 0
+            }
+            return Math.log10(result)
+        }
+        else {
+            return 2 * adjustmentFactor
+        }
+    }
+    else if (problemName === "Machine Learning") {
+        if (penalty === "log(n)") {
+            let f = n => Math.log10(n) / 2 - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = utils.bisectionMethod(f, 2, 10 ** 100);
+            if (result === null) {
+                return 0
+            }
+            return Math.log10(result)
+        }
+        else {
+            return 2 * adjustmentFactor
+        }
+    }
+    else if (problemName === "Time Dependent Hartree-Fock Approximation (Quantum Chemistry)") {
+        if (penalty === "log(n)") {
+            let f = n => 2 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = utils.bisectionMethod(f, 2, 10 ** 100);
+            if (result === null) {
+                return 0
+            }
+            return Math.log10(result)
+        }
+        else {
+            return 0.5 * adjustmentFactor
+        }
+    }
+    else if (problemName === "Linear Algebra") {
+        if (penalty === "log(n)") {
+            let f = n => 0.627 * Math.log10(n) - adjustmentFactor - Math.log10(Math.log2(n))
+            let result = utils.bisectionMethod(f, 2, 10 ** 100);
+            if (result === null) {
+                return 0
+            }
+            return Math.log10(result)
+        }
+        else {
+            return adjustmentFactor / 0.627
+        }
+    }
+    else if (problemName === "Traveling Salesman") {
+        let f;
+        if (penalty === "log(n)") {
+            f = n => 2 * Math.log10(n) - adjustmentFactor - n * Math.log10(0.89) - Math.log10(Math.log2(n))
+        }
+        else {
+            f = n => 2 * Math.log10(n) - adjustmentFactor - n * Math.log10(0.89)
+        }
+        let result = utils.bisectionMethod(f, 2, 2000); //hardware slowdown of 10 ** (100) would yield an nstar of around 1700, plenty of buffer
+        if (result === null) {
+            console.log("null returned!!!!")
+            return 0
+        }
+        return Math.log10(result)
+    }
+    else if (problemName === "Integer Factorization") {
+        let f;
+        if (penalty === "log(n)") {
+            f = n => (64 * n / 9) ** (1 / 3) * (Math.log(n) ** (2 / 3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n)) - Math.log10(Math.log2(n))
+        }
+        else {
+            f = n => (64 * n / 9) ** (1 / 3) * (Math.log(n) ** (2 / 3)) * Math.log10(Math.E) - adjustmentFactor - 2 * Math.log10(n) - Math.log10(Math.log(n))
+        }
+        // let result = utils.bisectionMethod(f, 0, 100000); //100000 is overkill, no realistic slowdown would yield this
+        let result = utils.bisectionMethod(f, 2, 1000);
+        if (result === null) {
+            console.log("null returned!!!!")
+            return 0
+        }
+        // if (result >= 99999) return Infinity
+        return Math.log10(result)
+    }
+    else if (problemName === "Full Configuration Interaction (Quantum Chemistry)") {
+        let f;
+        if (penalty === "log(n)") {
+            f = n => Math.log(n) * (n - 5) - n - adjustmentFactor * Math.log(10) - Math.log(Math.log2(n)) //????????log10???
+        }
+        else {
+            f = n => Math.log(n) * (n - 5) - n - adjustmentFactor * Math.log(10)
+        }
+        let result = utils.bisectionMethod(f, 2, 60);
+        if (result === null) {
+            console.log("null returned!!!!")
+            return 0
+        }
+        // if (result >= 99999) return Infinity
+        return Math.log10(result)
     }
 
-    return Math.log10(result);
+    console.log("this should never print")
 
+    return 0
 }
-// converts expression with q (qubits) to expression with n (problem size) by using the inverse of 
-// the function specified by qubitToProblemSize parameter
-function getQuantumWork(model) {
-    let quantumWork = model.quantumWork;
-    console.log("quantum work was ", quantumWork);
-    if (model.qubitToProblemSize === "2^{q}") {
-        //regular expression to remove only q's that are not part of a word (like sqrt)
-        quantumWork = quantumWork.replaceAll(/\bq\b/g, "(log(n, 2))");
-    }
-    else if (model.qubitToProblemSize === "log({q})") {
-        quantumWork = quantumWork.replaceAll(/\bq\b/g, "(2^n)");
-    }
-    else if (model.qubitToProblemSize === "{q}") {
-        quantumWork = quantumWork.replaceAll(/\bq\b/g, "n");
-    }
-    else {
-        console.log("this should never print");
-    }
-    console.log("quantum work is ", quantumWork);
-    return quantumWork;
-}
+
 
 
 function calculateCurrentAdvantage(model) {
 
-    // let problemName = model.problemName;
-    // let penalty = model.penalty;
-    // let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
-    // let classicalRuntime = model.classicalRuntime;
+    let problemName = model.problemName;
+    let penalty = model.penalty;
+    // let quantumRuntime = model.quantumRuntime;
+    let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
+    let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = Number(model.hardwareSlowdown);
     let quantumImprovementRate = ((100 + Number(model.quantumImprovementRate)) / 100)
     let year = new Date().getFullYear();
@@ -105,45 +190,21 @@ function calculateCurrentAdvantage(model) {
     let classicalRuntimeInput = model.classicalRuntimeInput;
     let quantumRuntimeInput = model.quantumRuntimeInput;
     let penaltyInput = model.penaltyInput;
+
     
-    //lcf = logged classical function
-    let lcf = utils.createLoggedFunction(classicalRuntimeInput);
-    let lqf = utils.createLoggedFunction(quantumRuntimeInput);
-    let lpf = utils.createLoggedFunction(penaltyInput);
-    
-    //ccf = converted classical function
-    let ccf = utils.createConvertedFunction(classicalRuntimeInput);
-    let cqf = utils.createConvertedFunction(quantumRuntimeInput);
-    let cpf = utils.createConvertedFunction(penaltyInput);
+    let advantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
+    let costAdvantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate, year);
+    // if (free) {
+    //     advantage = getQuantumAdvantage(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, hardwareSlowdown, quantumImprovementRate, year);
+    //     costAdvantage = getQuantumAdvantage(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, costFactor, costImprovementRate, year);
+    // }
 
-    //lcfc = logged classical function cost
-    let lcfc = utils.createLoggedFunction(model.classicalWork);
-    let quantumWork = getQuantumWork(model);
-    let lqfc = utils.createLoggedFunction(quantumWork);
-    
-    //ccfc = converted classical function cost
-    let ccfc = utils.createConvertedFunction(model.classicalWork);
-    let cqfc = utils.createConvertedFunction(quantumWork);
-
-    // let advantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year);
-    // let costAdvantage = getQuantumAdvantage(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate, year);
-    let advantage = getQuantumAdvantage(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate, year);
-    let costAdvantage = getQuantumAdvantage(lcfc, lqfc, lpf, costFactor, costImprovementRate, year);
-
-    console.log("evaluating")
-    let realAdvantage = Math.pow(10, advantage);
-    let value = lcf(realAdvantage) - lqf(realAdvantage) - lpf(realAdvantage) - hardwareSlowdown;
-    console.log(realAdvantage, lcf(realAdvantage), lqf(realAdvantage), lpf(realAdvantage), hardwareSlowdown, value)
-
-    console.log("printing advantages");
-    console.log(advantage, costAdvantage);
-
+    // console.log(advantage)
     // range from 0 to double of the advantage with 200 ticks
     let range = []
     let currentAdvantageDataAux = {}
 
     if (advantage === Infinity) {
-        console.log("advantage is infinity. this probably never prints");
         for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
@@ -151,39 +212,38 @@ function calculateCurrentAdvantage(model) {
             nStar: -1,
             stepStar: -1,
             // replace NaN with Infinity
-            quantumSteps: range.map((i) => [i, cqf(i) + cpf(i) + hardwareSlowdown]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
-            classicalSteps: range.map((i) => [i, ccf(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
+            quantumSteps: range.map((i) => [i, quantumRuntime(i) + hardwareSlowdown]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            classicalSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
         }
     }
     else if (advantage === 0) {
-        console.log("advantage of zero returned");
         for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             nStar: 0,
-            stepStar: ccf(0),
+            stepStar: classicalRuntime(0),
             // replace NaN with Infinity
-            quantumSteps: range.map((i) => [i, cqf(i) + cpf(i) + hardwareSlowdown]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
-            classicalSteps: range.map((i) => [i, ccf(i)]).map(([x, y]) => [x, isNaN(y) ? 0 : y])
+            quantumSteps: range.map((i) => [i, quantumRuntime(i) + hardwareSlowdown]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            classicalSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? 0 : y])
         }
-    } 
-    else {
+
+
+    } else {
+
         for (let i = 0; i < ((advantage + costAdvantage) / 2) * 2; i += ((advantage + costAdvantage) / 2) / 100) {
             range.push(i);
         }
-
         currentAdvantageDataAux = {
             nStar: advantage,
-            stepStar: ccf(advantage),
-            quantumSteps: range.map((i) => [i, cqf(i) + cpf(i) + hardwareSlowdown]),
-            classicalSteps: range.map((i) => [i, ccf(i)])
+            stepStar: classicalRuntime(advantage),
+            quantumSteps: range.map((i) => [i, quantumRuntime(i) + hardwareSlowdown]),
+            classicalSteps: range.map((i) => [i, classicalRuntime(i)])
         }
     }
 
 
     if (costAdvantage === Infinity) {
-        console.log("costAdvantage is infinity. this probably never prints");
         for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
@@ -191,36 +251,38 @@ function calculateCurrentAdvantage(model) {
             ...currentAdvantageDataAux,
             nCostStar: -1,
             stepCostStar: -1,
-            quantumCostSteps: range.map((i) => [i, cqfc(i) + cpf(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
-            classicalCostSteps: range.map((i) => [i, ccfc(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            classicalCostSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
         }
     }
     else if (costAdvantage === 0) {
-        console.log("costAdvantage is 0");
-
         for (let i = 0; i < 100; i += 100 / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             ...currentAdvantageDataAux,
             nCostStar: 0,
-            stepCostStar: ccfc(0),
-            quantumCostSteps: range.map((i) => [i, cqfc(i) + cpf(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
-            classicalCostSteps: range.map((i) => [i, ccfc(i)]).map(([x, y]) => [x, isNaN(y) ? 0 : y])
+            stepCostStar: classicalRuntime(0),
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
+            classicalCostSteps: range.map((i) => [i, classicalRuntime(i)]).map(([x, y]) => [x, isNaN(y) ? 0 : y])
         }
-    } 
-    else {
+
+
+    } else {
+
         for (let i = 0; i < ((advantage + costAdvantage) / 2) * 2; i += ((advantage + costAdvantage) / 2) / 100) {
             range.push(i);
         }
         currentAdvantageDataAux = {
             ...currentAdvantageDataAux,
             nCostStar: costAdvantage,
-            stepCostStar: ccfc(costAdvantage),
-            quantumCostSteps: range.map((i) => [i, cqfc(i) + cpf(i) + costFactor]),
-            classicalCostSteps: range.map((i) => [i, ccfc(i)])
+            stepCostStar: classicalRuntime(costAdvantage),
+            quantumCostSteps: range.map((i) => [i, quantumRuntime(i) + costFactor]),
+            classicalCostSteps: range.map((i) => [i, classicalRuntime(i)])
         }
     }
+
+
 
     currentAdvantageData.value =  {...currentAdvantageDataAux,
         problemName: model.problemName,
@@ -228,11 +290,14 @@ function calculateCurrentAdvantage(model) {
 }
 
 
+
 function calculateQuantumEconomicAdvantage(model) {
-    // let problemName = model.problemName;
-    // let penalty = model.penalty;
-    // let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
-    // let classicalRuntime = model.classicalRuntime;
+
+    // let quantumRuntime = model.quantumRuntime;
+    let problemName = model.problemName;
+    let penalty = model.penalty;
+    let quantumRuntime = addPenalty(model.quantumRuntime, model.penalty);
+    let classicalRuntime = model.classicalRuntime;
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
     let ratioImprovementRate = ((100 + Number(model.ratioImprovementRate)) / 100);
@@ -245,47 +310,43 @@ function calculateQuantumEconomicAdvantage(model) {
     let quantumRuntimeInput = model.quantumRuntimeInput;
     let penaltyInput = model.penaltyInput;
 
-    //lcf = logged classical function
-    let lcf = utils.createLoggedFunction(classicalRuntimeInput);
-    let lqf = utils.createLoggedFunction(quantumRuntimeInput);
-    let lpf = utils.createLoggedFunction(penaltyInput);
-    
-    //lcfc = logged classical function cost
-    let lcfc = utils.createLoggedFunction(model.classicalWork);
-    let lqfc = utils.createLoggedFunction(getQuantumWork(model));
-    
-
     let costFactor = (Number(model.costFactor))
     let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
+
+    console.log('asdasdasd',getLogicalQubits(2032, model.roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit))
 
     function qf(roadmap) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit)
     }
 
-    // function qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
-    //     return year => getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
-    // }
-    function qa(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate) {
-        return year => getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, year)
-    }
 
+    function qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate) {
+        return year => getQuantumAdvantage(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate, year)
+    }
+    
+    // if (free) {
+    //     function qa(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, hardwareSlowdown, quantumImprovementRate) {
+    //         return year => getQuantumAdvantage(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, hardwareSlowdown, quantumImprovementRate, year)
+    //     }
+    // }
 
     let quantumFeasible = qf(model.roadmap);
     
-    // let quantumAdvantage = qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
-    // let quantumCostAdvantage = qa(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate);
-    let quantumAdvantage = qa(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate);
-    let quantumCostAdvantage = qa(lcfc, lqfc, lpf, costFactor, costImprovementRate);
+    let quantumAdvantage = qa(problemName, penalty, classicalRuntime, quantumRuntime, hardwareSlowdown, quantumImprovementRate);
+    let quantumCostAdvantage = qa(problemName, penalty, classicalRuntime, model.quantumRuntime, costFactor, costImprovementRate);
+    // if (free) {
+    //     let quantumAdvantage = qa(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, hardwareSlowdown, quantumImprovementRate);
+    //     let quantumCostAdvantage = qa(classicalRuntimeInput, quantumRuntimeInput, penaltyInput, costFactor, costImprovementRate);
+    // }
 
     let quantumEconomicAdvantageDataAux = {}
 
     const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000);
     const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2024, 3000);
 
-    // when there is no quantum advantage
-    if (quantumAdvantage(currentYear) >= 99999) {
-        console.log("probably never prints: problem size for QA is too large (> 10 ** 99999)")
 
+    // when there is no quantum advantage
+    if (quantumAdvantage(2024) >= 99999) {
         let range = []
 
         for (let i = 0; i < (2030 - currentYear) * 2; i += (2030 - currentYear) / 100) {
@@ -298,8 +359,12 @@ function calculateQuantumEconomicAdvantage(model) {
             quantumFeasible: quantumFeasibleList,
             quantumAdvantage: range.map(i => [currentYear + i, Infinity])
         }
-    } 
-    else {
+  
+
+
+    } else {
+
+
         let range = []
 
         if (tStar != null) {
@@ -350,8 +415,11 @@ function calculateQuantumEconomicAdvantage(model) {
 
             quantumCostAdvantage: range.map(i => [currentYear + i, Infinity])
         }
-    } 
-    else {
+
+
+    } else {
+
+
         let range = []
 
         if (tCostStar != null) {
@@ -393,6 +461,7 @@ function calculateQuantumEconomicAdvantage(model) {
     quantumEconomicAdvantageData.value = {...quantumEconomicAdvantageDataAux,
         problemName: model.problemName,
     }
+    
 
     roadmapCharacteristicsData.value = {
         roadmapUnit: roadmapUnit,
@@ -405,6 +474,8 @@ function calculateQuantumEconomicAdvantage(model) {
         qubitToProblemSize: qubitToProblemSize,
         quantumFeasible: quantumEconomicAdvantageDataAux.quantumFeasible,
     }
+
+
 }
 
 
@@ -452,23 +523,16 @@ function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImpr
         let problemSize = Math.log10(logLogicalQubits) - Math.log10(Math.log10(2))
 
         //true if logLogicalQubits is negative
-        //(Amount of physical qubits is less than the ratio to achieve a single logical qubit)
+        //(Amount of physical qubits is less than the ratio to achieve a single logical qubit))
         if (isNaN(problemSize)) {
             return 0;
         }
 
         return problemSize;
     }
-    else {
-        console.log("this should never print");
-        return 0;
-    }
-
 }
 
-//returns a new (logged) function which includes the specified penalty
-// (is only used to generate points in the graph series, not to calculate the actual advantage)
-function addPenalty(quantumRuntime, penalty) {
+function addPenalty(quantumRuntime, penalty) {//function is used to generate points but not in getQuantumAdvantage
     // console.log(penalty)
 
     if (penalty == "log(n)") {
@@ -491,6 +555,7 @@ const roadmapCharacteristicsData = ref({});
 
 // watch problems and hardwareslowdown
 watch(() => props.model, (model) => {
+
     calculateCurrentAdvantage(props.model);
     calculateQuantumEconomicAdvantage(props.model);
 }, { immediate: true, deep: true });
@@ -529,4 +594,5 @@ watch(() => props.model, (model) => {
        
 
     </div>
-</template>
+</template> } */
+

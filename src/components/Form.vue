@@ -11,6 +11,9 @@ import 'katex/dist/katex.min.css';
 import ReferenceDialog from './ReferenceDialog.vue';
 import HardwareReferences from './HardwareReferences.vue';
 import ProblemReferences from './ProblemReferences.vue';
+import ProblemRuntimeAdvanced from './ProblemRuntimeAdvanced.vue';
+import * as math from 'mathjs';
+
 
 const models = useModelsStore();
 
@@ -38,6 +41,11 @@ const problems = ref([
         quantumRuntime: (n) => 2 * n + Math.log10(n) + Math.log10(Math.log(10)),
         classicalRuntimeLabel: "O(e^{(64/9 * n)^{1/3} * \\ln(n)^{2/3}})",
         quantumRuntimeLabel: "O(n^{2} * \\ln(n))",
+        classicalRuntimeInput: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
+        classicalWork: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
+        quantumRuntimeInput: "n^(2) * log(n, e)",
+        quantumWork: "n^(2) * log(n, e) * q",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -47,6 +55,11 @@ const problems = ref([
         quantumRuntime: (n) => n / 2,
         classicalRuntimeLabel: "O(n)",
         quantumRuntimeLabel: "O(\\sqrt{n})",
+        classicalRuntimeInput: "n",
+        classicalWork: "n",
+        quantumRuntimeInput: "sqrt(n)",
+        quantumWork: "sqrt(n) * q",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "2^{q}",
         penalty: "log(n)",
     },
@@ -56,7 +69,12 @@ const problems = ref([
         quantumRuntime: (n) => n + 10 ** (n) * Math.log10(1.78),
         classicalRuntimeLabel: "O(n^{3} * 2^{n})",
         quantumRuntimeLabel: "O(n * 1.78^{n})",
-        qubitToProblemSize: "log({q})",
+        classicalRuntimeInput: "n^3 * 2^n",
+        classicalWork: "n^3 * 2^n",
+        quantumRuntimeInput: "n * 1.78^n",
+        quantumWork: "n * 1.78^n * q",
+        penaltyInput: "log(n, 2)",
+        qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
     {
@@ -65,6 +83,11 @@ const problems = ref([
         quantumRuntime: (n) => n,
         classicalRuntimeLabel: "O(n^{3})",
         quantumRuntimeLabel: "O(n)",
+        classicalRuntimeInput: "n^3",
+        classicalWork: "n^3",
+        quantumRuntimeInput: "n",
+        quantumWork: "n * q",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -74,6 +97,11 @@ const problems = ref([
         quantumRuntime: (n) => 5 * n,
         classicalRuntimeLabel: "O(n!)",
         quantumRuntimeLabel: "O(n^{5})",
+        classicalRuntimeInput: "(2 * pi * n)^(1/2) * (n / e)^n",
+        classicalWork: "(2 * pi * n)^(1/2) * (n / e)^n",
+        quantumRuntimeInput: "n^5",
+        quantumWork: "n^5 * q",
+        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
         penalty: "log(n)",
     },
@@ -88,6 +116,7 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "IBM (Superconducting)",
                 hardwareSlowdown: 3.78,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
                 ratioImprovementRate: -2,
@@ -106,6 +135,7 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "Google (Superconducting)",
                 hardwareSlowdown: 3.78,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
                 ratioImprovementRate: -2,
@@ -122,6 +152,7 @@ const hardwares = ref([
                 category: "Established builders",
                 hardwareName: "Rigetti (Superconducting)",
                 hardwareSlowdown: 3.78,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
                 ratioImprovementRate: -2,
@@ -138,6 +169,7 @@ const hardwares = ref([
             {
                 hardwareName: "IonQ (Trapped Ion)",
                 hardwareSlowdown: 6.7,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 32,
                 ratioImprovementRate: -2,
@@ -165,6 +197,7 @@ const hardwares = ref([
             {
                 hardwareName: "QuEra (Neutral Atom)",
                 hardwareSlowdown: 5.1,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
                 ratioImprovementRate: -2,
@@ -180,6 +213,7 @@ const hardwares = ref([
             {
                 hardwareName: "Pasqal (Neutral Atom)",
                 hardwareSlowdown: 5.1,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
                 ratioImprovementRate: -2,
@@ -195,6 +229,7 @@ const hardwares = ref([
             {
                 hardwareName: "Infeqtion (Neutral Atom)",
                 hardwareSlowdown: 5.1,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 800,
                 ratioImprovementRate: -2,
@@ -210,6 +245,7 @@ const hardwares = ref([
             {
                 hardwareName: "Quantum Silicon (Semiconductors)",
                 hardwareSlowdown: 5.1,
+                costFactor: 8,
                 quantumImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
                 ratioImprovementRate: -2,
@@ -251,6 +287,7 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.roadmapUnit = hardware.roadmapUnit;
     model.value.extrapolationType = hardware.extrapolationType;
     model.value.ratioImprovementRate = hardware.ratioImprovementRate;
+    model.value.costFactor = hardware.costFactor;
 
 }, { deep: true });
 
@@ -260,6 +297,11 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.quantumRuntime = problem.quantumRuntime;
     model.value.classicalRuntimeLabel = problem.classicalRuntimeLabel;
     model.value.quantumRuntimeLabel = problem.quantumRuntimeLabel;
+    model.value.classicalRuntimeInput = problem.classicalRuntimeInput;
+    model.value.classicalWork = problem.classicalWork;
+    model.value.quantumRuntimeInput = problem.quantumRuntimeInput;
+    model.value.quantumWork = problem.quantumWork;
+    model.value.penaltyInput = problem.penaltyInput;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
     model.value.penalty = problem.penalty;
 }, { deep: true });
@@ -326,6 +368,16 @@ function checkLimits() {
         model.value.ratioImprovementRate = -90;
     }
 }
+
+
+function updateFunctions(updatedValues) {
+    model.value.classicalRuntimeInput = updatedValues.classicalRuntimeInput;
+    model.value.quantumRuntimeInput = updatedValues.quantumRuntimeInput;
+    model.value.penaltyInput = updatedValues.penaltyInput;
+    model.value.classicalWork = updatedValues.classicalWork;
+    model.value.quantumWork = updatedValues.quantumWork;
+}
+
 
 
 
@@ -416,14 +468,23 @@ function checkLimits() {
             :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 hidden': editMode }">
             <div class="lg:grid grid-cols-2 gap-4 lg:w-2/4">
                 <div>
+                    <div class="flex justify-between mb-1">
 
-                    <div class="flex items-center gap-2">
-                        <label class="font-medium">Problem </label>
-                        <ReferenceDialog title="References" classes="max-w-3xl">
-                            <template #content>
-                                <ProblemReferences />
-                            </template>
-                        </ReferenceDialog>
+                        <div class="flex items-center gap-2">
+                            <label class="font-medium">Problem </label>
+                            <ReferenceDialog title="References" classes="max-w-3xl">
+                                <template #content>
+                                    <ProblemReferences />
+                                </template>
+                            </ReferenceDialog>
+                        </div>
+                        <ProblemRuntimeAdvanced :classicalRuntimeInput="model.classicalRuntimeInput"
+                            :quantumRuntimeInput="model.quantumRuntimeInput" :penaltyInput="model.penaltyInput" :classicalWork="model.classicalWork" :quantumWork="model.quantumWork"
+                            @updateFunctions="updateFunctions" v-slot="{ openModal }">
+                            <button class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600"
+                                @click="openModal">Advanced options</button>
+                        </ProblemRuntimeAdvanced>
+
                     </div>
                     <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                         v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
@@ -431,16 +492,18 @@ function checkLimits() {
                     <div class="mt-2">
                         <p class="text-sm font-medium">Classical Runtime</p>
                         <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                            <span v-html="katex.renderToString(model.classicalRuntimeLabel)"></span>
+                            <span v-html="katex.renderToString(math.parse(model.classicalRuntimeInput).toTex())"></span>
                         </div>
+
 
 
                     </div>
                     <div class="mt-2">
                         <p class="text-sm font-medium">Quantum Runtime</p>
                         <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                            <span v-html="katex.renderToString(model.quantumRuntimeLabel)"></span>
+                            <span v-html="katex.renderToString(math.parse(model.quantumRuntimeInput).toTex())"></span>
                         </div>
+
 
 
                     </div>
@@ -458,7 +521,8 @@ function checkLimits() {
                         </div>
                         <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                             :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                            :roadmapUnit="model.roadmapUnit" :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
+                            :roadmapUnit="model.roadmapUnit"
+                            :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                                 @click="openModal">Edit roadmap</button>
@@ -488,7 +552,9 @@ function checkLimits() {
                                 <td colspan="2" class="p-1 text-center">
                                     <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                                        :roadmapUnit="model.roadmapUnit" :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
+                                        :roadmapUnit="model.roadmapUnit"
+                                        :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio"
+                                        v-slot="{ openModal }">
                                         <button
                                             class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                             @click="openModal">See more</button>
@@ -497,6 +563,19 @@ function checkLimits() {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-sm">Connectivity Penalty</label>
+                    <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
+                        connectivity.
+                    </p>
+                    <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                        <span v-html="katex.renderToString(math.parse(model.penaltyInput).toTex())"></span>
+
+                    </div>
+
+
                 </div>
 
                 <div class="flex flex-col">
@@ -518,16 +597,8 @@ function checkLimits() {
                         </template>
                     </multiselect>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-sm">Connectivity Penalty</label>
-                    <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
-                        connectivity.
-                    </p>
-                    <multiselect class="custom-multiselect mt-1" v-model="model.penalty" :options="penalties"
-                        :allow-empty="false" :searchable="true" :close-on-select="true" :show-labels="false"
-                        placeholder="Pick a value">
-                    </multiselect>
-                </div>
+
+                <!-- <button @click="updateFunctions">Update Functions</button> -->
 
             </div>
 
@@ -573,15 +644,14 @@ function checkLimits() {
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                             <span class="pr-2">10 </span>
-                            <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs"
-                                type="number"  min="0" max="16" step="0.5" id="hardwareSlowdown"
-                                v-model="model.hardwareSlowdown" />
+                            <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
+                                min="0" max="16" step="0.5" id="hardwareSlowdown" v-model="model.hardwareSlowdown" />
 
                         </div>
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
-                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90"
-                                max="90" step="1" id="quantum_improvement_rate" v-model="model.quantumImprovementRate"
+                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90" max="90" step="1"
+                                id="quantum_improvement_rate" v-model="model.quantumImprovementRate"
                                 @input="checkLimits" />
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
@@ -605,15 +675,14 @@ function checkLimits() {
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                             <span class="pr-2">10 </span>
-                            <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs"
-                                type="number" min="0" max="16" step="0.5" id="costFactor" v-model="model.costFactor" />
+                            <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
+                                min="0" max="16" step="0.5" id="costFactor" v-model="model.costFactor" />
 
                         </div>
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
-                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90"
-                                max="90" step="1" id="costImprovementRate" v-model="model.costImprovementRate"
-                                @input="checkLimits" />
+                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90" max="90" step="1"
+                                id="costImprovementRate" v-model="model.costImprovementRate" @input="checkLimits" />
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
@@ -635,10 +704,9 @@ function checkLimits() {
                             id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
-                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90"
-                                step="1" id="ratio_improvement_rate" v-model="model.ratioImprovementRate"
-                                @input="checkLimits" />
-                                <span class="text-xs text-gray-600 text-left">
+                            <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90" step="1"
+                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" @input="checkLimits" />
+                            <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
 
