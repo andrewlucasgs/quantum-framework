@@ -20,7 +20,7 @@
 <script setup>
 const teamMembers = [
     {
-        name: 'Fred Meija',
+        name: 'Frederick Mejia',
         image: '/654bb5d93f6840c86a2fea17_headshot - Fred Mejia-p-500.png',
         affiliation: 'MIT FutureTech',
     },

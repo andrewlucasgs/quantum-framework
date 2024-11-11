@@ -19,12 +19,32 @@
                 </div>
 
                 <div>
+                    <label class="font-medium text-sm" for="classicalWork">Classical Work</label>
+                    <input type="text" v-model="classicalWork" class="w-full border rounded p-2"
+                        @input="validateInput('classicalWork')" />
+                    <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                        <p v-if="errors.classicalWork" class="text-red-500 text-xs">Invalid expression</p>
+                        <span v-if="!errors.classicalWork" v-html="renderKaTeX(classicalWork)"></span>
+                    </div>
+                </div>
+
+                <div>
                     <label class="font-medium text-sm" for="quantumRuntimeInput">Quantum Runtime</label>
                     <input type="text" v-model="quantumRuntimeInput" class="w-full border rounded p-2"
                         @input="validateInput('quantumRuntimeInput')" />
                     <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                         <p v-if="errors.quantumRuntimeInput" class="text-red-500 text-xs">Invalid expression</p>
                         <span v-if="!errors.quantumRuntimeInput" v-html="renderKaTeX(quantumRuntimeInput)"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-medium text-sm" for="quantumWork">Quantum Work</label>
+                    <input type="text" v-model="quantumWork" class="w-full border rounded p-2"
+                        @input="validateInput('quantumWork')" />
+                    <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                        <p v-if="errors.quantumWork" class="text-red-500 text-xs">Invalid expression</p>
+                        <span v-if="!errors.quantumWork" v-html="renderKaTeX(quantumWork)"></span>
                     </div>
                 </div>
             </div>
@@ -57,16 +77,23 @@ const props = defineProps({
     classicalRuntimeInput: String,
     quantumRuntimeInput: String,
     penaltyInput: String,
+    classicalWork: String,
+    quantumWork: String,
+
 });
 
 const classicalRuntimeInput = ref(props.classicalRuntimeInput);
 const quantumRuntimeInput = ref(props.quantumRuntimeInput);
 const penaltyInput = ref(props.penaltyInput);
+const classicalWork = ref(props.classicalWork);
+const quantumWork = ref(props.quantumWork);
 
 const errors = ref({
     classicalRuntimeInput: false,
     quantumRuntimeInput: false,
     penaltyInput: false,
+    classicalWork: false,
+    quantumWork: false,
 });
 
 const hasErrors = computed(() => Object.values(errors.value).some(error => error));
@@ -75,6 +102,8 @@ function updateValues() {
     classicalRuntimeInput.value = props.classicalRuntimeInput;
     quantumRuntimeInput.value = props.quantumRuntimeInput;
     penaltyInput.value = props.penaltyInput;
+    classicalWork.value = props.classicalWork;
+    quantumWork.value = props.quantumWork;
     validateAllInputs();
 }
 
@@ -88,6 +117,8 @@ function save() {
             classicalRuntimeInput: classicalRuntimeInput.value,
             quantumRuntimeInput: quantumRuntimeInput.value,
             penaltyInput: penaltyInput.value,
+            classicalWork: classicalWork.value,
+            quantumWork: quantumWork.value,
         });
         dialog.value.closeModal();
     }
@@ -98,7 +129,7 @@ function cancel() {
 }
 
 function validateInput(inputName) {
-    const scope = { n: 1 };
+    const scope = { n: 1, q: 1 };
 
     try {
         const compiled = math.compile(eval(inputName).value);
@@ -113,6 +144,8 @@ function validateAllInputs() {
     validateInput('classicalRuntimeInput');
     validateInput('quantumRuntimeInput');
     validateInput('penaltyInput');
+    validateInput('classicalWork');
+    validateInput('quantumWork');
 }
 
 function renderKaTeX(input) {

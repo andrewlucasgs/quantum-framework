@@ -1,5 +1,7 @@
 import * as math from 'mathjs';
 import { parse } from 'vue/compiler-sfc';
+import * as utils from "/Users/fred/Desktop/FutureTech/quantum-framework/src/store/utils.js"
+
 
 function main() {
 
@@ -10,93 +12,85 @@ function main() {
 
     // let expression = "n^(2) * log10(n) * e";
     // let expression = "(2 * pi * n)^(1/2) * (n / e)^n";
-    let expression = "n^3 + 2^n";
-    let parsedExpression = math.parse(expression);
-    let logged = applyLogRules(parsedExpression);
+    // let expression = "n^3 + 2^n";
+    // let expression = "n * (n - 10^11) / (n - 10^11)";
+    // let expression = "n * (n - 10^3)";
+    // let parsedExpression = math.parse(expression);
+    // let logged = utils.applyLogRules(parsedExpression);
 
-    let scope = {n: 100, y: 2};
+    // let scope = {n: 100, y: 2};
     
     
     // console.log(expression)
-    console.log(parsedExpression.toString())
-    console.log(logged.toString())
+    // console.log(parsedExpression.toString())
+    // console.log(logged.toString())
+    // console.log(math.simplify(logged.toString()).toString())
     // logged.traverse(processNode);
-    // console.log(logged.compile().evaluate(scope));
 
-    // console.log();
-    
-    // let replaced = expression.replaceAll("n", "(10^(y))");
-    // let pr = math.parse(replaced)
-    // let lr = applyLogRules(pr);
-    // console.log(replaced)
-    // console.log(pr.toString())
-    // console.log(lr.toString());
-    // console.log(lr.compile().evaluate(scope));
+    let classicalRuntimeInput = "n * (n - 10^3)";
+    let quantumRuntimeInput = "n ^ 0.5";
+    let penaltyInput = "log(n, 2)";
+    let hardwareSlowdown = 3.78;
+    let quantumImprovementRate = .9;
 
-    // let l = createLoggedFunction(expression);
-    // let c = createConvertedFunction(expression);
-    // console.log(l(100) == c(2))
-    // console.log(c(2))
+    let lcf = utils.createLoggedFunction(classicalRuntimeInput);
+    let lqf = utils.createLoggedFunction(quantumRuntimeInput);
+    let lpf = utils.createLoggedFunction(penaltyInput);
+
+    console.log("lcf(2):", lcf(2), "\nlqf(2):", lqf(2), "\nlpf(2):", lpf(2));
+    console.log(lcf(2) - lqf(2) - lpf(2) - hardwareSlowdown);
+    console.log(Math.abs(lcf(2) - lqf(2) - lpf(2) - hardwareSlowdown));
+    console.log(Math.abs(lcf(2) - lqf(2) - lpf(2) - hardwareSlowdown) < 100);
+
+    console.log()
+    let advantage = getQuantumAdvantage(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate, 2024);
+    console.log()
+    console.log(advantage)
+
 }
 
-function createLoggedFunction(expression) {
-    let loggedTree = applyLogRules(math.parse(expression)).compile();
-    function logged(value) {
-        let scope = {n: value};
-        return loggedTree.evaluate(scope);
-    }
-    return logged;
-}
+// returns log_10 of the problem size where qa is reached
+function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, year = 2024) {
+    // let adjustmentFactor = Number(hardwareSlowdown) + Math.log10(Math.pow(quantumImprovementRate, year - 2024));
+    let adjustmentFactor = Number(hardwareSlowdown) + (year - 2024) * Math.log10(quantumImprovementRate);
+    adjustmentFactor = math.max(adjustmentFactor, 0);
+    // if (adjustmentFactor == 0) {
+    //     console.log("adjustment factor is ", adjustmentFactor, " year is ", year);
+    // }
 
-function createConvertedFunction(expression) {
-    let replaced = expression.replaceAll("n", "(10^(n))");
-    let convertedTree = applyLogRules(math.parse(replaced)).compile();
-    function converted(value) {
-        let scope = {n: value};
-        return convertedTree.evaluate(scope);
-    }
-    return converted;
-}
+    // if (adjustmentFactor <= -5) { //if adjustmentFactor is ever 0, then there is no hardware slowdown, so any problem should be QEA
+    //     console.log("adjustment factor is less than -5 and is ", adjustmentFactor, " year is ", year)
+    //     return 0;
+    // }
+    // else if (adjustmentFactor <= 0) {
+    //     console.log("adjustment factor is < 0 and is ", adjustmentFactor, " year is ", year)
+    // }
 
-
-
-function applyLogRules(node) {
-    if (node.isOperatorNode && node.op === '*') {
-        // log10(a * b) -> log10(a) + log10(b)
-        const transformedArgs = node.args.map(arg => applyLogRules(arg));
-        return transformedArgs.reduce((acc, arg) => new math.OperatorNode('+', 'add', [acc, arg]));
-    } 
-    if (node.isOperatorNode && node.op === '/') {
-        // log10(a / b) -> log10(a) - log10(b)
-        if (node.args.length != 2) {
-            console.log("error applying log to division")
-            return
-        }
-        let [numerator, denominator] = node.args
-        return new math.OperatorNode("-", "subtract", [
-            applyLogRules(numerator),
-            applyLogRules(denominator)
-        ])
-    } 
-    else if (node.isOperatorNode && node.op === '^') {
-        // log10(a^b) -> b * log10(a)
-        const [base, exponent] = node.args;
-        return new math.OperatorNode('*', 'multiply', [
-            exponent,
-            applyLogRules(base)
-        ]);
-    } 
-    else if (node.isParenthesisNode) {
-        return applyLogRules(node.content)
-    }
-    else if (node.isOperatorNode || node.isFunctionNode || node.isSymbolNode || node.isConstantNode) {
-        return new math.FunctionNode(new math.SymbolNode("log10"), [node])
-    }
-    else {
-        console.log("parsing expression. this should never print")
+    function evaluate(n) {
+        let value = logClassicalFunction(n) - logQuantumFunction(n) - logPenaltyFunction(n) - adjustmentFactor;
+        return value;
     }
 
-    return node;
+    let lowerBound = 2;
+    let upperBound = 10**100;
+    let result = utils.bisectionMethod(evaluate, lowerBound, upperBound);
+    // if (result === null) {
+    while (result === null && lowerBound < 10) {
+        lowerBound += 0.5;
+        result = utils.bisectionMethod(evaluate, lowerBound, upperBound);
+    }
+    if (result === null) {
+        console.log(`null returned!!!! year was ${year} and adjustmentFactor was ${adjustmentFactor}`);
+        console.log("lowerBound:", lowerBound, "upperBound:", upperBound);
+        console.log("f(lowerBound):", evaluate(lowerBound), "f(upperBound):", evaluate(upperBound));
+        return 0;
+    }
+    // if (lowerBound > 2) {
+        // console.log(`Had to guess start for QA bisection more than once, final lowerBound was ${lowerBound}`);
+    // }
+
+    return Math.log10(result);
+
 }
 
 // Function to process each node

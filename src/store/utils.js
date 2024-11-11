@@ -92,6 +92,11 @@ export function applyLogRules(node) {
 }
 
 export function createLoggedFunction(expression) {
+    // let loggedTree = applyLogRules(math.parse(expression));
+    // console.log(expression)
+    // console.log(loggedTree.toString())
+    // loggedTree = loggedTree.compile();
+
     let loggedTree = applyLogRules(math.parse(expression)).compile();
     function logged(value) {
         let scope = {n: value};
@@ -215,22 +220,34 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
 }
 
 // find when f(x) = 0
-export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
+// assumes f is a function which generally trends upwards
+// export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
+export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
     let fa = f(a);
     let fb = f(b);
-    if (fa * fb >= 0) {
-        return null;
+    // if (fa * fb >= 0) {
+    //     return null;
+    // }
+    if (fa > 0) {
+        console.log("fa is positive. implies that classical is always more expensive")
+        return null
+    }
+    if (fb < 0) {
+        console.log("fb is negative. implies that quantum is always more expensive")
+        return null
     }
 
     let c = a;
     for (let i = 0; i < maxIter; i++) {
         c = (a + b) / 2;
         let fc = f(c);
-        // if (fc === 0 || (b - a) / 2 < tol) {
-        if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
-            // if ((b - a) / 2 < tol) {
-            //     console.log("binary search range tolerance reached before value tolerance. function is very sensitive.")
-            // }
+        // if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
+        if (Math.abs(fc) < tol || Math.abs(b - a) < tol) {
+            // if (Math.abs(b - a) / 2 < tol) {
+            if (Math.abs(fc) >= tol) {
+                console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
+                console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c));
+            }
             return c;
         }
         if (fa * fc < 0) {
@@ -242,11 +259,13 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
         }
     }
 
-    console.log("couldn't converge during binary search")
+    console.log("couldn't converge during binary search"); 
+    // console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c)); 
+    // console.log(b - a)
     return c;
 }
 
-//returns the amount of logical qubits needed to achieve said problem size using the function specified by qubitToProblemSize
+//returns (log_10 of) the amount of logical qubits needed to achieve said problem size using the function specified by qubitToProblemSize
 //(logSize parameter is log_10 of the actual problem size)
 export function problemSizeToQubits(logSize, qubitToProblemSize) {
     let loglogicalQubits = 0;
@@ -263,7 +282,7 @@ export function problemSizeToQubits(logSize, qubitToProblemSize) {
         loglogicalQubits = Math.pow(10, logSize) * Math.log10(2)
     }
     else {
-        console.log("this should never print")
+        console.log("this should never print, loglogicalQubits will be set to 0")
     }
     return loglogicalQubits;
 }
