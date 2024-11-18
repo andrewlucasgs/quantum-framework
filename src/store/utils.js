@@ -220,36 +220,56 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
 }
 
 // find when f(x) = 0
-// assumes f is a function which generally trends upwards
+// assumes f is a function such that f(a) * f(b) < 0 and f(b) > 0
 // export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
-export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
+// export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
+export function bisectionMethod(f, a, b, description = "", tol = 1e-7, maxIter = 1000) {
     let fa = f(a);
     let fb = f(b);
-    // if (fa * fb >= 0) {
-    //     return null;
-    // }
+
+    if (fa == null || fb == null || isNaN(fa) || isNaN(fb)) {
+        console.log("fa or fb is null or NaN")
+        console.log("Description: ", description) 
+        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return b;
+    }
+
     if (fa > 0) {
         console.log("fa is positive. implies that classical is always more expensive")
+        console.log("Description: ", description) 
+        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
         return null
     }
     if (fb < 0) {
         console.log("fb is negative. implies that quantum is always more expensive")
+        console.log("Description: ", description) 
+        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
         return null
     }
-
+    
     let c = a;
+    let fc = fa;
     for (let i = 0; i < maxIter; i++) {
         c = (a + b) / 2;
-        let fc = f(c);
-        // if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
+        fc = f(c);
+        if (fc == null || isNaN(fc)) {
+            console.log("fc is null");
+            console.log("Description: ", description) 
+            console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
+            return b;
+        }
         if (Math.abs(fc) < tol || Math.abs(b - a) < tol) {
-            // if (Math.abs(b - a) / 2 < tol) {
             if (Math.abs(fc) >= tol) {
                 console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
-                console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c));
+                console.log("Description: ", description) 
+                console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
             }
+            // else {
+            //     console.log("smooth binary search")
+            // }
             return c;
         }
+
         if (fa * fc < 0) {
             b = c;
             fb = fc;
@@ -259,9 +279,9 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
         }
     }
 
-    console.log("couldn't converge during binary search"); 
-    // console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c)); 
-    // console.log(b - a)
+    console.log("couldn't converge during binary search. returning last value") 
+    console.log("Description: ", description) 
+    console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
     return c;
 }
 
