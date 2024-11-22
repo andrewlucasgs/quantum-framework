@@ -92,9 +92,10 @@ onMounted(() => {
                 </div> -->
                 <hr class="w-full border-white/30">
 
-                <div class="flex gap-8 items-center flex-wrap justify-center">
-                    <img class="max-w-[200px]" src="/futuretech.svg" alt="">
-                    <img class="max-w-[200px]" src="/Accenture_logo.svg" alt="">
+                <div class="flex gap-8 items-center justify-center">
+                    <a class="max-w-[350px] w-full" href="https://futuretech.mit.edu" target="_blank"><img  src="/futuretech.svg" alt=""></a>
+                    <a class="max-w-[350px] w-full" href="https://www.accenture.com" target="_blank"><img  src="/Accenture_logo.svg" alt=""></a>
+                    
                 </div>
                 <hr class="w-full border-white/30">
                 <div class="text-white text-sm py-3 text-center">
