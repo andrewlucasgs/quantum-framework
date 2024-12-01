@@ -24,20 +24,22 @@ function processDataToGraph(data) {
 
     // Set maxY and maxX to the minimum values among classicalSteps, quantumSteps, and quantumCostSteps if midY or midX is 0
     const maxY = (midY === 0)
-        ? Math.min(...[data.classicalSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[1]))))
+        ? Math.min(...[data.classicalSteps, data.classicalCostSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[1]))))
         : midY * 2;
     const maxX = (midX === 0)
-        ? Math.min(...[data.classicalSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[0]))))
+        ? Math.min(...[data.classicalSteps, data.classicalCostSteps, data.quantumSteps, data.quantumCostSteps].map(arr => Math.max(...arr.map(step => step[0]))))
         : midX * 2;
 
     let classicalSteps = data.classicalSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
-    let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY);
+    let classicalCostSteps = data.classicalCostSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
+    // let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY);
+    let quantumCostSteps = data.quantumCostSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
     let quantumSteps = data.quantumSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
 
     const problemName = props.data.problemName.split('(')[0];
     const graphTitle = problemName + (problemName.length > 40 ? '<br>' : ' ') + 'Problem Sizes';
 
-    return { graphTitle, classicalSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX };
+    return { graphTitle, classicalSteps, classicalCostSteps, quantumCostSteps, quantumSteps, stepCostStar, nCostStar, stepStar, nStar, maxY, maxX };
 }
 
 
@@ -74,7 +76,7 @@ const chartOptions = {
                 ${
                     this.points.map(point => `<div class="flex items-center gap-1">
                         <span class="w-4 h-[2px]" style="background-color: ${point.series.color};"></span>
-                        <span class="flex-1 gap-1 flex justify-between" >${point.series.name === 'Classical' ? 'Classical Steps/Cost' : point.series.name}: <span class="min-w-[5ch] text-gray-700 font-bold">${utils.toBase10HTML(point.y)}</span></span>
+                        <span class="flex-1 gap-1 flex justify-between" >${point.series.name}: <span class="min-w-[5ch] text-gray-700 font-bold">${utils.toBase10HTML(point.y)}</span></span>
                         </div>`).join('')
                 }
             </div>
@@ -199,7 +201,7 @@ function updateGraphData() {
 
     chartOptions.series = [
         {
-            name: 'Classical',
+            name: 'Classical Steps',
             data: [...data.classicalSteps, ({
                 dataLabels: {
                     enabled: true,
@@ -234,6 +236,46 @@ function updateGraphData() {
 
         },
         {
+            name: 'Classical Cost',
+            data: [...data.classicalCostSteps, ({
+                dataLabels: {
+                    enabled: true,
+                    align: 'left',
+                    x: 3,
+                    verticalAlign: 'middle',
+                    overflow: true,
+                    crop: false,
+                    color: 'rgba(0,255,0,1)', //Andrew should choose a better color
+                    shadow: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    // breakline
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="text-align: cnter;">Classical<br/>Algorithm<br/>Cost</div>';
+                    }
+
+                },
+                x: data.classicalCostSteps[data.classicalCostSteps.length - 1][0],
+                y: data.classicalCostSteps[data.classicalCostSteps.length - 1][1],
+
+            })],
+            type: 'spline',
+            style: {
+                linewidth: 22,
+                color: 'rgba(0,255,0,1)'
+            },
+            color: 'rgba(0,255,0,1)',
+            marker: {
+                enabled: false,
+                symbol: 'circle'
+            }
+        },
+
+        {
             name: 'Quantum Steps',
             data: [...data.quantumSteps, ({
                 dataLabels: {
@@ -267,7 +309,6 @@ function updateGraphData() {
         },
         {
             name: 'Quantum Cost',
-            data: data.quantumCostSteps,
             data: [...data.quantumCostSteps, ({
                 dataLabels: {
                     enabled: true,

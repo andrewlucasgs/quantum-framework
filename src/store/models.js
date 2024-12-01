@@ -27,6 +27,7 @@ const modelTemplate = {
     physicalLogicalQubitsRatio: 1000,
     ratioImprovementRate: -2,
     costImprovementRate: -10,
+    processors: 1,
 
 }
 

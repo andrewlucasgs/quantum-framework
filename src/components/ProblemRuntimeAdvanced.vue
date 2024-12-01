@@ -58,6 +58,22 @@
                     <span v-if="!errors.penaltyInput" v-html="renderKaTeX(penaltyInput)"></span>
                 </div>
             </div>
+
+            <div>
+                <label class="font-medium text-sm" for="processors">Processors</label>
+                <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
+                </div> -->
+                <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
+                    <input class="flex-1 accent-[#002D9D]" type="range" id="processors" min="0" max="100" step="1"
+                                v-model="processors" />
+                    <div
+                        class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
+                        <span class="pr-2">10 </span>
+                        <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
+                            min="0" max="100" step="1" id="processors" v-model="processors" />
+                    </div>
+                </div>
+            </div>
         </template>
     </Dialog>
 </template>
@@ -79,6 +95,7 @@ const props = defineProps({
     penaltyInput: String,
     classicalWork: String,
     quantumWork: String,
+    processors: Number,
 
 });
 
@@ -87,6 +104,7 @@ const quantumRuntimeInput = ref(props.quantumRuntimeInput);
 const penaltyInput = ref(props.penaltyInput);
 const classicalWork = ref(props.classicalWork);
 const quantumWork = ref(props.quantumWork);
+const processors = ref(props.processors);
 
 const errors = ref({
     classicalRuntimeInput: false,
@@ -104,6 +122,7 @@ function updateValues() {
     penaltyInput.value = props.penaltyInput;
     classicalWork.value = props.classicalWork;
     quantumWork.value = props.quantumWork;
+    processors.value = props.processors;
     validateAllInputs();
 }
 
@@ -119,6 +138,7 @@ function save() {
             penaltyInput: penaltyInput.value,
             classicalWork: classicalWork.value,
             quantumWork: quantumWork.value,
+            processors: processors.value,
         });
         dialog.value.closeModal();
     }

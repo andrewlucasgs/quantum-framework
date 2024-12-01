@@ -349,6 +349,7 @@ function updateFunctions(updatedValues) {
     model.value.penaltyInput = updatedValues.penaltyInput;
     model.value.classicalWork = updatedValues.classicalWork;
     model.value.quantumWork = updatedValues.quantumWork;
+    model.value.processors = updatedValues.processors;
 }
 
 
@@ -452,7 +453,7 @@ function updateFunctions(updatedValues) {
                             </ReferenceDialog>
                         </div>
                         <ProblemRuntimeAdvanced :classicalRuntimeInput="model.classicalRuntimeInput"
-                            :quantumRuntimeInput="model.quantumRuntimeInput" :penaltyInput="model.penaltyInput" :classicalWork="model.classicalWork" :quantumWork="model.quantumWork"
+                            :quantumRuntimeInput="model.quantumRuntimeInput" :penaltyInput="model.penaltyInput" :classicalWork="model.classicalWork" :quantumWork="model.quantumWork" :processors="model.processors"
                             @updateFunctions="updateFunctions" v-slot="{ openModal }">
                             <button class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600"
                                 @click="openModal">Advanced options</button>

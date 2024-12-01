@@ -228,23 +228,23 @@ export function bisectionMethod(f, a, b, description = "", tol = 1e-7, maxIter =
     let fb = f(b);
 
     if (fa == null || fb == null || isNaN(fa) || isNaN(fb)) {
-        console.log("fa or fb is null or NaN")
+        console.log("fa or fb is null or NaN; returning null")
         console.log("Description: ", description) 
         console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
-        return b;
+        return null;
     }
 
-    if (fa > 0) {
-        console.log("fa is positive. implies that classical is always more expensive")
-        console.log("Description: ", description) 
-        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
-        return null
+    if (fa >= 0) {
+        // console.log("fa is positive. implies that classical is always more expensive")
+        // console.log("Description: ", description) 
+        // console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return 0;
     }
     if (fb < 0) {
-        console.log("fb is negative. implies that quantum is always more expensive")
-        console.log("Description: ", description) 
-        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
-        return null
+        // console.log("fb is negative. implies that quantum is always more expensive")
+        // console.log("Description: ", description) 
+        // console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return Infinity;
     }
     
     let c = a;
@@ -253,17 +253,17 @@ export function bisectionMethod(f, a, b, description = "", tol = 1e-7, maxIter =
         c = (a + b) / 2;
         fc = f(c);
         if (fc == null || isNaN(fc)) {
-            console.log("fc is null");
+            console.log("fc is null or NaN; returning null");
             console.log("Description: ", description) 
             console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
-            return b;
+            return null;
         }
         if (Math.abs(fc) < tol || Math.abs(b - a) < tol) {
-            if (Math.abs(fc) >= tol) {
-                console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
-                console.log("Description: ", description) 
-                console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
-            }
+            // if (Math.abs(fc) >= tol) {
+            //     console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
+            //     console.log("Description: ", description) 
+            //     console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
+            // }
             // else {
             //     console.log("smooth binary search")
             // }
