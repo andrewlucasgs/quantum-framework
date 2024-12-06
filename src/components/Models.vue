@@ -23,7 +23,7 @@ import {
 import { get } from '@vueuse/core';
 
 // returns log_10 of the problem size where qa is reached
-function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, year = 2024) {
+function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, processors, costImprovementRate, year) {
     let adjustmentFactor = Number(hardwareSlowdown) + (year - 2024) * Math.log10(quantumImprovementRate);
 
     if (adjustmentFactor == null || isNaN(adjustmentFactor)) {
@@ -34,8 +34,12 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
 
     adjustmentFactor = math.max(adjustmentFactor, 0);
 
+    // console.log("processors: ", processors);
+    let effectiveProcessors = processors + (year - 2024) * Math.log10(costImprovementRate);
+
     function evaluate(n) {
-        let value = logClassicalFunction(n) - logQuantumFunction(n) - logPenaltyFunction(n) - adjustmentFactor;
+        let scope = {n: n, p: Math.pow(10, effectiveProcessors)};
+        let value = logClassicalFunction(n, scope) - logQuantumFunction(n) - logPenaltyFunction(n) - adjustmentFactor;
         return value;
     }
 
@@ -74,22 +78,16 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
 // converts expression with q (qubits) to expression with n (problem size) by using the inverse of 
 // the function specified by qubitToProblemSize parameter
 function getQuantumWork(model) {
-    function replaceVariable(formula, oldVar, newVar) {
-        // Match `q` only when it's not in a larger word (like `sqrt`)
-        let regex = new RegExp(`(?<![a-zA-Z])${oldVar}(?![a-zA-Z])`, 'g');
-        return formula.replace(regex, newVar);
-    }
-    
     let quantumWork = model.quantumWork;
     // console.log("quantum work was ", quantumWork);
     if (model.qubitToProblemSize === "2^{q}") {
-        quantumWork = replaceVariable(quantumWork, "q", "(log(n, 2))");
+        quantumWork = utils.replaceVariable(quantumWork, "q", "(log(n, 2))");
     }
     else if (model.qubitToProblemSize === "log({q})") {
-        quantumWork = replaceVariable(quantumWork, "q", "(2^n)");
+        quantumWork = utils.replaceVariable(quantumWork, "q", "(2^n)");
     }
     else if (model.qubitToProblemSize === "{q}") {
-        quantumWork = replaceVariable(quantumWork, "q", "n");
+        quantumWork = utils.replaceVariable(quantumWork, "q", "n");
     }
     else {
         console.log("this should never print");
@@ -111,6 +109,8 @@ function calculateCurrentAdvantage(model) {
     let classicalRuntimeInput = model.classicalRuntimeInput;
     let quantumRuntimeInput = model.quantumRuntimeInput;
     let penaltyInput = model.penaltyInput;
+
+    let processors = model.processors;
     
     //lcf = logged classical function
     let lcf = utils.createLoggedFunction(classicalRuntimeInput);
@@ -131,8 +131,8 @@ function calculateCurrentAdvantage(model) {
     let ccfc = utils.createConvertedFunction(model.classicalWork);
     let cqfc = utils.createConvertedFunction(quantumWork);
 
-    let advantage = getQuantumAdvantage(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate, year);
-    let costAdvantage = getQuantumAdvantage(lcfc, lqfc, lpf, costFactor, costImprovementRate, year);
+    let advantage = getQuantumAdvantage(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate, processors, costImprovementRate, year);
+    let costAdvantage = getQuantumAdvantage(lcfc, lqfc, lpf, costFactor, costImprovementRate, processors, costImprovementRate, year); //should be refactored to avoid using same parameter twice
 
     // let realAdvantage = Math.pow(10, advantage);
     // let value = lcf(realAdvantage) - lqf(realAdvantage) - lpf(realAdvantage) - hardwareSlowdown;
@@ -147,6 +147,7 @@ function calculateCurrentAdvantage(model) {
     if (advantage === null || costAdvantage === null) {
         // show error message to user
         console.log("Error: advantage or costAdvantage is null");
+        console.log(`advantage: ${advantage}, costAdvantage: ${costAdvantage}`);
         return;
     }
 
@@ -187,7 +188,7 @@ function calculateCurrentAdvantage(model) {
         }
         currentAdvantageDataAux = {
             nStar: advantage,
-            stepStar: ccf(advantage),
+            stepStar: ccf(advantage, {n: advantage, p: Math.pow(10, processors)}),
             nCostStar: -1,
             stepCostStar: -1,
         }
@@ -211,7 +212,7 @@ function calculateCurrentAdvantage(model) {
 
         currentAdvantageDataAux = {
             nStar: advantage,
-            stepStar: ccf(advantage),
+            stepStar: ccf(advantage, {n: advantage, p: Math.pow(10, processors)}),
             nCostStar: costAdvantage,
             stepCostStar: ccfc(costAdvantage),
         }
@@ -224,7 +225,7 @@ function calculateCurrentAdvantage(model) {
     currentAdvantageDataAux = {
         ...currentAdvantageDataAux,
         quantumSteps: range.map((i) => [i, cqf(i) + cpf(i) + hardwareSlowdown]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
-        classicalSteps: range.map((i) => [i, ccf(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y]),
+        classicalSteps: range.map((i) => [i, ccf(i, {n: i, p: Math.pow(10, processors)})]).map(([x, y]) => [x, isNaN(y) ? -1 : y]),
         quantumCostSteps: range.map((i) => [i, cqfc(i) + cpf(i) + costFactor]).map(([x, y]) => [x, y === NaN ? 99999 : y]),
         classicalCostSteps: range.map((i) => [i, ccfc(i)]).map(([x, y]) => [x, isNaN(y) ? -1 : y])
     }
@@ -266,12 +267,15 @@ function calculateQuantumEconomicAdvantage(model) {
     let costFactor = (Number(model.costFactor))
     let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
+    let processors = model.processors;
+
     function qf(roadmap) {
         return year => getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit)
     }
 
     function qa(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate) {
-        return year => getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, year)
+        //should probably be refactored eventually
+        return year => getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, processors, costImprovementRate, year)
     }
 
 
@@ -281,6 +285,12 @@ function calculateQuantumEconomicAdvantage(model) {
     let quantumCostAdvantage = qa(lcfc, lqfc, lpf, costFactor, costImprovementRate);
 
     let quantumEconomicAdvantageDataAux = {}
+
+    console.log("testing")
+    console.log(quantumAdvantage(2024))
+    console.log("testing again")
+    console.log(quantumAdvantage(3000))
+    console.log("done testing")
 
     const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000, "tStar in QEA");
     const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2024, 3000, "tCostStar in QEA");

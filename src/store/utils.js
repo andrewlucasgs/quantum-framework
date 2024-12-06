@@ -98,8 +98,8 @@ export function createLoggedFunction(expression) {
     // loggedTree = loggedTree.compile();
 
     let loggedTree = applyLogRules(math.parse(expression)).compile();
-    function logged(value) {
-        let scope = {n: value};
+    function logged(value, scope = {n: value}) {
+        // let scope = {n: value};
         return loggedTree.evaluate(scope);
     }
     return logged;
@@ -305,4 +305,10 @@ export function problemSizeToQubits(logSize, qubitToProblemSize) {
         console.log("this should never print, loglogicalQubits will be set to 0")
     }
     return loglogicalQubits;
+}
+
+export function replaceVariable(formula, oldVar, newVar) {
+    // Match `q` only when it's not in a larger word (like `sqrt`)
+    let regex = new RegExp(`(?<![a-zA-Z])${oldVar}(?![a-zA-Z])`, 'g');
+    return formula.replace(regex, newVar);
 }

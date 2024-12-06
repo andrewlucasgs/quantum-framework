@@ -20,8 +20,8 @@
 
                 <div>
                     <label class="font-medium text-sm" for="classicalWork">Classical Work</label>
-                    <input type="text" v-model="classicalWork" class="w-full border rounded p-2"
-                        @input="validateInput('classicalWork')" />
+                    <!-- <input type="text" v-model="classicalWork" class="w-full border rounded p-2"
+                        @input="validateInput('classicalWork')" /> -->
                     <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                         <p v-if="errors.classicalWork" class="text-red-500 text-xs">Invalid expression</p>
                         <span v-if="!errors.classicalWork" v-html="renderKaTeX(classicalWork)"></span>
@@ -64,13 +64,13 @@
                 <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                 </div> -->
                 <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
-                    <input class="flex-1 accent-[#002D9D]" type="range" id="processors" min="0" max="100" step="1"
+                    <input class="flex-1 accent-[#002D9D]" type="range" id="processors" min="0" max="20" step="1"
                                 v-model="processors" />
                     <div
                         class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                         <span class="pr-2">10 </span>
                         <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
-                            min="0" max="100" step="1" id="processors" v-model="processors" />
+                            min="0" max="20" step="1" id="processors" v-model="processors" />
                     </div>
                 </div>
             </div>
@@ -84,6 +84,7 @@ import { ref, computed, watch } from 'vue';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import * as math from 'mathjs';
+import * as utils from '../store/utils';
 
 const emit = defineEmits(['updateFunctions']);
 
@@ -149,12 +150,25 @@ function cancel() {
 }
 
 function validateInput(inputName) {
-    const scope = { n: 1, q: 1 };
+    const scope = { n: 1};
 
     try {
         const compiled = math.compile(eval(inputName).value);
+        if (inputName == "classicalRuntimeInput") {
+            scope["p"] = 1; // Number of processors
+        }
+        else if (inputName == "quantumWork") {
+            scope["q"] = 1; // Number of qubits
+        }
+
         compiled.evaluate(scope); // Evaluate expression with scope
         errors.value[inputName] = false;
+        
+        if (inputName == "classicalRuntimeInput") {
+            classicalWork.value = utils.replaceVariable(classicalRuntimeInput.value, "p", "(1)");
+            validateInput('classicalWork');
+        }
+
     } catch {
         errors.value[inputName] = true;
     }
