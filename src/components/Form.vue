@@ -89,7 +89,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2020: 27,
                     2022: 127,
@@ -109,7 +109,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2019: 54,
                     2023: 100,
@@ -127,7 +127,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2023: 336,
                     2025: 1000,
@@ -145,7 +145,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 32,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2021: 22,
                     2022: 25,
@@ -174,7 +174,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2023: 256,
                     2025: 3000,
@@ -191,7 +191,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2022: 200,
                     2024: 1000,
@@ -208,7 +208,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 800,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2024: 2,
                     2026: 10,
@@ -225,7 +225,7 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: -2,
+                ratioImprovementRate: -10,
                 roadmap: {
                     2018: 1,
                     2021: 6,

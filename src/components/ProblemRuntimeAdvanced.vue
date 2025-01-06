@@ -20,8 +20,8 @@
 
                 <div>
                     <label class="font-medium text-sm" for="classicalWork">Classical Work</label>
-                    <!-- <input type="text" v-model="classicalWork" class="w-full border rounded p-2"
-                        @input="validateInput('classicalWork')" /> -->
+                    <input type="text" v-model="classicalWork" class="w-full border rounded p-2"
+                        @input="validateInput('classicalWork')" />
                     <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                         <p v-if="errors.classicalWork" class="text-red-500 text-xs">Invalid expression</p>
                         <span v-if="!errors.classicalWork" v-html="renderKaTeX(classicalWork)"></span>
@@ -164,10 +164,10 @@ function validateInput(inputName) {
         compiled.evaluate(scope); // Evaluate expression with scope
         errors.value[inputName] = false;
         
-        if (inputName == "classicalRuntimeInput") {
-            classicalWork.value = utils.replaceVariable(classicalRuntimeInput.value, "p", "(1)");
-            validateInput('classicalWork');
-        }
+        // if (inputName == "classicalRuntimeInput") {
+        //     classicalWork.value = utils.replaceVariable(classicalRuntimeInput.value, "p", "(1)");
+        //     validateInput('classicalWork');
+        // }
 
     } catch {
         errors.value[inputName] = true;

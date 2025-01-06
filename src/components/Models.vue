@@ -286,11 +286,11 @@ function calculateQuantumEconomicAdvantage(model) {
 
     let quantumEconomicAdvantageDataAux = {}
 
-    console.log("testing")
-    console.log(quantumAdvantage(2024))
-    console.log("testing again")
-    console.log(quantumAdvantage(3000))
-    console.log("done testing")
+    // console.log("testing")
+    // console.log(quantumAdvantage(2024))
+    // console.log("testing again")
+    // console.log(quantumAdvantage(3000))
+    // console.log("done testing")
 
     const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000, "tStar in QEA");
     const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2024, 3000, "tCostStar in QEA");
