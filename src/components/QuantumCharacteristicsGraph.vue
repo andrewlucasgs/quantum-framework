@@ -81,7 +81,7 @@ const chartOptions = {
         backgroundColor: 'transparent',
         formatter: function () {
 
-            const year = utils.round(this.points[0].x, data.maxX - 2024 <= 5 ? 1 : 0)
+            const year = utils.round(this.points[0].x, data.maxX - 2025 <= 5 ? 1 : 0)
 
 
             return `
@@ -108,7 +108,7 @@ const chartOptions = {
                 return this.value.toFixed(2);
             }
         },
-        min: 2024,
+        min: 2025,
         max: data.maxX,
         plotLines: [{
             value: data.tStar,
@@ -216,7 +216,7 @@ function updateGraph() {
     chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
     const lastYear = data.maxX
-    const mid = parseInt((data.maxX - 2024) / 2) + 2024
+    const mid = parseInt((data.maxX - 2025) / 2) + 2025
     chartOptions.xAxis.tickPositions = [
         currentYear,
         (currentYear + mid) / 2,

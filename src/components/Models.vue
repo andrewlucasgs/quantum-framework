@@ -23,8 +23,9 @@ import {
 import { get } from '@vueuse/core';
 
 // returns log_10 of the problem size where qa is reached
+// processors only apply if the variable p is used in the classical function
 function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, processors, costImprovementRate, year) {
-    let adjustmentFactor = Number(hardwareSlowdown) + (year - 2024) * Math.log10(quantumImprovementRate);
+    let adjustmentFactor = Number(hardwareSlowdown) + (year - 2025) * Math.log10(quantumImprovementRate);
 
     if (adjustmentFactor == null || isNaN(adjustmentFactor)) {
         console.log("Adjustment factor is null or NaN");
@@ -35,7 +36,7 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
     adjustmentFactor = math.max(adjustmentFactor, 0);
 
     // console.log("processors: ", processors);
-    let effectiveProcessors = processors + (year - 2024) * Math.log10(costImprovementRate);
+    let effectiveProcessors = processors + (year - 2025) * Math.log10(costImprovementRate);
 
     function evaluate(n) {
         let scope = {n: n, p: Math.pow(10, effectiveProcessors)};
@@ -95,6 +96,24 @@ function getQuantumWork(model) {
     // console.log("quantum work is ", quantumWork);
     return quantumWork;
 }
+function clone(model) {
+    let penaltyInput = model.penaltyInput;
+    // console.log("quantum work was ", quantumWork);
+    if (model.qubitToProblemSize === "2^{q}") {
+        penaltyInput = utils.replaceVariable(penaltyInput, "q", "(log(n, 2))");
+    }
+    else if (model.qubitToProblemSize === "log({q})") {
+        penaltyInput = utils.replaceVariable(penaltyInput, "q", "(2^n)");
+    }
+    else if (model.qubitToProblemSize === "{q}") {
+        penaltyInput = utils.replaceVariable(penaltyInput, "q", "n");
+    }
+    else {
+        console.log("this should never print");
+    }
+    // console.log("quantum work is ", quantumWork);
+    return penaltyInput;
+}
 
 
 function calculateCurrentAdvantage(model) {
@@ -108,7 +127,9 @@ function calculateCurrentAdvantage(model) {
 
     let classicalRuntimeInput = model.classicalRuntimeInput;
     let quantumRuntimeInput = model.quantumRuntimeInput;
-    let penaltyInput = model.penaltyInput;
+
+    // let penaltyInput = model.penaltyInput;
+    let penaltyInput = clone(model);
 
     let processors = model.processors;
     
@@ -231,8 +252,8 @@ function calculateCurrentAdvantage(model) {
     }
 
 
-    console.log("printing advantages");
-    console.log(advantage, costAdvantage);
+    // console.log("printing current advantages");
+    // console.log(advantage, costAdvantage);
 
     currentAdvantageData.value =  {...currentAdvantageDataAux,
         problemName: model.problemName,
@@ -252,7 +273,9 @@ function calculateQuantumEconomicAdvantage(model) {
 
     let classicalRuntimeInput = model.classicalRuntimeInput;
     let quantumRuntimeInput = model.quantumRuntimeInput;
-    let penaltyInput = model.penaltyInput;
+    // let penaltyInput = model.penaltyInput;
+    let penaltyInput = clone(model);
+
 
     //lcf = logged classical function
     let lcf = utils.createLoggedFunction(classicalRuntimeInput);
@@ -292,8 +315,8 @@ function calculateQuantumEconomicAdvantage(model) {
     // console.log(quantumAdvantage(3000))
     // console.log("done testing")
 
-    const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000, "tStar in QEA");
-    const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2024, 3000, "tCostStar in QEA");
+    const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2025, 3000, "tStar in QEA");
+    const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2025, 3000, "tCostStar in QEA");
 
     let yearRadius = 0; //({last year on the QEA graph} - currentYear) / 2; used to populate ranges
     let defaultRadius = 5;
@@ -372,6 +395,8 @@ function calculateQuantumEconomicAdvantage(model) {
 
     let range = [];
     for (let i = 0; i < yearRadius * 2; i += yearRadius / 100) {
+    // for (let i = 0; i < yearRadius * 250; i += yearRadius / 100) {
+    // for (let i = 0; i < yearRadius * 250; i += yearRadius / 10) {
         range.push(i);
     }
 
@@ -388,6 +413,8 @@ function calculateQuantumEconomicAdvantage(model) {
     }
 
     console.log("tStar is ", tStar, "tCostStar is ", tCostStar);
+    console.log("nStar is", quantumFeasible(tStar), "nCostStar is", quantumFeasible(tCostStar));
+    // getQuantumFeasible(tStar, model.roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit, true)
 
     // // when there is no quantum advantage
     // if (quantumAdvantage(currentYear) >= 99999) {
@@ -516,15 +543,20 @@ function calculateQuantumEconomicAdvantage(model) {
 
 
 //returns the log_10 of the amount of logical qubits available with the given parameters
-function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit) {
+function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit, print=false) {
     const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, props.model.extrapolationType)
     if (roadmapUnit === "logical") {
         return logOfPhysicalQubits
     }
     //log_10 of the PLQR including the ratio improvement rate
-    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2025) * Math.log10(ratioImprovementRate);
     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
         adjustedPLQR = Math.log10(3)
+    }
+
+    if (print) {
+        console.log("log of physical qubits:", logOfPhysicalQubits)
+        console.log("adjusted PLQR (log):", adjustedPLQR)
     }
 
     //logLogicalQubits has the log_10 of the true number of logical qubits
@@ -535,9 +567,9 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
 
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
-function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit) {
+function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit, print=false) {
     //logLogicalQubits has the log_10 of the true number of logical qubits
-    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit)
+    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit, print)
 
     if (qubitToProblemSize == "2^{q}") {
         // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))

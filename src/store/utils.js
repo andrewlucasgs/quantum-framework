@@ -164,7 +164,7 @@ const interpolationFunctions = {
 const regressionMap = new Map()
 
 //returns log_10 of the number of qubits available based on inputs and saves the value to the regressionMap
-export function getPhysicalQubits(year, roadmap, extrapolationType) {
+export function getPhysicalQubits(year, roadmap, extrapolationType, baseFactor = 1) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
     let qubits = Object.values(roadmap).map(Number)
@@ -196,18 +196,27 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
         } 
         else {
             //exponential regression is just linear regression in log space
-            let [lastYears, lastQubitsLog] = [years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]
-            let key = JSON.stringify([lastYears, lastQubitsLog]);
-            let regression;
-            if (regressionMap.has(key)) {
-                regression = regressionMap.get(key)
-            }
-            else{
-                regression = simpleLinearRegression(lastYears, lastQubitsLog);
-                regressionMap.set(key, regression)
-            }
+            // let [lastYears, lastQubitsLog] = [years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]
+            // let key = JSON.stringify([lastYears, lastQubitsLog]);
+            // let regression;
+            // if (regressionMap.has(key)) {
+            //     regression = regressionMap.get(key)
+            // }
+            // else{
+            //     regression = simpleLinearRegression(lastYears, lastQubitsLog);
+            //     regressionMap.set(key, regression)
+            // }
+
             // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
-            logOfPhysicalQubits = regression.slope * year + regression.intercept;
+            // if (baseFactor != 1) {
+            //     console.log("base factor is not 1. original growth was ", Math.pow(10, regression.slope), "new growth is ", Math.pow(10, regression.slope + Math.log10(baseFactor)))
+            // }
+            // logOfPhysicalQubits = regression.slope * year + regression.intercept;
+
+            let growthRate = Math.pow(qubits[qubits.length - 1] / qubits[qubits.length - 2], 1 / (years[years.length - 1] - years[years.length - 2]));
+            // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate);
+            logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate * baseFactor);
+        
         }
 
     } 

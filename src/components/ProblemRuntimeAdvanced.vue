@@ -160,6 +160,9 @@ function validateInput(inputName) {
         else if (inputName == "quantumWork") {
             scope["q"] = 1; // Number of qubits
         }
+        else if (inputName == "penaltyInput") {
+            scope["q"] = 1; // Number of qubits
+        }
 
         compiled.evaluate(scope); // Evaluate expression with scope
         errors.value[inputName] = false;

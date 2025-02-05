@@ -31,29 +31,32 @@ const problems = ref([
 
     {
         problemName: "Integer Factorization",
-        classicalRuntimeInput: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
+        classicalRuntimeInput: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3)) / p",
         classicalWork: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
         quantumRuntimeInput: "n^(2) * log(n, e)",
         quantumWork: "n^(2) * log(n, e) * q",
-        penaltyInput: "log(n, 2)",
+        // penaltyInput: "log(n, 2)",
+        penaltyInput: "n^.5",
         qubitToProblemSize: "{q}",
     },
     {
         problemName: "Database Search",
-        classicalRuntimeInput: "n",
+        classicalRuntimeInput: "n / p",
         classicalWork: "n",
         quantumRuntimeInput: "sqrt(n)",
         quantumWork: "sqrt(n) * q",
-        penaltyInput: "log(n, 2)",
+        // penaltyInput: "log(n, 2)",
+        penaltyInput: "log(n, 2)^.5",
         qubitToProblemSize: "2^{q}",
     },
     {
         problemName: "Traveling Salesman",
-        classicalRuntimeInput: "n^3 * 2^n",
+        classicalRuntimeInput: "n^3 * 2^n / p",
         classicalWork: "n^3 * 2^n",
         quantumRuntimeInput: "n * 1.78^n",
         quantumWork: "n * 1.78^n * q",
-        penaltyInput: "log(n, 2)",
+        // penaltyInput: "log(n, 2)",
+        penaltyInput: "n^.5",
         qubitToProblemSize: "{q}",
     },
     {
@@ -88,15 +91,19 @@ const hardwares = ref([
                 costFactor: 8,
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
-                physicalLogicalQubitsRatio: 1000,
-                ratioImprovementRate: -10,
+                // physicalLogicalQubitsRatio: 1000,
+                physicalLogicalQubitsRatio: 264,
+                // ratioImprovementRate: -10,
+                ratioImprovementRate: -23,
                 roadmap: {
                     2020: 27,
                     2022: 127,
                     2024: 133,
                     2025: 156,
-                    2029: 200,
-                    2033: 2000,
+                    // 2029: 200,
+                    // 2033: 2000,
+                    2029: 22974,
+                    2033: 100000,
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
@@ -140,12 +147,14 @@ const hardwares = ref([
 
             {
                 hardwareName: "IonQ (Trapped Ion)",
-                hardwareSlowdown: 6.7,
+                // hardwareSlowdown: 6.7,
+                hardwareSlowdown: 8.48,
                 costFactor: 8,
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 32,
-                ratioImprovementRate: -10,
+                // ratioImprovementRate: -10,
+                ratioImprovementRate: -23,
                 roadmap: {
                     2021: 22,
                     2022: 25,
@@ -174,7 +183,8 @@ const hardwares = ref([
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                ratioImprovementRate: -10,
+                // ratioImprovementRate: -10,
+                ratioImprovementRate: -23,
                 roadmap: {
                     2023: 256,
                     2025: 3000,
@@ -286,7 +296,8 @@ watch(() => model.value, (value) => {
 
 
 
-const editMode = ref(true);
+// const editMode = ref(true);
+const editMode = ref(false);//misnamed??
 
 function updateRoadmap(value) {
     model.value.roadmap = value.roadmap;
