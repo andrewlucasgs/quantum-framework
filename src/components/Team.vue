@@ -49,5 +49,10 @@ const teamMembers = [
         image: '/6616978ed50987169fb845b7_hrvoje_picture - Hrvoje Kukina-p-500.jpg',
         affiliation: 'MIT FutureTech',
     },
+    {
+        name: 'Eleanor Crane',
+        image: 'eleanor_crane.jpeg',
+        affiliation: 'MIT FutureTech',
+    },
 ];
 </script>
