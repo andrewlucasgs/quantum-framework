@@ -32,7 +32,6 @@ function processDataToGraph(data) {
 
     let classicalSteps = data.classicalSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
     let classicalCostSteps = data.classicalCostSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
-    // let quantumCostSteps = data.quantumCostSteps.sort((a, b) => a[0] - b[0]).filter(step => step[0] <= maxX && step[1] <= maxY);
     let quantumCostSteps = data.quantumCostSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
     let quantumSteps = data.quantumSteps.filter(step => step[0] <= maxX && step[1] <= maxY);
 
@@ -439,8 +438,6 @@ function updateGraphData() {
                     },
                     color: 'black',
                     align: (data.nStar < data.nCostStar && (Math.abs(data.nCostStar - data.nStar) / data.maxX) < 0.13) ? 'right' : 'left',
-
-                    // align: data.nStar <= data.nCostStar ? 'right' : 'left',
 
                     useHTML: true,
                     text: '<b>'+utils.toBase10HTML(data.nStar.toFixed(1))+'</b>' + (data.nStar < data.nCostStar ? '<br>Quantum<br>Faster' : '<br>Quantum<br>Faster and Cheaper'),

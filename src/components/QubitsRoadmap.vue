@@ -5,16 +5,18 @@ import { number } from 'mathjs';
 import { defineProps, ref, watch } from 'vue';
 import * as utils from "../store/utils"
 
+const currentYear = new Date().getFullYear();
+
 const props = defineProps({
     data: Object,
     extrapolationType: String
 });
 
 const physicalQubits = ref(Array.from({
-    length: Math.max(Math.max(...Object.keys(props.data)) + 10, 2025 + 10) - 2025
+    length: Math.max(Math.max(...Object.keys(props.data)) + 10, currentYear + 10) - currentYear
 }, (_, i) => [
-    i + 2025,
-    utils.getPhysicalQubits(i + 2025, props.data, props.extrapolationType)
+    i + currentYear,
+    utils.getPhysicalQubits(i + currentYear, props.data, props.extrapolationType)
 ]))
 
 const chartOptions = {
@@ -51,7 +53,7 @@ const chartOptions = {
             text: 'Year',
         },
         startOnTick: true,
-        min: 2025,
+        min: currentYear,
 
 
     },
@@ -134,10 +136,10 @@ watch(() => [props.data, props.extrapolationType],
     () => {
 
         physicalQubits.value = Array.from({
-            length: Math.max(Math.max(...Object.keys(props.data)), 2025 + 10) - 2025 + 1
+            length: Math.max(Math.max(...Object.keys(props.data)), currentYear + 10) - currentYear + 1
         }, (_, i) => [
-            i + 2025,
-            utils.getPhysicalQubits(i + 2025, props.data, props.extrapolationType)
+            i + currentYear,
+            utils.getPhysicalQubits(i + currentYear, props.data, props.extrapolationType)
         ])
         chartOptions.series[0].data = physicalQubits.value;
         chartOptions.series[1].data = physicalQubits.value.filter(([year, qubits]) => props.data.hasOwnProperty(year));

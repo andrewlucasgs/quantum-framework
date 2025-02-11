@@ -9,6 +9,7 @@ import { Chart } from 'highcharts-vue'
 import { ref, defineProps, watch } from 'vue';
 import * as utils from "../store/utils"
 
+const currentYear = new Date().getFullYear();
 
 const props = defineProps({
     data: Object,
@@ -29,13 +30,10 @@ function processDataToGraph(data) {
     // Set maxY and maxX to minimum values among quantumAdvantage, quantumCostAdvantage, and quantumFeasible if midY or midX is 0
     const maxY = (midY === 0)
         ? Math.min(...[data.quantumAdvantage, data.quantumCostAdvantage, data.quantumFeasible].map(arr => Math.max(...arr.map(step => step[1]))))
-        // : midY * 3;
         : midY * 2;
     const maxX = (midX === 0)
         ? Math.min(...[data.quantumAdvantage, data.quantumCostAdvantage, data.quantumFeasible].map(arr => Math.max(...arr.map(step => step[0]))))
-        // : midX + 2 * (midX - 2025);
-        : midX + (midX - 2025);
-        // : 2100;
+        : midX + (midX - currentYear);
 
     let quantumAdvantage = data.quantumAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
     let quantumCostAdvantage = data.quantumCostAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
@@ -126,7 +124,7 @@ const chartOptions = {
         backgroundColor: 'transparent',
         formatter: function () {
 
-            const year = utils.round(this.points[0].x, data.maxX - 2025 <= 5 ? 1 : 0)
+            const year = utils.round(this.points[0].x, data.maxX - currentYear <= 5 ? 1 : 0)
 
 
             return `
@@ -153,7 +151,7 @@ const chartOptions = {
                 return this.value.toFixed(2);
             }
         },
-        min: 2025,
+        min: currentYear,
         max: data.maxX,
     },
     yAxis: {
@@ -226,7 +224,7 @@ function updateGraph() {
     chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
     const lastYear = data.maxX
-    const mid = parseInt((data.maxX - 2025) / 2) + 2025
+    const mid = parseInt((data.maxX - currentYear) / 2) + currentYear
     chartOptions.xAxis.tickPositions = [
         currentYear,
         (currentYear + mid) / 2,
@@ -449,7 +447,7 @@ function updateGraph() {
                 useHTML: true,
                 formatter: function () {
                     return `
-                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2025 <= 5 ? 1 : 0)}</p>
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - currentYear <= 5 ? 1 : 0)}</p>
                     `
                 },
             },
@@ -472,7 +470,7 @@ function updateGraph() {
 
                 formatter: function () {
                     return `
-                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2025 <= 5 ? 1 : 0)}</p>
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - currentYear <= 5 ? 1 : 0)}</p>
                     `
                 },
             },

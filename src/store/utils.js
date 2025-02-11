@@ -167,7 +167,7 @@ const regressionMap = new Map()
 export function getPhysicalQubits(year, roadmap, extrapolationType, baseFactor = 1) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap).map(Number)
+    let qubits = Object.values(roadmap).map(Number);
 
     //actual value of the number of physical qubits
     let numberOfPhysicalQubits;
@@ -176,7 +176,6 @@ export function getPhysicalQubits(year, roadmap, extrapolationType, baseFactor =
     if (roadmap.hasOwnProperty(year)) {
         numberOfPhysicalQubits = roadmap[year]
         logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
-
     } 
     else if (year > Math.max(...years)) {
         if (extrapolationType === 'linear') {
@@ -196,26 +195,24 @@ export function getPhysicalQubits(year, roadmap, extrapolationType, baseFactor =
         } 
         else {
             //exponential regression is just linear regression in log space
-            // let [lastYears, lastQubitsLog] = [years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]
-            // let key = JSON.stringify([lastYears, lastQubitsLog]);
-            // let regression;
-            // if (regressionMap.has(key)) {
-            //     regression = regressionMap.get(key)
-            // }
-            // else{
-            //     regression = simpleLinearRegression(lastYears, lastQubitsLog);
-            //     regressionMap.set(key, regression)
-            // }
+            let [lastYears, lastQubitsLog] = [years.slice(-2), qubits.slice(-2).map(x => Math.log10(x))]
+            let key = JSON.stringify([lastYears, lastQubitsLog]);
+            let regression;
+            if (regressionMap.has(key)) {
+                regression = regressionMap.get(key)
+            }
+            else{
+                regression = simpleLinearRegression(lastYears, lastQubitsLog);
+                regressionMap.set(key, regression)
+            }
 
             // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
-            // if (baseFactor != 1) {
-            //     console.log("base factor is not 1. original growth was ", Math.pow(10, regression.slope), "new growth is ", Math.pow(10, regression.slope + Math.log10(baseFactor)))
-            // }
-            // logOfPhysicalQubits = regression.slope * year + regression.intercept;
+            logOfPhysicalQubits = regression.slope * year + regression.intercept;
 
-            let growthRate = Math.pow(qubits[qubits.length - 1] / qubits[qubits.length - 2], 1 / (years[years.length - 1] - years[years.length - 2]));
-            // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate);
-            logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate * baseFactor);
+            // different logic to incorporate base factor.
+            // let growthRate = Math.pow(qubits[qubits.length - 1] / qubits[qubits.length - 2], 1 / (years[years.length - 1] - years[years.length - 2]));
+            // // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate);
+            // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate * baseFactor);
         
         }
 
@@ -317,7 +314,13 @@ export function problemSizeToQubits(logSize, qubitToProblemSize) {
 }
 
 export function replaceVariable(formula, oldVar, newVar) {
-    // Match `q` only when it's not in a larger word (like `sqrt`)
+    // Match symbol (like `q`) only when it's not in a larger word (like `sqrt`)
     let regex = new RegExp(`(?<![a-zA-Z])${oldVar}(?![a-zA-Z])`, 'g');
     return formula.replace(regex, newVar);
+}
+
+// returns the fractional representation of the percentage input
+// -20% -> 0.8, +30% -> 1.3
+export function percentageToFraction(percentage) {
+    return 1 + percentage / 100;
 }

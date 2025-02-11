@@ -1,6 +1,6 @@
 <template>
     <Dialog title="Runtime Functions" ref="dialog" @save="save" @cancel="cancel" @reset="reset"
-        @openModal="updateValues" classes="max-w-xl">
+        @openModal="reset" classes="max-w-xl">
         <template v-slot:button="{ openModal }">
             <slot :openModal="openModal" />
         </template>
@@ -11,7 +11,6 @@
                     <label class="font-medium text-sm" for="classicalRuntimeInput">Classical Runtime</label>
                     <input type="text" v-model="classicalRuntimeInput" class="w-full border rounded p-2"
                         @input="validateInput('classicalRuntimeInput')" />
-                    <!-- <div  class="mt-1" v-html="renderKaTeX(classicalRuntimeInput)"></div> -->
                     <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
                         <p v-if="errors.classicalRuntimeInput" class="text-red-500 text-xs">Invalid expression</p>
                         <span v-if="!errors.classicalRuntimeInput" v-html="renderKaTeX(classicalRuntimeInput)"></span>
@@ -61,8 +60,6 @@
 
             <div>
                 <label class="font-medium text-sm" for="processors">Processors</label>
-                <!-- <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                </div> -->
                 <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
                     <input class="flex-1 accent-[#002D9D]" type="range" id="processors" min="0" max="20" step="1"
                                 v-model="processors" />
@@ -117,20 +114,17 @@ const errors = ref({
 
 const hasErrors = computed(() => Object.values(errors.value).some(error => error));
 
-function updateValues() {
+function reset() {
     classicalRuntimeInput.value = props.classicalRuntimeInput;
     quantumRuntimeInput.value = props.quantumRuntimeInput;
     penaltyInput.value = props.penaltyInput;
     classicalWork.value = props.classicalWork;
     quantumWork.value = props.quantumWork;
     processors.value = props.processors;
-    validateAllInputs();
+    validateAllInputs(false);
 }
 
-function reset() {
-    updateValues(); // Reset inputs to initial values when modal was opened
-}
-
+// tool will only save if all expressions are valid
 function save() {
     if (!hasErrors.value) {
         emit('updateFunctions', {
@@ -149,7 +143,11 @@ function cancel() {
     dialog.value.closeModal();
 }
 
-function validateInput(inputName) {
+// ensures expressions only contain allowed variables
+// classicalWork and quantumRuntime are functions of n
+// classicalRuntime is a function of n and p
+// quantumWork and penalty are functions of n and q
+function validateInput(inputName, overrideClassicalWork = true) {
     const scope = { n: 1};
 
     try {
@@ -167,18 +165,19 @@ function validateInput(inputName) {
         compiled.evaluate(scope); // Evaluate expression with scope
         errors.value[inputName] = false;
         
-        // if (inputName == "classicalRuntimeInput") {
-        //     classicalWork.value = utils.replaceVariable(classicalRuntimeInput.value, "p", "(1)");
-        //     validateInput('classicalWork');
-        // }
+        // Updates classical work automatically if classical runtime changes
+        if (overrideClassicalWork && inputName == "classicalRuntimeInput") {
+            classicalWork.value = utils.replaceVariable(classicalRuntimeInput.value, "p", "(1)");
+            validateInput('classicalWork');
+        }
 
     } catch {
         errors.value[inputName] = true;
     }
 }
 
-function validateAllInputs() {
-    validateInput('classicalRuntimeInput');
+function validateAllInputs(overrideClassicalWork = true) {
+    validateInput('classicalRuntimeInput', overrideClassicalWork);
     validateInput('quantumRuntimeInput');
     validateInput('penaltyInput');
     validateInput('classicalWork');

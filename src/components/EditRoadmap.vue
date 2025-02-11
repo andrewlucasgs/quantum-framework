@@ -1,7 +1,7 @@
 <template>
     <Dialog :title="'Edit ' + name + ' Roadmap'"
     button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel" @reset="reset"
-        classes="max-w-7xl" @openModal="updateValues">
+        classes="max-w-7xl" @openModal="reset">
         <template v-slot:button="{ openModal }">
             <slot :openModal="openModal" />
         </template>
@@ -46,7 +46,7 @@
                         <thead class="border rounded-xl">
                             <tr class="text-gray-700">
                                 <th class="border border-slate-200 p-1">Year</th>
-                                <th class="border border-slate-200 p-1"># of {{ roadmapUnit}} Qubits</th>
+                                <th class="border border-slate-200 p-1"># of {{ roadmapUnit}} qubits</th>
                                 <th class="border border-slate-200 p-1"></th>
                             </tr>
                         </thead>
@@ -117,7 +117,7 @@ watch(roadmapData, (newVal) => {
     dataToGraph.value = Object.fromEntries(newVal.filter(roadmap => roadmap.year && roadmap.qubits).map(roadmap => ([Number(roadmap.year), roadmap.qubits])))
 }, { deep: true })
 
-function updateValues() {
+function reset() {
     extrapolationType.value = props.extrapolationType;
     roadmapUnit.value = props.roadmapUnit;
     roadmapData.value = Object.entries(props.roadmap).map(([key, value]) => {
@@ -128,14 +128,17 @@ function updateValues() {
     });
 }
 
-watch(() => roadmapUnit.value, (newVal) => {
-    roadmapData.value = roadmapData.value.map(roadmap => {
-        return {
-            year: roadmap.year,
-            qubits: roadmap.qubits * (newVal === 'physical' ? props.physicalLogicalQubitsRatio : 1/(props.physicalLogicalQubitsRatio))
-        }
-    })
-})
+// Automatically switches the qubit values based on PLQR (This implementation is buggy with how this component appears twice in Form.vue).
+// Additionally, users might interpret the converted roadmap to symbolize the same thing as the original roadmap, but because this conversion does not account
+// for PLQR-change over time, it does not. 
+// watch(() => roadmapUnit.value, (newVal) => {
+//     roadmapData.value = roadmapData.value.map(roadmap => {
+//         return {
+//             year: roadmap.year,
+//             qubits: roadmap.qubits * (newVal === 'physical' ? props.physicalLogicalQubitsRatio : 1/(props.physicalLogicalQubitsRatio))
+//         }
+//     })
+// })
    
 
 function save() {
@@ -157,10 +160,6 @@ function save() {
 
 function cancel() {
     dialog.value.closeModal();
-}
-
-function reset() {
-    updateValues();
 }
 
 const emit = defineEmits(['updateRoadmap'])

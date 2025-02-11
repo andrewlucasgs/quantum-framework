@@ -1,6 +1,6 @@
 <template>
     <Dialog title="Classical Hardware Speed Advantage" button-label="Advanced options" ref="dialog" @save="save" @cancel="cancel"
-        @reset="reset" @openModal="updateValues" classes="max-w-xl">
+        @reset="reset" @openModal="reset" classes="max-w-xl">
         <template v-slot:button="{ openModal }">
             <slot :openModal="openModal" />
         </template>
@@ -12,23 +12,23 @@
 
                     <label class="font-medium text-sm " for="speed">Classical/Quantum Speed Ratio</label>
                     <div class="text-xs ">
-                        <input hidden type="radio" id="simple" value="simple" v-model="speedInput" />
+                        <input hidden type="radio" id="simple" value="simple" v-model="inputType" />
                         <label class="border rounded-sm transition-all text-center p-1" :class="{
-        'bg-[#002D9D] text-white': speedInput === 'simple',
-        'bg-gray-100': speedInput !== 'simple'
-    }" for="simple">Simple</label>
-                        <input hidden type="radio" id="manual" value="manual" v-model="speedInput" />
+                            'bg-[#002D9D] text-white': inputType === 'simple',
+                            'bg-gray-100': inputType !== 'simple'
+                        }" for="simple">Simple</label>
+                        <input hidden type="radio" id="manual" value="manual" v-model="inputType" />
                         <label class="border rounded-sm transition-all text-center p-1" :class="{
-        'bg-[#002D9D] text-white': speedInput === 'manual',
-        'bg-gray-100': speedInput !== 'manual'
-    }" for="manual">Manual</label>
+                            'bg-[#002D9D] text-white': inputType === 'manual',
+                            'bg-gray-100': inputType !== 'manual'
+                        }" for="manual">Manual</label>
                     </div>
                 </div>
                 <p class="text-xs text-gray-600">The ratio of the speed of a classical computer
                     divided by the speed of the quantum computer.</p>
 
 
-                <div v-if="speedInput === 'manual'">
+                <div v-if="inputType === 'manual'">
                     <div class="flex items-end mt-2 justify-between w-full gap-2">
                         <div class="flex-1">
                             <div class="flex items-end">
@@ -45,7 +45,7 @@
 
                                 <div>
 
-                                    <p class="font-medium text-xs "> Classical CPU GHz</p>
+                                    <p class="font-medium text-xs ">Classical CPU GHz</p>
                                     <div class="flex items-center gap-1">
 
                                         <input class="bg-gray-100 p-1 rounded-lg text-center w-1/2" type="number"
@@ -72,7 +72,7 @@
                 <div v-else>
                     <div class="flex items-center justify-between w-full gap-2">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="speed" v-model="speed" min="1"
-                            max="100000" />
+                            max="1000000" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number" id="speed"
                             v-model="speed" />
                     </div>
@@ -129,64 +129,47 @@
 import Dialog from './Dialog.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useDialogInputStore } from '../store/dialogInputs.js';
+import * as utils from "../store/utils"
 
-const dialogInputStore = useDialogInputStore();
 const dialog = ref(null);
 
-const speedInput = ref("simple");
-const gateTime = ref(100)
-const cpuGHz = ref(5)
+const props = defineProps({
+    advancedSlowdown: Object,
+});
+
+const inputType = ref("simple");
+
+const gateTime = ref(props.advancedSlowdown.gateTime);
+const cpuGHz = ref(props.advancedSlowdown.cpuGHz);
+const speed = ref(props.advancedSlowdown.speed);
+const gateOverhead = ref(props.advancedSlowdown.gateOverhead);
+const algorithmConstant = ref(props.advancedSlowdown.algorithmConstant);
 
 const manualSpeed = computed(() => {
     return gateTime.value * cpuGHz.value
 })
 
-const speed = ref(10000);
+const hwSlowdown = ref(0); //initial value ignored
 
-const gateOverhead = ref(100);
-const algorithmConstant = ref(1);
-
-const hwSlowdown = ref(6);
-
-watch([() => [speedInput.value, manualSpeed.value, speed.value, gateOverhead.value, algorithmConstant.value], () => {
-    if (speedInput.value === "manual") {
-        hwSlowdown.value = Math.round(Math.log10(manualSpeed.value * gateOverhead.value * algorithmConstant.value) * 100) / 100;
+watch([() => [inputType.value, manualSpeed.value, speed.value, gateOverhead.value, algorithmConstant.value], () => {
+    if (inputType.value === "manual") {
+        hwSlowdown.value = utils.round(Math.log10(manualSpeed.value * gateOverhead.value * algorithmConstant.value), 2);
     }
     else {
-        hwSlowdown.value = Math.round(Math.log10(speed.value * gateOverhead.value * algorithmConstant.value) * 100) / 100;
+        hwSlowdown.value = utils.round(Math.log10(speed.value * gateOverhead.value * algorithmConstant.value), 2);
     }
 }])
 
-// const hwSlowdown = computed(() => {
-//     console.log("in")
-//     if (speedInput === "manual") {
-//         console.log("top")
-//         return Math.round(Math.log10(manualSpeed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
-//     }
-//     else {
-//         console.log("bot")
-//         return Math.round(Math.log10(speed.value*gateOverhead.value*algorithmConstant.value)*100)/100;
-//     }
-// })
-
-function updateValues() {
-    speed.value = dialogInputStore.hardwareSlowdownAdvancedOptions.speed;
-    gateOverhead.value = dialogInputStore.hardwareSlowdownAdvancedOptions.gateOverhead;
-    algorithmConstant.value = dialogInputStore.hardwareSlowdownAdvancedOptions.algorithmConstant;
-    gateTime.value = dialogInputStore.hardwareSlowdownAdvancedOptions.gateTime;
-    cpuGHz.value = dialogInputStore.hardwareSlowdownAdvancedOptions.cpuGHz;
-}
-
 function save() {
-    dialogInputStore.hardwareSlowdownAdvancedOptions = {
+    let newAdvancedSlowdown = {
+        gateTime: gateTime.value,
+        cpuGHz: cpuGHz.value,
         speed: speed.value,
         gateOverhead: gateOverhead.value,
         algorithmConstant: algorithmConstant.value,
-        gateTime: gateTime.value,
-        cpuGHz: cpuGHz.value,
     }
 
-    emit("updateSlowdown", hwSlowdown.value);
+    emit("updateSlowdown", hwSlowdown.value, newAdvancedSlowdown);
     dialog.value.closeModal();
 }
 
@@ -195,11 +178,11 @@ function cancel() {
 }
 
 function reset() {
-    speed.value = 10000;
-    gateOverhead.value = 100;
-    algorithmConstant.value = 1;
-    gateTime.value = 100;
-    cpuGHz.value = 5;
+    gateTime.value = props.advancedSlowdown.gateTime;
+    cpuGHz.value = props.advancedSlowdown.cpuGHz;
+    speed.value = props.advancedSlowdown.speed;
+    gateOverhead.value = props.advancedSlowdown.gateOverhead;
+    algorithmConstant.value = props.advancedSlowdown.algorithmConstant;
 }
 
 const emit = defineEmits(['updateSlowdown'])

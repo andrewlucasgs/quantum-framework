@@ -30,6 +30,13 @@ const modelTemplate = {
     ratioImprovementRate: -23,
     costImprovementRate: -10,
     processors: 5,
+    advancedSlowdown: {
+        gateTime: 12,
+        cpuGHz: 5,
+        speed: 60,
+        gateOverhead: 100,
+        algorithmConstant: 1,
+    },
 
 }
 

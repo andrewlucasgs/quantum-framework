@@ -35,8 +35,6 @@ const problems = ref([
         classicalWork: "e^((64/9 * n)^(1/3) * log(n, e)^(2/3))",
         quantumRuntimeInput: "n^(2) * log(n, e)",
         quantumWork: "n^(2) * log(n, e) * q",
-        // penaltyInput: "log(n, 2)",
-        penaltyInput: "n^.5",
         qubitToProblemSize: "{q}",
     },
     {
@@ -45,8 +43,6 @@ const problems = ref([
         classicalWork: "n",
         quantumRuntimeInput: "sqrt(n)",
         quantumWork: "sqrt(n) * q",
-        // penaltyInput: "log(n, 2)",
-        penaltyInput: "log(n, 2)^.5",
         qubitToProblemSize: "2^{q}",
     },
     {
@@ -55,8 +51,6 @@ const problems = ref([
         classicalWork: "n^3 * 2^n",
         quantumRuntimeInput: "n * 1.78^n",
         quantumWork: "n * 1.78^n * q",
-        // penaltyInput: "log(n, 2)",
-        penaltyInput: "n^.5",
         qubitToProblemSize: "{q}",
     },
     {
@@ -65,7 +59,6 @@ const problems = ref([
         classicalWork: "n^3",
         quantumRuntimeInput: "n",
         quantumWork: "n * q",
-        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
     },
     {
@@ -74,7 +67,6 @@ const problems = ref([
         classicalWork: "(2 * pi * n)^(1/2) * (n / e)^n",
         quantumRuntimeInput: "n^5",
         quantumWork: "n^5 * q",
-        penaltyInput: "log(n, 2)",
         qubitToProblemSize: "{q}",
     },
 ]);
@@ -87,13 +79,13 @@ const hardwares = ref([
             {
                 category: "Established builders",
                 hardwareName: "IBM (Superconducting)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 3.78,
                 costFactor: 8,
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
-                // physicalLogicalQubitsRatio: 1000,
                 physicalLogicalQubitsRatio: 264,
-                // ratioImprovementRate: -10,
                 ratioImprovementRate: -23,
                 roadmap: {
                     2020: 27,
@@ -107,10 +99,19 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 12,
+                    cpuGHz: 5,
+                    speed: 60,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
             },
             {
                 category: "Established builders",
                 hardwareName: "Google (Superconducting)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 3.78,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -124,11 +125,20 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 12,
+                    cpuGHz: 5,
+                    speed: 60,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://quantumai.google/static/site-assets/images/marketing/misc/roadmap.png",
             },
             {
                 category: "Established builders",
                 hardwareName: "Rigetti (Superconducting)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 3.78,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -142,12 +152,20 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 12,
+                    cpuGHz: 5,
+                    speed: 60,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://www.globenewswire.com/news-release/2022/05/16/2444311/0/en/Rigetti-Computing-Reports-First-Quarter-2022-Financial-Results-and-Provides-Business-Update.html",
             },
 
             {
                 hardwareName: "IonQ (Trapped Ion)",
-                // hardwareSlowdown: 6.7,
+                penaltyInput: "1",
+                processors: 5,
                 hardwareSlowdown: 8.48,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -168,6 +186,13 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 600000,
+                    cpuGHz: 5,
+                    speed: 3000000,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
             },
         ]
 
@@ -178,12 +203,13 @@ const hardwares = ref([
 
             {
                 hardwareName: "QuEra (Neutral Atom)",
+                penaltyInput: "1",
+                processors: 5,
                 hardwareSlowdown: 5.1,
                 costFactor: 8,
                 quantumImprovementRate: -10,
                 costImprovementRate: -10,
                 physicalLogicalQubitsRatio: 100,
-                // ratioImprovementRate: -10,
                 ratioImprovementRate: -23,
                 roadmap: {
                     2023: 256,
@@ -192,10 +218,19 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 250,
+                    cpuGHz: 5,
+                    speed: 1250,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://www.quera.com/qec",
             },
             {
                 hardwareName: "Pasqal (Neutral Atom)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 5.1,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -209,10 +244,19 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 250,
+                    cpuGHz: 5,
+                    speed: 1250,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://www.hpcwire.com/2024/03/13/pasqal-issues-roadmap-to-10000-qubits-in-2026-and-fault-tolerance-in-2028/",
             },
             {
                 hardwareName: "Infeqtion (Neutral Atom)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 5.1,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -226,10 +270,19 @@ const hardwares = ref([
                 },
                 roadmapUnit: "logical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 250,
+                    cpuGHz: 5,
+                    speed: 1250,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://www.nextbigfuture.com/2024/02/infleqtion-1600-qubit-array-today-and-five-year-roadmap-to-fault-tolerant-quantum-computers.html",
             },
             {
                 hardwareName: "Quantum Silicon (Semiconductors)",
+                penaltyInput: "sqrt(q)",
+                processors: 5,
                 hardwareSlowdown: 5.1,
                 costFactor: 8,
                 quantumImprovementRate: -10,
@@ -243,6 +296,13 @@ const hardwares = ref([
                 },
                 roadmapUnit: "physical",
                 extrapolationType: "exponential",
+                advancedSlowdown: {
+                    gateTime: 250,
+                    cpuGHz: 5,
+                    speed: 1250,
+                    gateOverhead: 100,
+                    algorithmConstant: 1,
+                },
                 reference: "https://www.eetimes.eu/cea-leti-details-silicon-based-quantum-computing-roadmap/",
             },
         ]
@@ -255,8 +315,9 @@ const hardwares = ref([
 
 const model = ref(models.models.find(m => m.id === props.modelId));
 
-function updateSlowdown(value) {
-    model.value.hardwareSlowdown = value;
+function updateSlowdown(hwSlowdown, advancedSlowdown) {
+    model.value.hardwareSlowdown = hwSlowdown;
+    model.value.advancedSlowdown = advancedSlowdown;
 }
 
 const selectedProblem = ref(problems.value.find(p => p.problemName === model.value.problemName));
@@ -267,6 +328,8 @@ onMounted(() => {
 
 watch(() => selectedHardware.value, (hardware) => {
     model.value.hardwareName = hardware.hardwareName;
+    model.value.penaltyInput = hardware.penaltyInput;
+    model.value.processors = hardware.processors;
     model.value.hardwareSlowdown = hardware.hardwareSlowdown;
     model.value.physicalLogicalQubitsRatio = hardware.physicalLogicalQubitsRatio;
     model.value.quantumImprovementRate = hardware.quantumImprovementRate;
@@ -276,7 +339,7 @@ watch(() => selectedHardware.value, (hardware) => {
     model.value.ratioImprovementRate = hardware.ratioImprovementRate;
     model.value.costFactor = hardware.costFactor;
     model.value.costImprovementRate = hardware.costImprovementRate;
-
+    model.value.advancedSlowdown = hardware.advancedSlowdown;
 }, { deep: true });
 
 watch(() => selectedProblem.value, (problem) => {
@@ -285,7 +348,6 @@ watch(() => selectedProblem.value, (problem) => {
     model.value.classicalWork = problem.classicalWork;
     model.value.quantumRuntimeInput = problem.quantumRuntimeInput;
     model.value.quantumWork = problem.quantumWork;
-    model.value.penaltyInput = problem.penaltyInput;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
 }, { deep: true });
 
@@ -338,7 +400,6 @@ function checkLimits() {
     else if (model.value.quantumImprovementRate < -90) {
         model.value.quantumImprovementRate = -90;
     }
-
     if (model.value.costImprovementRate > 90) {
         model.value.costImprovementRate = 90;
     }
@@ -350,6 +411,10 @@ function checkLimits() {
     }
     else if (model.value.ratioImprovementRate < -90) {
         model.value.ratioImprovementRate = -90;
+    }
+
+    if (model.physicalLogicalQubitsRatio < 3) {
+        model.physicalLogicalQubitsRatio = 3;
     }
 }
 
@@ -363,7 +428,13 @@ function updateFunctions(updatedValues) {
     model.value.processors = updatedValues.processors;
 }
 
-
+// attempt at only using one editroadmap instance
+// const editRoadmapRef = ref(null);
+// const openEditRoadmap = () => {
+//   if (editRoadmapRef.value) {
+//     editRoadmapRef.value.openModal();
+//   }
+// };
 
 
 
@@ -504,6 +575,12 @@ function updateFunctions(updatedValues) {
                                 </template>
                             </ReferenceDialog>
                         </div>
+                        <!-- <button
+                            class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+                            @click="openEditRoadmap"
+                        >
+                            Edit roadmap
+                        </button> -->
                         <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                             :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
                             :roadmapUnit="model.roadmapUnit"
@@ -535,6 +612,12 @@ function updateFunctions(updatedValues) {
                             </tr>
                             <tr>
                                 <td colspan="2" class="p-1 text-center">
+                                    <!-- <button
+                                        class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                        @click="openEditRoadmap"
+                                    >
+                                        See more
+                                    </button> -->
                                     <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
                                         :roadmapUnit="model.roadmapUnit"
@@ -548,6 +631,11 @@ function updateFunctions(updatedValues) {
                             </tr>
                         </tbody>
                     </table>
+                    <EditRoadmap ref="editRoadmapRef" :name="model.hardwareName" :roadmap="model.roadmap"
+                        :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
+                        :roadmapUnit="model.roadmapUnit"
+                        :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio">
+                    </EditRoadmap>
                 </div>
 
                 <div class="flex flex-col">
@@ -611,7 +699,7 @@ function updateFunctions(updatedValues) {
                                 </template>
                             </ReferenceDialog>
                         </div>
-                        <HardwareSlowdownAdvanced @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                        <HardwareSlowdownAdvanced :advancedSlowdown="model.advancedSlowdown" @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
                                 @click="openModal">Advanced options</button>
@@ -684,7 +772,7 @@ function updateFunctions(updatedValues) {
                         qubit.</p>
                     <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                            v-model="model.physicalLogicalQubitsRatio" min="1" max="2000" />
+                            v-model="model.physicalLogicalQubitsRatio" min="3" max="2000" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
                         <div
