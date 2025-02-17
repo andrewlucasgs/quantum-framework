@@ -98,8 +98,8 @@ export function createLoggedFunction(expression) {
     // loggedTree = loggedTree.compile();
 
     let loggedTree = applyLogRules(math.parse(expression)).compile();
-    function logged(value) {
-        let scope = {n: value};
+    function logged(value, scope = {n: value}) {
+        // let scope = {n: value};
         return loggedTree.evaluate(scope);
     }
     return logged;
@@ -164,10 +164,10 @@ const interpolationFunctions = {
 const regressionMap = new Map()
 
 //returns log_10 of the number of qubits available based on inputs and saves the value to the regressionMap
-export function getPhysicalQubits(year, roadmap, extrapolationType) {
+export function getPhysicalQubits(year, roadmap, extrapolationType, baseFactor = 1) {
     year = parseFloat(year);
     let years = Object.keys(roadmap).map(Number);
-    let qubits = Object.values(roadmap).map(Number)
+    let qubits = Object.values(roadmap).map(Number);
 
     //actual value of the number of physical qubits
     let numberOfPhysicalQubits;
@@ -176,7 +176,6 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
     if (roadmap.hasOwnProperty(year)) {
         numberOfPhysicalQubits = roadmap[year]
         logOfPhysicalQubits = Math.log10(numberOfPhysicalQubits);
-
     } 
     else if (year > Math.max(...years)) {
         if (extrapolationType === 'linear') {
@@ -206,8 +205,15 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
                 regression = simpleLinearRegression(lastYears, lastQubitsLog);
                 regressionMap.set(key, regression)
             }
+
             // numberOfPhysicalQubits = 10 ** (regression.slope * year + regression.intercept);
             logOfPhysicalQubits = regression.slope * year + regression.intercept;
+
+            // different logic to incorporate base factor.
+            // let growthRate = Math.pow(qubits[qubits.length - 1] / qubits[qubits.length - 2], 1 / (years[years.length - 1] - years[years.length - 2]));
+            // // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate);
+            // logOfPhysicalQubits = Math.log10(qubits[qubits.length - 1]) + (year - years[years.length - 1]) * Math.log10(growthRate * baseFactor);
+        
         }
 
     } 
@@ -220,36 +226,56 @@ export function getPhysicalQubits(year, roadmap, extrapolationType) {
 }
 
 // find when f(x) = 0
-// assumes f is a function which generally trends upwards
+// assumes f is a function such that f(a) * f(b) < 0 and f(b) > 0
 // export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 10000000) {
-export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
+// export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
+export function bisectionMethod(f, a, b, description = "", tol = 1e-7, maxIter = 1000) {
     let fa = f(a);
     let fb = f(b);
-    // if (fa * fb >= 0) {
-    //     return null;
-    // }
-    if (fa > 0) {
-        console.log("fa is positive. implies that classical is always more expensive")
-        return null
-    }
-    if (fb < 0) {
-        console.log("fb is negative. implies that quantum is always more expensive")
-        return null
+
+    if (fa == null || fb == null || isNaN(fa) || isNaN(fb)) {
+        console.log("fa or fb is null or NaN; returning null")
+        console.log("Description: ", description) 
+        console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return null;
     }
 
+    if (fa >= 0) {
+        // console.log("fa is positive. implies that classical is always more expensive")
+        // console.log("Description: ", description) 
+        // console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return 0;
+    }
+    if (fb < 0) {
+        // console.log("fb is negative. implies that quantum is always more expensive")
+        // console.log("Description: ", description) 
+        // console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, fa: ${fa}, fb: ${fb}`);
+        return Infinity;
+    }
+    
     let c = a;
+    let fc = fa;
     for (let i = 0; i < maxIter; i++) {
         c = (a + b) / 2;
-        let fc = f(c);
-        // if (Math.abs(fc) < tol || (b - a) / 2 < tol) {
+        fc = f(c);
+        if (fc == null || isNaN(fc)) {
+            console.log("fc is null or NaN; returning null");
+            console.log("Description: ", description) 
+            console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
+            return null;
+        }
         if (Math.abs(fc) < tol || Math.abs(b - a) < tol) {
-            // if (Math.abs(b - a) / 2 < tol) {
-            if (Math.abs(fc) >= tol) {
-                console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
-                console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c));
-            }
+            // if (Math.abs(fc) >= tol) {
+            //     console.log("binary search range tolerance reached before value tolerance. function is very sensitive to changes in input.")
+            //     console.log("Description: ", description) 
+            //     console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
+            // }
+            // else {
+            //     console.log("smooth binary search")
+            // }
             return c;
         }
+
         if (fa * fc < 0) {
             b = c;
             fb = fc;
@@ -259,9 +285,9 @@ export function bisectionMethod(f, a, b, tol = 1e-7, maxIter = 400) {
         }
     }
 
-    console.log("couldn't converge during binary search"); 
-    // console.log("a: ", a, "\nb: ", b, "\nc: ", c, "\nfa: ", fa, "\nfb: ", fb, "\nfc: ", f(c)); 
-    // console.log(b - a)
+    console.log("couldn't converge during binary search. returning last value") 
+    console.log("Description: ", description) 
+    console.log(`a: ${a}, b: ${b}, b-a: ${b-a}, c: ${c}, fa: ${fa}, fb: ${fb}, fc: ${fc}`);
     return c;
 }
 
@@ -285,4 +311,16 @@ export function problemSizeToQubits(logSize, qubitToProblemSize) {
         console.log("this should never print, loglogicalQubits will be set to 0")
     }
     return loglogicalQubits;
+}
+
+export function replaceVariable(formula, oldVar, newVar) {
+    // Match symbol (like `q`) only when it's not in a larger word (like `sqrt`)
+    let regex = new RegExp(`(?<![a-zA-Z])${oldVar}(?![a-zA-Z])`, 'g');
+    return formula.replace(regex, newVar);
+}
+
+// returns the fractional representation of the percentage input
+// -20% -> 0.8, +30% -> 1.3
+export function percentageToFraction(percentage) {
+    return 1 + percentage / 100;
 }

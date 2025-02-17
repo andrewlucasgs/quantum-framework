@@ -9,6 +9,7 @@ import { Chart } from 'highcharts-vue'
 import { ref, defineProps, watch } from 'vue';
 import * as utils from "../store/utils"
 
+const currentYear = new Date().getFullYear();
 
 const props = defineProps({
     data: Object,
@@ -32,7 +33,7 @@ function processDataToGraph(data) {
         : midY * 2;
     const maxX = (midX === 0)
         ? Math.min(...[data.quantumAdvantage, data.quantumCostAdvantage, data.quantumFeasible].map(arr => Math.max(...arr.map(step => step[0]))))
-        : midX + (midX - 2024);
+        : midX + (midX - currentYear);
 
     let quantumAdvantage = data.quantumAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
     let quantumCostAdvantage = data.quantumCostAdvantage.filter(step => step[0] <= maxX && step[1] <= maxY);
@@ -123,7 +124,7 @@ const chartOptions = {
         backgroundColor: 'transparent',
         formatter: function () {
 
-            const year = utils.round(this.points[0].x, data.maxX - 2024 <= 5 ? 1 : 0)
+            const year = utils.round(this.points[0].x, data.maxX - currentYear <= 5 ? 1 : 0)
 
 
             return `
@@ -150,7 +151,7 @@ const chartOptions = {
                 return this.value.toFixed(2);
             }
         },
-        min: 2024,
+        min: currentYear,
         max: data.maxX,
     },
     yAxis: {
@@ -223,7 +224,7 @@ function updateGraph() {
     chartOptions.xAxis.max = data.maxX
     const currentYear = new Date().getFullYear()
     const lastYear = data.maxX
-    const mid = parseInt((data.maxX - 2024) / 2) + 2024
+    const mid = parseInt((data.maxX - currentYear) / 2) + currentYear
     chartOptions.xAxis.tickPositions = [
         currentYear,
         (currentYear + mid) / 2,
@@ -446,7 +447,7 @@ function updateGraph() {
                 useHTML: true,
                 formatter: function () {
                     return `
-                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - currentYear <= 5 ? 1 : 0)}</p>
                     `
                 },
             },
@@ -469,7 +470,7 @@ function updateGraph() {
 
                 formatter: function () {
                     return `
-                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - 2024 <= 5 ? 1 : 0)}</p>
+                    <p class="text-gray-700 mb-1 font-bold" style="color: ${this.series.color};">${utils.round(this.x, data.maxX - currentYear <= 5 ? 1 : 0)}</p>
                     `
                 },
             },
