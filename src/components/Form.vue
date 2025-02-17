@@ -425,7 +425,7 @@ function updateFunctions(updatedValues) {
     model.value.penaltyInput = updatedValues.penaltyInput;
     model.value.classicalWork = updatedValues.classicalWork;
     model.value.quantumWork = updatedValues.quantumWork;
-    model.value.processors = updatedValues.processors;
+    model.value.processors = Number(updatedValues.processors);
 }
 
 // attempt at only using one editroadmap instance
@@ -768,7 +768,7 @@ function updateFunctions(updatedValues) {
                 <div class="flex flex-col">
                     <label class="font-medium text-s" for="physical_logical_ratio">Physical to Logical Qubit
                         Ratio</label>
-                    <p class="text-xs text-gray-600">Number of physical qbits needed per one error corrected logical
+                    <p class="text-xs text-gray-600">Number of physical qubits needed per one error corrected logical
                         qubit.</p>
                     <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
                         <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"

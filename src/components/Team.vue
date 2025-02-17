@@ -199,19 +199,18 @@ const accentureMembers = computed(() => teamMembers.filter(member => member.affi
 import { computed } from "vue";
 
 const teamMembers = [
-    { name: 'Neil Thompson', image: '/650353e37ba6cf9c37b2db67_neil-thompson.jpg', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Jayson Lynch', image: '/650353e88fadc59390b6639b_jayson-lynch-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Frederick Mejia', image: '/654bb5d93f6840c86a2fea17_headshot - Fred Mejia-p-500.png', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Andrew Souza', image: '/650353ea2e6029b3cea2ee24_andrew-lucas-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Hans Gundlach', image: '/660c392f18a635bb348acc70_profilemay2023 - Hans Gundlach-p-500.png', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Hrvoje Kukina', image: '/6616978ed50987169fb845b7_hrvoje_picture - Hrvoje Kukina-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Eleanor Crane', image: "/eleanor_crane.jpeg", affiliation: 'MIT FutureTech', role: 'Title' },
+    { name: 'Neil Thompson', image: '/650353e37ba6cf9c37b2db67_neil-thompson.jpg', affiliation: 'MIT FutureTech', role: 'Director of FutureTech' },
+    { name: 'Jayson Lynch', image: '/650353e88fadc59390b6639b_jayson-lynch-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Head of Algorithms' },
+    { name: 'Frederick Mejia', image: '/654bb5d93f6840c86a2fea17_headshot - Fred Mejia-p-500.png', affiliation: 'MIT FutureTech', role: 'MEng Student, Developer' },
+    { name: 'Hans Gundlach', image: '/660c392f18a635bb348acc70_profilemay2023 - Hans Gundlach-p-500.png', affiliation: 'MIT FutureTech', role: 'Researcher' },
+    { name: 'Hrvoje Kukina', image: '/6616978ed50987169fb845b7_hrvoje_picture - Hrvoje Kukina-p-500.jpg', affiliation: 'MIT FutureTech', role: 'PhD Candidate' },
+    { name: 'Eleanor Crane', image: "/eleanor_crane.jpeg", affiliation: 'MIT FutureTech', role: 'Researcher' },
     { name: 'Johannes Galatsanos-Dueck', image: '', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Albert Scerbo', image: '', affiliation: 'MIT FutureTech', role: 'Title' },
     { name: 'Carl Dukatz', image: '', affiliation: 'Accenture', role: 'Title' },
-    { name: 'Prashant Shukla', image: '', affiliation: 'Accenture', role: 'Title' },
-    { name: 'KC Hsu', image: '', affiliation: 'Accenture', role: 'Title' },
-    { name: 'Victoria Hazoglou', image: '', affiliation: 'Accenture', role: 'Title' }
+    { name: 'Prashant P. Shukla', image: 'PrashantShukla.jpg', affiliation: 'Accenture', role: 'Lead – Accenture & MIT IDE Research Program' },
+    { name: 'Kung-Chuan Hsu', image: '', affiliation: 'Accenture', role: 'Title' },
+    { name: 'Victoria Hazoglou', image: '', affiliation: 'Accenture', role: 'Title' },
+    { name: 'Andrew Souza', image: '/650353ea2e6029b3cea2ee24_andrew-lucas-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Former Developer' },
 ];
 
 const mitMembers = computed(() => teamMembers.filter(member => member.affiliation === "MIT FutureTech"));

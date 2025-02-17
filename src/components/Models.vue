@@ -39,6 +39,7 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
 
     // console.log("processors: ", processors);
     let effectiveProcessors = processors + (year - currentYear) * Math.log10(costImprovementRate);
+    effectiveProcessors = math.max(effectiveProcessors, 0);
 
     function evaluate(n) {
         let scope = {n: n, p: Math.pow(10, effectiveProcessors)};
@@ -76,8 +77,8 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
     // }
 
     return Math.log10(result);
-
 }
+
 // converts expression with q (qubits) to expression with n (problem size) by using the inverse of 
 // the function specified by qubitToProblemSize parameter
 function convertQubits(model, expression) {
@@ -283,6 +284,10 @@ function calculateQuantumEconomicAdvantage(model) {
 
     const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), currentYear, 3000, "tStar in QEA");
     const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), currentYear, 3000, "tCostStar in QEA");
+
+    console.log("printing stuff");
+    console.log(quantumFeasible(currentYear), quantumAdvantage(currentYear));
+    console.log(quantumFeasible(3000), quantumAdvantage(3000));
 
     let yearRadius = 0; //({last year on the QEA graph} - currentYear) / 2; used to populate ranges
     let defaultRadius = 5;
