@@ -206,9 +206,9 @@ const teamMembers = [
     { name: 'Hrvoje Kukina', image: '/6616978ed50987169fb845b7_hrvoje_picture - Hrvoje Kukina-p-500.jpg', affiliation: 'MIT FutureTech', role: 'PhD Candidate' },
     { name: 'Eleanor Crane', image: "/eleanor_crane.jpeg", affiliation: 'MIT FutureTech', role: 'Researcher' },
     { name: 'Johannes Galatsanos-Dueck', image: '', affiliation: 'MIT FutureTech', role: 'Title' },
-    { name: 'Prashant P. Shukla', image: 'PrashantShukla.jpg', affiliation: 'Accenture', role: 'Accenture Research Lead for MIT IDE' },
-    { name: 'Carl Dukatz', image: '', affiliation: 'Accenture', role: 'Title' },
-    { name: 'Kung-Chuan Hsu', image: '', affiliation: 'Accenture', role: 'Title' },
+    { name: 'Prashant P. Shukla', image: 'PrashantShukla.jpg', affiliation: 'Accenture', role: 'Accenture Research Lead - MIT IDE' },
+    { name: 'Carl Dukatz', image: 'Carl_Dukatz_Profile_Picture 1.jpeg', affiliation: 'Accenture', role: 'Managing Director - Next Gen Compute' },
+    { name: 'Kung-Chuan Hsu', image: 'profile_pic_KC.jpg', affiliation: 'Accenture', role: 'Quantum Information Scientist - Next Gen Compute' },
     { name: 'Victoria Hazoglou', image: '', affiliation: 'Accenture', role: 'Title' },
     { name: 'Andrew Souza', image: '/650353ea2e6029b3cea2ee24_andrew-lucas-p-500.jpg', affiliation: 'MIT FutureTech', role: 'Former Developer' },
 ];

@@ -4,7 +4,7 @@ import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
 import { useModelsStore } from '../store/models';
 import { Switch } from '@headlessui/vue'
 
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import EditRoadmap from './EditRoadmap.vue';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -355,6 +355,7 @@ watch(() => model.value, (value) => {
     models.updateModel(props.modelId, value);
 }, { deep: true });
 
+const lockPLQR = computed(() => model.value.roadmapUnit !== "physical");
 
 
 
@@ -765,27 +766,38 @@ function updateFunctions(updatedValues) {
                     </div>
                 </div>
 
-                <div class="flex flex-col">
-                    <label class="font-medium text-s" for="physical_logical_ratio">Physical to Logical Qubit
+                <div class="flex flex-col relative">
+                    <label class="font-medium text-s" for="physical_logical_ratio">Physical-Logical Qubit
                         Ratio</label>
                     <p class="text-xs text-gray-600">Number of physical qubits needed per one error corrected logical
                         qubit.</p>
-                    <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
+                    <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4 relative">
+                        <!-- Overlay for disabling input fields -->
+                        <div 
+                            v-if="lockPLQR" 
+                            class="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center 
+                                text-gray-800 text-sm font-semibold rounded-lg pointer-events-none 
+                                z-10 drop-shadow-lg px-4 text-center">
+                            Physical-Logical Qubit Ratio is unused when roadmap is defined in terms of logical qubits.
+                        </div>
                         <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                            v-model="model.physicalLogicalQubitsRatio" min="3" max="2000" />
+                            v-model="model.physicalLogicalQubitsRatio" min="3" max="2000" 
+                            :disabled="lockPLQR"/>
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
-                            id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio" />
+                            id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio"
+                            :disabled="lockPLQR"/>
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
                             <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90" step="1"
-                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" @input="checkLimits" />
+                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" @input="checkLimits" 
+                                :disabled="lockPLQR"/>
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
 
                         </div>
-
                     </div>
+
                 </div>
 
 
