@@ -1,5 +1,8 @@
 import * as utils from "/Users/fred/Desktop/FutureTech/quantum-framework/src/store/utils.js"
 import * as math from 'mathjs';
+import fs from "fs"
+
+const currentYear = new Date().getFullYear();
 
 const problems = [
     {
@@ -63,27 +66,33 @@ const hardwares = [
         costFactor: 8,
         quantumImprovementRate: -10,
         costImprovementRate: -10,
-        physicalLogicalQubitsRatio: 1000,
-        ratioImprovementRate: -10,
+        // physicalLogicalQubitsRatio: 1000,
+        physicalLogicalQubitsRatio: 264,
+        // ratioImprovementRate: -10,
+        ratioImprovementRate: -23,
         roadmap: {
             2020: 27,
             2022: 127,
             2024: 133,
             2025: 156,
-            2029: 200,
-            2033: 2000,
+            // 2029: 200,
+            // 2033: 2000,
+            2029: 22974,
+            2033: 100000,
         },
         roadmapUnit: "physical",
         extrapolationType: "exponential",
     },
     {
         hardwareName: "IonQ (Trapped Ion)",
-        hardwareSlowdown: 6.7,
+        // hardwareSlowdown: 6.7,
+        hardwareSlowdown: 8.48,
         costFactor: 8,
         quantumImprovementRate: -10,
         costImprovementRate: -10,
         physicalLogicalQubitsRatio: 32,
-        ratioImprovementRate: -10,
+        // ratioImprovementRate: -10,
+        ratioImprovementRate: -23,
         roadmap: {
             2021: 22,
             2022: 25,
@@ -99,32 +108,50 @@ const hardwares = [
         extrapolationType: "exponential",
     },
     {
-        hardwareName: "Pasqal (Neutral Atom)",
+        hardwareName: "QuEra (Neutral Atom)",
         hardwareSlowdown: 5.1,
         costFactor: 8,
         quantumImprovementRate: -10,
         costImprovementRate: -10,
         physicalLogicalQubitsRatio: 100,
-        ratioImprovementRate: -10,
+        // ratioImprovementRate: -10,
+        ratioImprovementRate: -23,
         roadmap: {
-            2022: 200,
-            2024: 1000,
+            2023: 256,
+            2025: 3000,
             2026: 10000,
         },
         roadmapUnit: "physical",
         extrapolationType: "exponential",
-        reference: "https://www.hpcwire.com/2024/03/13/pasqal-issues-roadmap-to-10000-qubits-in-2026-and-fault-tolerance-in-2028/",
+        reference: "https://www.quera.com/qec",
     },
+    // {
+    //     hardwareName: "Pasqal (Neutral Atom)",
+    //     hardwareSlowdown: 5.1,
+    //     costFactor: 8,
+    //     quantumImprovementRate: -10,
+    //     costImprovementRate: -10,
+    //     physicalLogicalQubitsRatio: 100,
+    //     ratioImprovementRate: -10,
+    //     roadmap: {
+    //         2022: 200,
+    //         2024: 1000,
+    //         2026: 10000,
+    //     },
+    //     roadmapUnit: "physical",
+    //     extrapolationType: "exponential",
+    //     reference: "https://www.hpcwire.com/2024/03/13/pasqal-issues-roadmap-to-10000-qubits-in-2026-and-fault-tolerance-in-2028/",
+    // },
 ];
 
 //returns the log_10 of the amount of logical qubits available with the given parameters
-function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit) {
-    const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, "exponential")
+function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit, baseFactor) {
+    const logOfPhysicalQubits = utils.getPhysicalQubits(year, roadmap, "exponential", baseFactor)
     if (roadmapUnit === "logical") {
         return logOfPhysicalQubits
     }
     //log_10 of the PLQR including the ratio improvement rate
-    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - 2024) * Math.log10(ratioImprovementRate);
+    let adjustedPLQR = Math.log10(physicalLogicalQubitsRatio) + (year - currentYear) * Math.log10(ratioImprovementRate);
     if (adjustedPLQR < Math.log10(3)) { //minimum PLQR is 3
         adjustedPLQR = Math.log10(3)
     }
@@ -136,9 +163,9 @@ function getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprov
 }
 
 //function returns the log of the problem size solvable, even though there is a "10 ** problemSize"
-function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit) {
+function getQuantumFeasible(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit, baseFactor) {
     //logLogicalQubits has the log_10 of the true number of logical qubits
-    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit)
+    let logLogicalQubits = getLogicalQubits(year, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate , roadmapUnit, baseFactor)
 
     if (qubitToProblemSize == "2^{q}") {
         // let problemSize = (logOfPhysicalQubits + Math.log10(Math.log10(2)) - Math.log10(physicalLogicalQubitsRatio))
@@ -197,7 +224,7 @@ function getQuantumWork(model) {
 
 // returns log_10 of the problem size where qa is reached
 function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate, processors, costImprovementRate, year) {
-    let adjustmentFactor = Number(hardwareSlowdown) + (year - 2024) * Math.log10(quantumImprovementRate);
+    let adjustmentFactor = Number(hardwareSlowdown) + (year - currentYear) * Math.log10(quantumImprovementRate);
 
     if (adjustmentFactor == null || isNaN(adjustmentFactor)) {
         console.log("Adjustment factor is null or NaN");
@@ -208,7 +235,7 @@ function getQuantumAdvantage(logClassicalFunction, logQuantumFunction, logPenalt
     adjustmentFactor = math.max(adjustmentFactor, 0);
 
     // console.log("processors: ", processors);
-    let effectiveProcessors = processors + (year - 2024) * Math.log10(costImprovementRate);
+    let effectiveProcessors = processors + (year - currentYear) * Math.log10(costImprovementRate);
 
     function evaluate(n) {
         let scope = {n: n, p: Math.pow(10, effectiveProcessors)};
@@ -287,24 +314,29 @@ function calculateQuantumEconomicAdvantage(model) {
     }
 
 
+
     let quantumFeasible = qf(model.roadmap);
     
     let quantumAdvantage = qa(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate);
     let quantumCostAdvantage = qa(lcfc, lqfc, lpf, costFactor, costImprovementRate);
 
+    // console.log("veer off")
+    // console.log(utils.bisectionMethod(t => 1.338 - quantumAdvantage(t), currentYear, 3000, "something"));
+    // console.log(quantumAdvantage(2086.9664758));
+    // console.log("done veering off")
     // console.log("testing")
     // console.log(quantumAdvantage(2024))
     // console.log("testing again")
     // console.log(quantumAdvantage(3000))
     // console.log("done testing")
 
-    const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), 2024, 3000, "tStar in QEA");
-    const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), 2024, 3000, "tCostStar in QEA");
+    const tStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumAdvantage(year), currentYear, 3000, "tStar in QEA");
+    const tCostStar = utils.bisectionMethod(year => quantumFeasible(year) - quantumCostAdvantage(year), currentYear, 3000, "tCostStar in QEA");
 
     return [tStar, tCostStar];
 }
 
-function freeFeasible(model, parameter, targetYear, range) {
+function freeFeasible(model, parameter, targetYear, range, forCost) {
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
     let ratioImprovementRate = ((100 + Number(model.ratioImprovementRate)) / 100);
@@ -331,9 +363,10 @@ function freeFeasible(model, parameter, targetYear, range) {
     let costImprovementRate = ((100 + Number(model.costImprovementRate)) / 100);
 
     let processors = model.processors;
+    let baseFactor = model.baseFactor;
 
     function qf(roadmap) {
-        let base = "getQuantumFeasible(targetYear, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit)";
+        let base = "getQuantumFeasible(targetYear, roadmap, physicalLogicalQubitsRatio, ratioImprovementRate, qubitToProblemSize, roadmapUnit, baseFactor)";
         base = base.replace(parameter, "parameter");
         return eval('(' + "parameter => " + base + ')');
     }
@@ -346,21 +379,32 @@ function freeFeasible(model, parameter, targetYear, range) {
     // console.log("parameter: ", parameter)
 
     let quantumFeasible = qf(model.roadmap);
-    let quantumAdvantage = qa(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate);
+    let quantumAdvantage;
+    if (forCost) {
+        quantumAdvantage = qa(lcfc, lqfc, lpf, costFactor, costImprovementRate);
+    }
+    else {
+        quantumAdvantage = qa(lcf, lqf, lpf, hardwareSlowdown, quantumImprovementRate);
+    }
 
     let goal = quantumAdvantage(targetYear);
     // console.log("goal:", goal);
     // console.log(quantumFeasible(range[0]))
     // console.log(quantumFeasible(range[1]))
 
-    const pStar = utils.bisectionMethod(p => goal - quantumFeasible(p), range[0], range[1]);
+    let flip = 1;
+    if (parameter == "baseFactor") {
+        flip = -1;
+    }
+
+    const pStar = utils.bisectionMethod(p => flip * (goal - quantumFeasible(p)), range[0], range[1]);
 
     // console.log("pStar:", pStar);
     // console.log("testYear:", testYear, "parameter:", parameter, "pStar:", pStar);
     return pStar;
 }
 
-function freeAdvantage(model, parameter, targetYear, range) {
+function freeAdvantage(model, parameter, targetYear, range, forCost) {
     let hardwareSlowdown = model.hardwareSlowdown;
     let physicalLogicalQubitsRatio = model.physicalLogicalQubitsRatio;
     let ratioImprovementRate = ((100 + Number(model.ratioImprovementRate)) / 100);
@@ -394,10 +438,10 @@ function freeAdvantage(model, parameter, targetYear, range) {
 
 
     function qa(logClassicalFunction, logQuantumFunction, logPenaltyFunction, hardwareSlowdown, quantumImprovementRate) {
-        if (parameter == "costFactor") {
+        if (parameter == "costFactor" && forCost) {
             parameter = "hardwareSlowdown";
         }
-        if (parameter == "costImprovementRate") {
+        if (parameter == "costImprovementRate" && forCost) {
             parameter = "quantumImprovementRate";
         }
 
@@ -412,7 +456,7 @@ function freeAdvantage(model, parameter, targetYear, range) {
     let quantumFeasible = qf(model.roadmap);
     let f = null;
 
-    if (parameter[0] == "c") {
+    if (forCost) {
         f = qa(lcfc, lqfc, lpf, costFactor, costImprovementRate);
 
     }
@@ -435,61 +479,546 @@ function freeAdvantage(model, parameter, targetYear, range) {
 }
 
 function main() {
-    let hardwareIndex = 2;
-    let problemIndex = 4;
+    let hardwareIndex = 0;
+    let problemIndex = 2;
     let model = {...problems[problemIndex], ...hardwares[hardwareIndex],}
     model.processors = 5;
+    model.baseFactor = 1;
+    if (hardwareIndex != 0) { //ibm is the only one with a connectivity penalty
+        model.penaltyInput = "1";
+    }
+    else if (problemIndex == 1) { //search has 2^q qps
+        model.penaltyInput = "log(n, 2)^0.5";
+    }
+    else { //everything else has q^0.5 penalty
+        model.penaltyInput = "n^0.5";
+    }
+
+
+
+    // let sigfigs = 4;
+    let flipUnits = false;
+    // let flipUnits = true;
 
     let anchors = calculateQuantumEconomicAdvantage(model);
+    // console.log("anchors:", anchors);
+    // return;
+    // let speedTable = {
+    //     xLabels: ["", "Original Value", "-1 Year Value", "-1 Year Change Ratio", "+1 Year Value", "+1 Year Change Ratio"], //first is empty for Y header alignment
+    //     yLabels: ["Hardware Slowdown", "Quantum Improvement Rate", "Cost Improvement Rate", "Processors", "Physical-Logical Qubits Ratio", "Ratio Improvement Rate", "Base Factor"],
+    //     values: []
+    // };
+    // let costTable = {
+    //     xLabels: ["", "Original Value", "-1 Year Value", "-1 Year Change Ratio", "+1 Year Value", "+1 Year Change Ratio"], //first is empty for Y header alignment
+    //     yLabels: ["Cost Factor", "Cost Improvement Rate", "Physical-Logical Qubits Ratio", "Ratio Improvement Rate", "Base Factor"],
+    //     values: []
+    // };
+    // let speedAnalysisTable = {
+    //     xLabels: ["", "Hardware Slowdown -- Ratio", "Hardware Slowdown ++ Ratio", "Quantum Improvement Rate -- Ratio", "Quantum Improvement Rate ++ Ratio", "Cost Improvement Rate -- Ratio", "Cost Improvement Rate ++ Ratio", "Processors -- Ratio", "Processors ++ Ratio", "Physical-Logical Qubits Ratio -- Ratio", "Physical-Logical Qubits Ratio ++ Ratio", "Ratio Improvement Rate -- Ratio", "Ratio Improvement Rate ++ Ratio", "Base Factor -- Ratio", "Base Factor ++ Ratio"],
+    //     yLabels: [/*Problem X Hardware Instances*/],
+    //     values: []
+    // };
+    // let costAnalysisTable = {
+    //     xLabels: ["", "Cost Factor -- Ratio", "Cost Factor ++ Ratio", "Cost Improvement Rate -- Ratio", "Cost Improvement Rate ++ Ratio", "Physical-Logical Qubits Ratio -- Ratio", "Physical-Logical Qubits Ratio ++ Ratio", "Ratio Improvement Rate -- Ratio", "Ratio Improvement Rate ++ Ratio", "Base Factor -- Ratio", "Base Factor ++ Ratio"],
+    //     yLabels: [/*Problem X Hardware Instances*/],
+    //     values: []
+    // };
 
-    for (let parameter of ["hardwareSlowdown", "costFactor", "quantumImprovementRate",  "costImprovementRate", "processors"]) {
-        let anchorIndex = 0;
-        if (parameter == "costFactor" || parameter == "costImprovementRate") {
-            anchorIndex = 1;
-        }
+    // let anchorIndex = 0;
+    // for (let parameter of ["hardwareSlowdown", "quantumImprovementRate",  "costImprovementRate", "processors"]) {
+    //     let og = model[parameter];
 
-        for (let delta of [-1, 1]) {
-            let targetYear = anchors[anchorIndex] + delta;
-            let range = [0, 100];
-            if (parameter.endsWith("Rate")) {
-                range = [.00001, 1000];
-            }
+    //     if (flipUnits && (parameter == "hardwareSlowdown" || parameter == "processors")) {
+    //         og = 10 ** og;
+    //     }
+    //     else if (flipUnits && parameter.endsWith("Rate")) {
+    //         og = og / 100 + 1;
+    //     }
+    
 
-            let pstar = freeAdvantage(model, parameter, targetYear, range);
-            let og = model[parameter];
+    //     let row = [og];
+    //     for (let delta of [-1, 1]) {
+    //         let targetYear = anchors[anchorIndex] + delta;
+    //         let range = [0, 100];
+    //         if (parameter.endsWith("Rate")) {
+    //             range = [.00001, 1000];
+    //         }
 
-            if (parameter.endsWith("Rate")) {
-                pstar = (pstar - 1) * 100;
-            }
+    //         let pstar = freeAdvantage(model, parameter, targetYear, range, /*forCost=*/false);
 
-            let dp = (pstar - og) / og;
+    //         if (flipUnits && (parameter == "hardwareSlowdown" || parameter == "processors")) {
+    //             pstar = 10 ** pstar;
+    //         }
+    //         if (! flipUnits && parameter.endsWith("Rate")) {
+    //             pstar = (pstar - 1) * 100;
+    //         }
 
-            console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
-        }
-    }
+    //         let dp = (pstar - og) / og;
 
-    for (let parameter of ["physicalLogicalQubitsRatio", "ratioImprovementRate"]) {
-        let anchorIndex = 0;
+    //         row.push(pstar);
+    //         row.push(dp);
 
-        for (let delta of [-1, 1]) {
-            let targetYear = anchors[anchorIndex] + delta;
-            let range = [3, 100000000];
-            if (parameter.endsWith("Rate")) {
-                range = [.00001, 1000];
-            }
+    //         console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //     }
+    //     speedTable.values.push(row);
+    // }
 
-            let pstar = freeFeasible(model, parameter, targetYear, range);
-            let og = model[parameter];
+    // console.log("");
 
-            if (parameter.endsWith("Rate")) {
-                pstar = (pstar - 1) * 100;
-            }
+    // for (let parameter of ["physicalLogicalQubitsRatio", "ratioImprovementRate", "baseFactor"]) {
+    //     let og = model[parameter];
 
-            let dp = (pstar - og) / og;
+    //     if (flipUnits && parameter.endsWith("Rate")) {
+    //         og = og / 100 + 1;
+    //     }
 
-            console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
-        }
-    }
+    //     let row = [og];
+    //     for (let delta of [-1, 1]) {
+    //         let targetYear = anchors[anchorIndex] + delta;
+
+    //         let range = [];
+    //         if (parameter.endsWith("Rate")) {
+    //             range = [.00001, 1000];
+    //         }
+    //         else if (parameter == "physicalLogicalQubitsRatio") {
+    //             range = [3, 1000000];
+    //         }
+    //         else if (parameter == "baseFactor") {
+    //             range = [.01, 100];
+    //         }
+
+    //         let pstar = freeFeasible(model, parameter, targetYear, range, /*forCost=*/false);
+
+    //         if (! flipUnits && parameter.endsWith("Rate")) {
+    //             pstar = (pstar - 1) * 100;
+    //         }
+
+    //         let dp = (pstar - og) / og;
+
+    //         row.push(pstar);
+    //         row.push(dp);
+
+    //         console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //     }
+    //     speedTable.values.push(row);
+    // }
+
+    // console.log("\nstarting cost");
+
+    // anchorIndex = 1;
+
+    // for (let parameter of ["costFactor",  "costImprovementRate"]) {
+    //     let og = model[parameter];
+
+    //     if (flipUnits && (parameter == "costFactor")) {
+    //         og = 10 ** og;
+    //     }
+    //     else if (flipUnits && parameter.endsWith("Rate")) {
+    //         og = og / 100 + 1;
+    //     }
+
+    //     let row = [og];
+    //     for (let delta of [-1, 1]) {
+    //         let targetYear = anchors[anchorIndex] + delta;
+    //         let range = [0, 100];
+    //         if (parameter.endsWith("Rate")) {
+    //             range = [.00001, 1000];
+    //         }
+
+    //         let pstar = freeAdvantage(model, parameter, targetYear, range, /*forCost=*/true);
+
+    //         if (flipUnits && parameter == "costFactor") {
+    //             pstar = 10 ** pstar;
+    //         }
+    //         if (! flipUnits && parameter.endsWith("Rate")) {
+    //             pstar = (pstar - 1) * 100;
+    //         }
+
+    //         let dp = (pstar - og) / og;
+
+    //         row.push(pstar);
+    //         row.push(dp);
+
+    //         console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //     }
+    //     costTable.values.push(row);
+    // }
+
+    // console.log("");
+
+    // for (let parameter of ["physicalLogicalQubitsRatio", "ratioImprovementRate", "baseFactor"]) {
+    //     let og = model[parameter];
+
+    //     if (flipUnits && parameter.endsWith("Rate")) {
+    //         og = og / 100 + 1;
+    //     }
+
+    //     let row = [og];
+    //     for (let delta of [-1, 1]) {
+    //         let targetYear = anchors[anchorIndex] + delta;
+
+    //         let range = [];
+    //         if (parameter.endsWith("Rate")) {
+    //             range = [.00001, 1000];
+    //         }
+    //         else if (parameter == "physicalLogicalQubitsRatio") {
+    //             range = [3, 1000000];
+    //         }
+    //         else if (parameter == "baseFactor") {
+    //             range = [.01, 100];
+    //         }
+
+    //         let pstar = freeFeasible(model, parameter, targetYear, range, /*forCost=*/true);
+
+    //         if (! flipUnits && parameter.endsWith("Rate")) {
+    //             pstar = (pstar - 1) * 100;
+    //         }
+
+    //         let dp = (pstar - og) / og;
+
+    //         row.push(pstar);
+    //         row.push(dp);
+
+    //         console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //     }
+    //     costTable.values.push(row);
+    // }
+
+    // const tableToCSV = (table) => {
+    //     const { xLabels, yLabels, values } = table;
+    
+    //     // Build the CSV rows
+    //     const csvRows = [];
+    
+    //     // Add header row (X labels)
+    //     csvRows.push(xLabels.join(","));
+    
+    //     // Add data rows (Y labels + values)
+    //     yLabels.forEach((label, index) => {
+    //     csvRows.push([label, ...values[index]].join(","));
+    //     });
+    
+    //     return csvRows.join("\n");
+    // };
+    
+    // // // // // Convert table to CSV string
+    // const speedData = tableToCSV(speedTable);
+    // const costData = tableToCSV(costTable);
+    
+    // // // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Speed Table" + (flipUnits ? " Flipped":"") + ".csv", speedData, "utf8");
+    // // // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Cost Table" + (flipUnits ? " Flipped":"") + ".csv", costData, "utf8");
+    // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Speed Table CP" + ".csv", speedData, "utf8");
+    // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Cost Table CP" + ".csv", costData, "utf8");
+    // console.log(anchors);
+
+    //////////////////////////////////////////////////////
+
+    // for (let hardwareIndex = 0; hardwareIndex < 3; hardwareIndex++) {
+    //     for (let problemIndex = 0; problemIndex < 3; problemIndex++) {
+    //         let model = {...problems[problemIndex], ...hardwares[hardwareIndex],}
+    //         model.processors = 5;
+    //         model.baseFactor = 1;
+
+    //         if (hardwareIndex != 0) { //ibm is the only one with a connectivity penalty
+    //             model.penaltyInput = "1";
+    //         }
+    //         else if (problemIndex == 1) { //search has 2^q qps
+    //             model.penaltyInput = "log(n, 2)^0.5";
+    //         }
+    //         else { //everything else has q^0.5 penalty
+    //             model.penaltyInput = "n^0.5";
+    //         }
+
+    //         let anchors = calculateQuantumEconomicAdvantage(model);
+
+
+    //         let instanceName = problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName;
+    //         console.log(instanceName);
+
+    //         let sa = []
+    //         let ca = []
+            
+    //         let anchorIndex = 0;
+    //         for (let parameter of ["hardwareSlowdown", "quantumImprovementRate",  "costImprovementRate", "processors"]) {
+    //             // console.log("parameter: ", parameter);
+    //             let og = model[parameter];
+    //             if (flipUnits && (parameter == "hardwareSlowdown" || parameter == "processors")) {
+    //                 og = 10 ** og;
+    //             }
+    //             else if (flipUnits && parameter.endsWith("Rate")) {
+    //                 og = og / 100 + 1;
+    //             }
+            
+
+    //             let row = [og];
+    //             for (let delta of [-1, 1]) {
+    //                 let impossible = false;
+    //                 let targetYear = anchors[anchorIndex] + delta;
+    //                 let range = [0, 100];
+    //                 if (parameter.endsWith("Rate")) {
+    //                     range = [.00001, 1000];
+    //                 }
+
+    //                 let pstar = freeAdvantage(model, parameter, targetYear, range, /*forCost=*/false);
+
+    //                 if (pstar <= range[0] || pstar >= range[1]) {
+    //                     console.log("parameter: ", parameter);
+    //                     console.log("impossible");
+    //                     console.log("pstar:", pstar, "range:", range);
+    //                     impossible = true;
+    //                 }
+
+    //                 if (flipUnits && (parameter == "hardwareSlowdown" || parameter == "processors")) {
+    //                     pstar = 10 ** pstar;
+    //                 }
+    //                 if (! flipUnits && parameter.endsWith("Rate")) {
+    //                     pstar = (pstar - 1) * 100;
+    //                 }
+
+    //                 let dp = (pstar - og) / og;
+
+    //                 row.push(pstar);
+    //                 row.push(dp);
+
+    //                 if (impossible) {
+    //                     sa.push("impossible");
+    //                 }
+    //                 else {
+    //                     sa.push(dp);
+    //                 }
+
+    //                 // console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //             }
+    //             speedTable.values.push(row);
+    //         }
+
+    //         // console.log("");
+
+    //         for (let parameter of ["physicalLogicalQubitsRatio", "ratioImprovementRate", "baseFactor"]) {
+    //             console.log("parameter: ", parameter);
+    //             let og = model[parameter];
+                
+    //             if (flipUnits && parameter.endsWith("Rate")) {
+    //                 og = og / 100 + 1;
+    //             }
+                
+    //             let row = [og];
+    //             for (let delta of [-1, 1]) {
+    //                 let impossible = false;
+    //                 let targetYear = anchors[anchorIndex] + delta;
+
+    //                 let range = [3, 100000000];
+    //                 if (parameter.endsWith("Rate")) {
+    //                     range = [.00001, 1000];
+    //                 }
+    //                 else if (parameter == "physicalLogicalQubitsRatio") {
+    //                     range = [3, 1000000];
+    //                 }
+    //                 else if (parameter == "baseFactor") {
+    //                     range = [.01, 100];
+    //                 }
+
+    //                 let pstar = freeFeasible(model, parameter, targetYear, range, /*forCost=*/false);
+
+    //                 if (pstar <= range[0] || pstar >= range[1]) {
+    //                     console.log("impossible");
+    //                     impossible = true;
+    //                 }
+
+    //                 if (! flipUnits && parameter.endsWith("Rate")) {
+    //                     pstar = (pstar - 1) * 100;
+    //                 }
+
+    //                 let dp = (pstar - og) / og;
+
+    //                 row.push(pstar);
+    //                 row.push(dp);
+
+    //                 if (impossible) {
+    //                     sa.push("impossible");
+    //                 }
+    //                 else {
+    //                     sa.push(dp);
+    //                 }
+
+    //                 // console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //             }
+    //             speedTable.values.push(row);
+    //         }
+
+    //         // console.log("\nstarting cost");
+
+    //         anchorIndex = 1;
+
+    //         for (let parameter of ["costFactor",  "costImprovementRate"]) {
+    //             console.log("parameter: ", parameter);
+    //             let og = model[parameter];
+                
+    //             if (flipUnits && (parameter == "costFactor")) {
+    //                 og = 10 ** og;
+    //             }
+    //             else if (flipUnits && parameter.endsWith("Rate")) {
+    //                 og = og / 100 + 1;
+    //             }
+                
+    //             let row = [og];
+    //             for (let delta of [-1, 1]) {
+    //                 let impossible = false;
+    //                 let targetYear = anchors[anchorIndex] + delta;
+    //                 let range = [0, 100];
+    //                 if (parameter.endsWith("Rate")) {
+    //                     range = [.00001, 1000];
+    //                 }
+
+    //                 let pstar = freeAdvantage(model, parameter, targetYear, range, /*forCost=*/true);
+
+    //                 if (pstar <= range[0] || pstar >= range[1]) {
+    //                     console.log("impossible");
+    //                     impossible = true;
+    //                 }
+
+    //                 if (flipUnits && parameter == "costFactor") {
+    //                     pstar = 10 ** pstar;
+    //                 }
+    //                 if (! flipUnits && parameter.endsWith("Rate")) {
+    //                     pstar = (pstar - 1) * 100;
+    //                 }
+
+    //                 let dp = (pstar - og) / og;
+
+    //                 row.push(pstar);
+    //                 row.push(dp);
+
+    //                 if (impossible) {
+    //                     ca.push("impossible");
+    //                 }
+    //                 else {
+    //                     ca.push(dp);
+    //                 }
+
+    //                 // console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //             }
+    //             costTable.values.push(row);
+    //         }
+
+    //         // console.log("");
+
+    //         for (let parameter of ["physicalLogicalQubitsRatio", "ratioImprovementRate", "baseFactor"]) {
+    //             console.log("parameter: ", parameter);
+    //             let og = model[parameter];
+                
+    //             if (flipUnits && parameter.endsWith("Rate")) {
+    //                 og = og / 100 + 1;
+    //             }
+                
+    //             let row = [og];
+    //             for (let delta of [-1, 1]) {
+    //                 let impossible = false;
+    //                 let targetYear = anchors[anchorIndex] + delta;
+
+    //                 let range = [3, 100000000];
+    //                 if (parameter.endsWith("Rate")) {
+    //                     range = [.00001, 1000];
+    //                 }
+    //                 else if (parameter == "physicalLogicalQubitsRatio") {
+    //                     range = [3, 1000000];
+    //                 }
+    //                 else if (parameter == "baseFactor") {
+    //                     range = [.01, 100];
+    //                 }
+
+    //                 let pstar = freeFeasible(model, parameter, targetYear, range, /*forCost=*/true);
+
+    //                 if (pstar <= range[0] || pstar >= range[1]) {
+    //                     console.log("impossible");
+    //                     impossible = true;
+    //                 }
+
+    //                 if (! flipUnits && parameter.endsWith("Rate")) {
+    //                     pstar = (pstar - 1) * 100;
+    //                 }
+
+    //                 let dp = (pstar - og) / og;
+
+    //                 row.push(pstar);
+    //                 row.push(dp);
+
+    //                 if (impossible) {
+    //                     ca.push("impossible");
+    //                 }
+    //                 else {
+    //                     ca.push(dp);
+    //                 }
+
+    //                 // console.log("parameter: ", parameter, "original: ", og, "delta: ", delta, "target year: ", targetYear, "pstar: ", pstar, "dp: ", dp);
+    //             }
+    //             costTable.values.push(row);
+    //         }
+
+    //         speedAnalysisTable.yLabels.push(instanceName);
+    //         costAnalysisTable.yLabels.push(instanceName);
+
+    //         speedAnalysisTable.values.push(sa);
+    //         costAnalysisTable.values.push(ca);
+            
+            
+            
+            
+    //         // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Speed Table" + (flipUnits ? " Flipped":"") + ".csv", speedData, "utf8");
+    //         // fs.writeFileSync(problems[problemIndex].problemName + " X " + hardwares[hardwareIndex].hardwareName +  " Cost Table" + (flipUnits ? " Flipped":"") + ".csv", costData, "utf8");
+    //     }
+    // }
+    // speedAnalysisTable.yLabels.push("variance");
+    // speedAnalysisTable.yLabels.push("standard deviation");
+    // costAnalysisTable.yLabels.push("variance");
+    // costAnalysisTable.yLabels.push("standard deviation");
+
+    // let speedVariances = [];
+    // let costVariances = [];
+    // let speedStdDevs = [];
+    // let costStdDevs = [];
+
+    // for (let i = 0; i < speedAnalysisTable.xLabels.length - 1; i++) {
+    //     let values = speedAnalysisTable.values.map(row => row[i]);
+    //     // console.log("Values: ", values);
+    //     let pureValues = values.filter(value => value !== "impossible");
+    //     // console.log("pureValues: ", pureValues);
+    //     let variance = -1;
+    //     let stdDev = -1;
+    //     if (pureValues.length != 0) {
+    //         variance = math.variance(pureValues);
+    //         stdDev = math.std(pureValues);
+    //     }
+    //     speedVariances.push(variance);
+    //     speedStdDevs.push(stdDev);
+    // }
+    // for (let i = 0; i < costAnalysisTable.xLabels.length - 1; i++) {
+    //     let values = costAnalysisTable.values.map(row => row[i]);
+    //     let pureValues = values.filter(value => value !== "impossible");
+    //     let variance = -1;
+    //     let stdDev = -1;
+    //     if (pureValues.length != 0) {
+    //         variance = math.variance(pureValues);
+    //         stdDev = math.std(pureValues);
+    //     }
+    //     costVariances.push(variance);
+    //     costStdDevs.push(stdDev);        
+    // }
+
+    // speedAnalysisTable.values.push(speedVariances);
+    // speedAnalysisTable.values.push(speedStdDevs);
+    // costAnalysisTable.values.push(costVariances);
+    // costAnalysisTable.values.push(costStdDevs);
+
+    // let speed = tableToCSV(speedAnalysisTable);
+    // let cost = tableToCSV(costAnalysisTable);
+
+    // // fs.writeFileSync("Speed Analysis" + (flipUnits ? " Flipped":"") + ".csv", speed, "utf8");
+    // // fs.writeFileSync("Cost Analysis" + (flipUnits ? " Flipped":"") + ".csv", cost, "utf8");
+    // fs.writeFileSync("Speed Analysis" + (flipUnits ? " Flipped":"") + " CP.csv", speed, "utf8");
+    // fs.writeFileSync("Cost Analysis" + (flipUnits ? " Flipped":"") + " CP.csv", cost, "utf8");
+
+
 }
 
 main()
