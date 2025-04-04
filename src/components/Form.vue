@@ -103,6 +103,7 @@ const hardwares = ref([
             gateOverhead: 100,
             algorithmConstant: 1,
         },
+        reference: "https://www.ibm.com/roadmaps/quantum.pdf"
     },
     {
         hardwareName: "Google (Superconducting)",
@@ -129,7 +130,7 @@ const hardwares = ref([
             gateOverhead: 100,
             algorithmConstant: 1,
         },
-        reference: "https://quantumai.google/static/site-assets/images/marketing/misc/roadmap.png",
+        reference: "Sycamore (2019), and Willow (2024).",
     },
     {
         hardwareName: "Rigetti (Superconducting)",
@@ -158,7 +159,7 @@ const hardwares = ref([
             gateOverhead: 100,
             algorithmConstant: 1,
         },
-        reference: "https://www.globenewswire.com/news-release/2022/05/16/2444311/0/en/Rigetti-Computing-Reports-First-Quarter-2022-Financial-Results-and-Provides-Business-Update.html",
+        reference: "19Q (2018), Aspen-M non-modular (2021), Ankaa-3 (2024)",
     },
 
     {
@@ -192,6 +193,7 @@ const hardwares = ref([
             gateOverhead: 100,
             algorithmConstant: 1,
         },
+        reference: "https://ionq.com/blog/how-we-achieved-our-2024-performance-target-of-aq-35",
     },
     {
         hardwareName: "QuEra (Neutral Atom)",

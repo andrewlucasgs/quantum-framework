@@ -13,13 +13,14 @@ const modelTemplate = {
     hardwareName: 'IBM (Superconducting)',
     roadmap: {
         2020: 27,
-        2022: 127,
+        // 2022: 127,
         2024: 133,
         2025: 156,
         // 2029: 200,
         // 2033: 2000,
-        2029: 22974,
-        2033: 100000,
+        2028: 1092,
+        // 2029: 22974,
+        // 2033: 100000
     },
     roadmapUnit: "physical",
     extrapolationType: 'exponential',
