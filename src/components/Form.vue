@@ -3,6 +3,7 @@ import Multiselect from 'vue-multiselect'
 import HardwareSlowdownAdvanced from './HardwareSlowdownAdvanced.vue';
 import { useModelsStore } from '../store/models';
 import { Switch } from '@headlessui/vue'
+import MappingPreview from './MappingPreview.vue'
 
 import { onMounted, ref, watch, computed } from 'vue';
 import EditRoadmap from './EditRoadmap.vue';
@@ -13,6 +14,8 @@ import HardwareReferences from './HardwareReferences.vue';
 import ProblemReferences from './ProblemReferences.vue';
 import ProblemRuntimeAdvanced from './ProblemRuntimeAdvanced.vue';
 import * as math from 'mathjs';
+import * as utils from '../store/utils';
+import { algorithmVariants, getBestAlgorithm, getAvailableAlgorithms } from '../store/algorithmVariants';
 
 
 const models = useModelsStore();
@@ -20,6 +23,97 @@ const models = useModelsStore();
 const props = defineProps({
     modelId: Number
 });
+
+/**
+ * Order of importance when auto-picking a default algorithm for a problem.
+ * Edit this array to change priorities.
+ * Earlier entries are more important.
+ */
+const ALGO_PRIORITY_ORDER = ['speed', 'span', 'work', 'space']
+
+/**
+ * Optional per-problem algorithm variants.
+ * Each problem gets at least two variants:
+ *  "Minimise runtime (default)" or "Minimise total work"
+ */
+
+const selectedClassicalAlgorithm = ref(null);
+
+const selectedQuantumAlgorithm = ref(null);
+
+/** Test whether a formula string can actually be parsed by mathjs */
+function isFormulaValid(formula) {
+    if (!formula || typeof formula !== 'string') return false;
+    try {
+        const compiled = math.compile(formula);
+        // Try evaluating with a dummy scope to catch undefined-variable errors
+        compiled.evaluate({ n: 2, p: 1, q: 1 });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Check if an algorithm has valid, parseable runtime and work formulas */
+function hasValidFormulas(algo) {
+    if (!algo || !algo.available) return false;
+    return isFormulaValid(algo.runtimeFormula) && isFormulaValid(algo.workFormula);
+}
+
+/** available classical algorithms for current problem (only those with valid formulas) */
+const availableClassicalAlgorithms = computed(() => {
+    if (!selectedProblem.value) return [];
+    const problemVariants = algorithmVariants[selectedProblem.value.problemName];
+    if (!problemVariants) return [];
+    return problemVariants.classical.filter(a => hasValidFormulas(a));
+});
+
+/** available quantum algorithms for current problem (only those with valid formulas) */
+const availableQuantumAlgorithms = computed(() => {
+    if (!selectedProblem.value) return [];
+    const problemVariants = algorithmVariants[selectedProblem.value.problemName];
+    if (!problemVariants) return [];
+    return problemVariants.quantum.filter(a => hasValidFormulas(a));
+});
+
+// Helper function to apply algs, with fallback to hardcoded problem defaults
+function applyAlgorithmsToModel(classicalAlgo, quantumAlgo, problemDefaults) {
+    if (!model.value) return;
+
+    // Apply classical algorithm if it has valid formulas
+    if (hasValidFormulas(classicalAlgo)) {
+        model.value.classicalRuntimeInput = classicalAlgo.runtimeFormula;
+        model.value.classicalWork = classicalAlgo.workFormula;
+    } else if (problemDefaults) {
+        model.value.classicalRuntimeInput = problemDefaults.classicalRuntimeInput;
+        model.value.classicalWork = problemDefaults.classicalWork;
+    }
+
+    // Apply quantum algorithm if it has valid formulas
+    if (hasValidFormulas(quantumAlgo)) {
+        model.value.quantumRuntimeInput = quantumAlgo.runtimeFormula;
+        model.value.quantumWork = quantumAlgo.workFormula;
+    } else if (problemDefaults) {
+        model.value.quantumRuntimeInput = problemDefaults.quantumRuntimeInput;
+        model.value.quantumWork = problemDefaults.quantumWork;
+    }
+}
+
+/** Format a raw qubit count as scientific notation HTML */
+function formatQubitCount(value) {
+    if (value <= 0) return '0';
+    return utils.toBase10HTML(Math.log10(value));
+}
+
+/** Safely render a math expression as KaTeX HTML; returns fallback text on error */
+function safeRenderKaTeX(input) {
+    try {
+        const expression = math.parse(input).toTex();
+        return katex.renderToString(expression, { throwOnError: false });
+    } catch {
+        return `<code>${input || ''}</code>`;
+    }
+}
 
 const qubitSizeOptions = ref([
     "2^{q}",
@@ -312,9 +406,44 @@ function updateSlowdown(hwSlowdown, advancedSlowdown) {
 
 const selectedProblem = ref(problems.value.find(p => p.problemName === model.value.problemName));
 const selectedHardware = ref(hardwares.value.find(h => h.hardwareName === model.value.hardwareName));
+
+/** currently selected algorithm (variant) for the chosen problem */
+const selectedAlgorithm = ref(null);
+
+/** algorithms available for the currently selected problem */
+const availableAlgorithms = computed(() => {
+    if (!selectedProblem.value) return [];
+    return problemAlgorithms.value[selectedProblem.value.problemName] || [];
+});
+
 onMounted(() => {
     model.value = Object.assign({}, models.models.find(m => m.id === props.modelId))
 });
+
+/** pick the “best” algorithm by the ALGO_PRIORITY_ORDER over metrics */
+function pickBestAlgorithm(algorithms) {
+    if (!algorithms || !algorithms.length) return null;
+    return [...algorithms].sort((a, b) => {
+        const ma = a.metrics || {};
+        const mb = b.metrics || {};
+        for (const key of ALGO_PRIORITY_ORDER) {
+            const av = ma[key] ?? Infinity;
+            const bv = mb[key] ?? Infinity;
+            if (av < bv) return -1;
+            if (av > bv) return 1;
+        }
+        return 0;
+    })[0];
+}
+
+/** apply an algorithm’s expressions onto the current model */
+function applyAlgorithmToModel(algorithm) {
+    if (!algorithm || !model.value) return;
+    model.value.classicalRuntimeInput = algorithm.classicalRuntimeInput;
+    model.value.classicalWork = algorithm.classicalWork;
+    model.value.quantumRuntimeInput = algorithm.quantumRuntimeInput;
+    model.value.quantumWork = algorithm.quantumWork;
+}
 
 watch(() => selectedHardware.value, (hardware) => {
     model.value.hardwareName = hardware.hardwareName;
@@ -333,12 +462,43 @@ watch(() => selectedHardware.value, (hardware) => {
 }, { deep: true });
 
 watch(() => selectedProblem.value, (problem) => {
+    if (!problem) return;
+
+    const problemVariants = algorithmVariants[problem.problemName];
+
+    // Determine best valid algorithms (or null if none exist)
+    let bestClassical = null, bestQuantum = null;
+    if (problemVariants) {
+        const validClassical = problemVariants.classical.filter(a => hasValidFormulas(a));
+        const validQuantum = problemVariants.quantum.filter(a => hasValidFormulas(a));
+        bestClassical = validClassical.length > 0 ? getBestAlgorithm(validClassical) : null;
+        bestQuantum = validQuantum.length > 0 ? getBestAlgorithm(validQuantum) : null;
+    }
+
+    // Resolve formulas: use algorithm variant if valid, otherwise hardcoded default
+    const newClassicalRuntime = bestClassical ? bestClassical.runtimeFormula : problem.classicalRuntimeInput;
+    const newClassicalWork = bestClassical ? bestClassical.workFormula : problem.classicalWork;
+    const newQuantumRuntime = bestQuantum ? bestQuantum.runtimeFormula : problem.quantumRuntimeInput;
+    const newQuantumWork = bestQuantum ? bestQuantum.workFormula : problem.quantumWork;
+
+    // Update algorithm selection refs (won't trigger redundant model writes
+    // since we removed the separate algorithm watchers)
+    selectedClassicalAlgorithm.value = bestClassical;
+    selectedQuantumAlgorithm.value = bestQuantum;
+
+    // Batch-apply all model values at once to avoid intermediate states
     model.value.problemName = problem.problemName;
-    model.value.classicalRuntimeInput = problem.classicalRuntimeInput;
-    model.value.classicalWork = problem.classicalWork;
-    model.value.quantumRuntimeInput = problem.quantumRuntimeInput;
-    model.value.quantumWork = problem.quantumWork;
     model.value.qubitToProblemSize = problem.qubitToProblemSize;
+    model.value.classicalRuntimeInput = newClassicalRuntime;
+    model.value.classicalWork = newClassicalWork;
+    model.value.quantumRuntimeInput = newQuantumRuntime;
+    model.value.quantumWork = newQuantumWork;
+}, { deep: true });
+
+/** when user manually changes algorithm from the dropdown */
+watch(() => selectedAlgorithm.value, (algorithm) => {
+    if (!algorithm) return;
+    applyAlgorithmToModel(algorithm);
 }, { deep: true });
 
 watch(() => model.value, (value) => {
@@ -417,10 +577,24 @@ function updateFunctions(updatedValues) {
     model.value.classicalWork = updatedValues.classicalWork;
     model.value.quantumWork = updatedValues.quantumWork;
     model.value.processors = Number(updatedValues.processors);
+    model.value.maxComputeTimeLog = updatedValues.maxComputeTimeLog;
+}
+
+function onAlgorithmChange(type, algorithm) {
+    if (!hasValidFormulas(algorithm)) return;
+    if (type === 'classical') {
+        selectedClassicalAlgorithm.value = algorithm;
+        model.value.classicalRuntimeInput = algorithm.runtimeFormula;
+        model.value.classicalWork = algorithm.workFormula;
+    } else if (type === 'quantum') {
+        selectedQuantumAlgorithm.value = algorithm;
+        model.value.quantumRuntimeInput = algorithm.runtimeFormula;
+        model.value.quantumWork = algorithm.workFormula;
+    }
 }
 
 // attempt at only using one editroadmap instance
-// const editRoadmapRef = ref(null);
+const editRoadmapRef = ref(null);
 // const openEditRoadmap = () => {
 //   if (editRoadmapRef.value) {
 //     editRoadmapRef.value.openModal();
@@ -440,20 +614,20 @@ function updateFunctions(updatedValues) {
             <div class="flex flex-wrap  items-center gap-4">
                 <!-- toogle quantum only -->
                 <label class="flex items-center gap-1 cursor-pointer">
-                    <Switch v-model="editMode" :class="!editMode ? 'bg-[#002D9D]' : 'bg-gray-400'"
+                    <Switch v-model="editMode" :class="!editMode ? 'bg-[#a32035]' : 'bg-gray-400'"
                         class="relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
                         <span class="sr-only">Advanced Options</span>
                         <span aria-hidden="true" :class="!editMode ? 'translate-x-4' : 'translate-x-0'"
                             class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out" />
 
                     </Switch>
-                    <span class="text-sm" :class="!editMode ? 'text-[#002D9D]' : 'text-gray-400'">
+                    <span class="text-sm" :class="!editMode ? 'text-[#a32035]' : 'text-gray-400'">
                         Advanced Options
                     </span>
 
                 </label>
                 <button
-                    class="flex items-center justify-center rounded-md bg-blue-100 ring-1 ring-opacity-50 ring-[#002D9D] px-2 py-2 text-sm text-[#002D9D] hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    class="flex items-center justify-center rounded-md bg-red-50 ring-1 ring-opacity-50 ring-[#a32035] px-2 py-2 text-sm text-[#a32035] hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a32035] focus-visible:ring-offset-2"
                     @click="duplicateModel">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-4 h-4">
@@ -487,9 +661,9 @@ function updateFunctions(updatedValues) {
                 </div>
                 <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                     v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
-                    :allowEmpty="false" :show-labels="false" placeholder="Pick a value"></multiselect>
-
+                    :allowEmpty="false" :show-labels="false" placeholder="Pick a value" />
             </div>
+
             <div class="w-full">
                 <div class="flex items-center gap-2">
                     <label class="font-medium">Roadmap </label>
@@ -510,12 +684,16 @@ function updateFunctions(updatedValues) {
         </div>
 
 
-        <div class="px-8  py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out" v-show="!editMode"
-            :class="{ 'max-h-screen pb-8 opacity-100': !editMode, 'max-h-0 opacity-0 hidden': editMode }">
+        <div class="px-8 py-2 md:flex justify-between gap-8 transition-all duration-500 ease-in-out" v-show="!editMode"
+            :class="{
+                'max-h-screen pb-8 opacity-100': !editMode,
+                'max-h-0 opacity-0 hidden': editMode
+            }">
+            <!-- LEFT HALF: problem, roadmap, penalty, qubits → size -->
             <div class="lg:grid grid-cols-2 gap-4 lg:w-2/4">
+                <!-- Problem column -->
                 <div>
                     <div class="flex justify-between mb-1">
-
                         <div class="flex items-center gap-2">
                             <label class="font-medium">Problem </label>
                             <ReferenceDialog title="References" classes="max-w-3xl">
@@ -524,39 +702,50 @@ function updateFunctions(updatedValues) {
                                 </template>
                             </ReferenceDialog>
                         </div>
-                        <ProblemRuntimeAdvanced :classicalRuntimeInput="model.classicalRuntimeInput"
-                            :quantumRuntimeInput="model.quantumRuntimeInput" :penaltyInput="model.penaltyInput" :classicalWork="model.classicalWork" :quantumWork="model.quantumWork" :processors="model.processors"
-                            @updateFunctions="updateFunctions" v-slot="{ openModal }">
-                            <button class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600"
-                                @click="openModal">Advanced options</button>
-                        </ProblemRuntimeAdvanced>
 
+                        <!-- Advanced runtime / algorithm modal (only place you can change variant) -->
+                        <ProblemRuntimeAdvanced :classicalRuntimeInput="model.classicalRuntimeInput"
+                            :quantumRuntimeInput="model.quantumRuntimeInput" :penaltyInput="model.penaltyInput"
+                            :classicalWork="model.classicalWork" :quantumWork="model.quantumWork"
+                            :processors="model.processors"
+                            :maxComputeTimeLog="model.maxComputeTimeLog"
+                            :availableClassicalAlgorithms="availableClassicalAlgorithms"
+                            :availableQuantumAlgorithms="availableQuantumAlgorithms"
+                            :selectedClassicalAlgorithm="selectedClassicalAlgorithm"
+                            :selectedQuantumAlgorithm="selectedQuantumAlgorithm" @updateFunctions="updateFunctions"
+                            @updateAlgorithmChange="onAlgorithmChange" v-slot="{ openModal }">
+                            <button class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600"
+                                @click="openModal">
+                                Advanced options
+                            </button>
+                        </ProblemRuntimeAdvanced>
                     </div>
+
+                    <!-- Problem selector (same UI as before; no algorithm dropdown here) -->
                     <multiselect class="custom-multiselect mt-1" track-by="problemName" label="problemName"
                         v-model="selectedProblem" :options="problems" :searchable="true" :close-on-select="true"
                         :show-labels="false" placeholder="Pick a value"></multiselect>
+
+                    <!-- Classical runtime preview -->
                     <div class="mt-2">
                         <p class="text-sm font-medium">Classical Runtime</p>
                         <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                            <span v-html="katex.renderToString(math.parse(model.classicalRuntimeInput).toTex())"></span>
+                            <span v-html="safeRenderKaTeX(model.classicalRuntimeInput)"></span>
                         </div>
-
-
-
                     </div>
+
+                    <!-- Quantum runtime preview -->
                     <div class="mt-2">
                         <p class="text-sm font-medium">Quantum Runtime</p>
                         <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                            <span v-html="katex.renderToString(math.parse(model.quantumRuntimeInput).toTex())"></span>
+                            <span v-html="safeRenderKaTeX(model.quantumRuntimeInput)"></span>
                         </div>
-
-
-
                     </div>
                 </div>
+
+                <!-- Roadmap column (same as before) -->
                 <div class="">
                     <div class="flex justify-between mb-1">
-
                         <div class="flex items-center gap-2">
                             <label class="font-medium">Roadmap </label>
                             <ReferenceDialog title="References" classes="max-w-lg">
@@ -565,21 +754,19 @@ function updateFunctions(updatedValues) {
                                 </template>
                             </ReferenceDialog>
                         </div>
-                        <!-- <button
-                            class="rounded-md bg-gray-500 text-xs p-0.5 px-2 text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-                            @click="openEditRoadmap"
-                        >
-                            Edit roadmap
-                        </button> -->
+
                         <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                             :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
                             :roadmapUnit="model.roadmapUnit"
                             :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-                                @click="openModal">Edit roadmap</button>
+                                @click="openModal">
+                                Edit roadmap
+                            </button>
                         </EditRoadmap>
                     </div>
+
                     <multiselect class="custom-multiselect" track-by="hardwareName" label="hardwareName"
                         v-model="selectedHardware" :options="hardwares" :searchable="true" :close-on-select="true"
                         :allowEmpty="false" :show-labels="false" placeholder="Pick a hardware provider">
@@ -596,17 +783,12 @@ function updateFunctions(updatedValues) {
                             <tr v-for="(value, key) in getRelevantRoadmapPoints(model.roadmap)" :key="key"
                                 class="border-b">
                                 <td class="p-1">
-                                    {{ key }}</td>
-                                <td>{{ value }}</td>
+                                    {{ key }}
+                                </td>
+                                <td><span v-html="formatQubitCount(value)"></span></td>
                             </tr>
                             <tr>
                                 <td colspan="2" class="p-1 text-center">
-                                    <!-- <button
-                                        class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                        @click="openEditRoadmap"
-                                    >
-                                        See more
-                                    </button> -->
                                     <EditRoadmap :name="model.hardwareName" :roadmap="model.roadmap"
                                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
                                         :roadmapUnit="model.roadmapUnit"
@@ -614,57 +796,53 @@ function updateFunctions(updatedValues) {
                                         v-slot="{ openModal }">
                                         <button
                                             class="hover:underline text-xs text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                            @click="openModal">See more</button>
+                                            @click="openModal">
+                                            See more
+                                        </button>
                                     </EditRoadmap>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
                     <EditRoadmap ref="editRoadmapRef" :name="model.hardwareName" :roadmap="model.roadmap"
                         :extrapolationType="model.extrapolationType" @updateRoadmap="updateRoadmap"
-                        :roadmapUnit="model.roadmapUnit"
-                        :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio">
+                        :roadmapUnit="model.roadmapUnit" :physicalLogicalQubitsRatio="model.physicalLogicalQubitsRatio">
                     </EditRoadmap>
                 </div>
 
+                <!-- Connectivity penalty card -->
                 <div class="flex flex-col">
                     <label class="font-medium text-sm">Connectivity Penalty</label>
-                    <p class="text-xs text-gray-600">The overhead to embed the quantum circuit in hardware with limited
+                    <p class="text-xs text-gray-600">
+                        The overhead to embed the quantum circuit in hardware with limited
                         connectivity.
                     </p>
                     <div class="flex items-center justify-center gap-2 bg-gray-100 p-2 rounded-lg">
-                        <span v-html="katex.renderToString(math.parse(model.penaltyInput).toTex())"></span>
-
+                        <span v-html="safeRenderKaTeX(model.penaltyInput)"></span>
                     </div>
-
-
                 </div>
 
+                <!-- Qubits → Problem Size card -->
                 <div class="flex flex-col">
                     <label class="font-medium text-sm" for="qubits_to_size">Qubits to Problem Size</label>
-                    <p class="text-xs text-gray-600">The function which correlates maximum problem size solvable with
-                        the given
-                        number of qubits (q).</p>
-                    <multiselect class="custom-multiselect mt-1" v-model="model.qubitToProblemSize"
-                        :options="qubitSizeOptions" :searchable="true" :close-on-select="true" :show-labels="false"
-                        :allow-empty="false" placeholder="Pick a value">
-                        <template #singleLabel="slotProps">
-                            <span v-html="katex.renderToString(slotProps.option)"></span>
-                        </template>
+                    <p class="text-xs text-gray-600">
+                        The function which correlates maximum problem size solvable with
+                        the given number of qubits (q).
+                        Use <code>q</code> in your expression. Examples:
+                        <code>q</code>, <code>sqrt(q)</code>, <code>q^2</code>,
+                        <code>log(q, 2)</code>, <code>2^q</code>.
+                    </p>
 
-                        <template #option="slotProps">
-                            <div class="flex items-center gap-2">
-                                <span v-html="katex.renderToString(slotProps.option)"></span>
-                            </div>
-                        </template>
-                    </multiselect>
+                    <input class="mt-1 bg-gray-100 p-2 rounded-lg text-sm" v-model="model.qubitToProblemSize"
+                        type="text" placeholder="q" />
+
+                    <!-- live preview -->
+                    <MappingPreview :expr="model.qubitToProblemSize" :roadmap="model.roadmap" />
                 </div>
-
-                <!-- <button @click="updateFunctions">Update Functions</button> -->
-
             </div>
 
-
+            <!-- RIGHT HALF: hardware slowdown & costs (unchanged content, just moved here) -->
             <div class="flex-1">
                 <div>
                     <div class="flex gap-2 items-center justify-between">
@@ -673,42 +851,45 @@ function updateFunctions(updatedValues) {
                                 Advantage</label>
                             <ReferenceDialog title="References" classes="max-w-lg">
                                 <template #content>
-                                    <h3 class="text-medium text-sm mt-4">Classical Hardware Speed Advantage</h3>
+                                    <h3 class="text-medium text-sm mt-4">
+                                        Classical Hardware Speed Advantage
+                                    </h3>
                                     <ul class="text-sm">
                                         <li class="ml-4 list-disc">
-                                            <a class="text-[#012D9D] hover:underline"
+                                            <a class="text-[#a32035] hover:underline"
                                                 href="https://arxiv.org/pdf/2310.15505.pdf" target="_blank"
-                                                rel="noopener noreferrer">The Quantum Tortoise and the Classical
-                                                Hare:
+                                                rel="noopener noreferrer">
+                                                The Quantum Tortoise and the Classical Hare:
                                                 A simple framework for understanding which
                                                 problems quantum computing will accelerate (and
-                                                which it won’t)</a>
+                                                which it won’t)
+                                            </a>
                                         </li>
                                     </ul>
                                 </template>
                             </ReferenceDialog>
                         </div>
-                        <HardwareSlowdownAdvanced :advancedSlowdown="model.advancedSlowdown" @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
+                        <HardwareSlowdownAdvanced :advancedSlowdown="model.advancedSlowdown"
+                            @updateSlowdown="updateSlowdown" v-slot="{ openModal }">
                             <button
                                 class="rounded-md bg-gray-500 text-xs   p-0.5 px-2  text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-                                @click="openModal">Advanced options</button>
-
+                                @click="openModal">
+                                Advanced options
+                            </button>
                         </HardwareSlowdownAdvanced>
                     </div>
-                    <p class="text-xs text-gray-600">The number of operations a classical computer could perform in
-                        the
-                        time it
-                        takes
-                        a quantum computer to perform one.</p>
+                    <p class="text-xs text-gray-600">
+                        The number of operations a classical computer could perform in the
+                        time it takes a quantum computer to perform one.
+                    </p>
                     <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
-                        <input class="flex-1 accent-[#002D9D]" type="range" id="hardwareSlowdown" min="0" max="16"
+                        <input class="flex-1 accent-[#a32035]" type="range" id="hardwareSlowdown" min="0" max="16"
                             step="0.5" v-model="model.hardwareSlowdown" />
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                             <span class="pr-2">10 </span>
                             <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
                                 min="0" max="16" step="0.5" id="hardwareSlowdown" v-model="model.hardwareSlowdown" />
-
                         </div>
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
@@ -718,28 +899,24 @@ function updateFunctions(updatedValues) {
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="flex flex-col">
                     <label class="font-medium text-s" for="costFactor">Classical Compute Cost Advantage</label>
-                    <p class="text-xs text-gray-600">The cost of doing one quantum operation as compared to one
-                        classical
-                        operation.
+                    <p class="text-xs text-gray-600">
+                        The cost of doing one quantum operation as compared to one
+                        classical operation.
                     </p>
                     <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4">
-                        <input class="flex-1 accent-[#002D9D]" type="range" id="costFactor" min="0" max="16" step="0.5"
+                        <input class="flex-1 accent-[#a32035]" type="range" id="costFactor" min="0" max="16" step="0.5"
                             v-model="model.costFactor" />
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/5 flex items-center justify-center relative">
                             <span class="pr-2">10 </span>
                             <input class="w-[6ch] bg-transparent  absolute t-0 l-0 ml-14 mb-4 text-xs" type="number"
                                 min="0" max="16" step="0.5" id="costFactor" v-model="model.costFactor" />
-
                         </div>
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
@@ -748,50 +925,43 @@ function updateFunctions(updatedValues) {
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
-
                         </div>
-
                     </div>
                 </div>
 
                 <div class="flex flex-col relative">
-                    <label class="font-medium text-s" for="physical_logical_ratio">Physical-Logical Qubit
-                        Ratio</label>
-                    <p class="text-xs text-gray-600">Number of physical qubits needed per one error corrected logical
-                        qubit.</p>
+                    <label class="font-medium text-s" for="physical_logical_ratio">Physical-Logical Qubit Ratio</label>
+                    <p class="text-xs text-gray-600">
+                        Number of physical qubits needed per one error corrected logical
+                        qubit.
+                    </p>
                     <div class="flex items-center justify-between w-full gap-2 mt-2 mb-4 relative">
                         <!-- Overlay for disabling input fields -->
-                        <div 
-                            v-if="lockPLQR" 
-                            class="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center 
+                        <div v-if="lockPLQR" class="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center 
                                 text-gray-800 text-sm font-semibold rounded-lg pointer-events-none 
                                 z-10 drop-shadow-lg px-4 text-center">
-                            Physical-Logical Qubit Ratio is unused when roadmap is defined in terms of logical qubits.
+                            Physical-Logical Qubit Ratio is unused when roadmap is defined
+                            in terms of logical qubits.
                         </div>
-                        <input class="flex-1 accent-[#002D9D]" type="range" id="physical_logical_ratio"
-                            v-model="model.physicalLogicalQubitsRatio" min="3" max="2000" 
-                            :disabled="lockPLQR"/>
+                        <input class="flex-1 accent-[#a32035]" type="range" id="physical_logical_ratio"
+                            v-model="model.physicalLogicalQubitsRatio" min="3" max="2000" :disabled="lockPLQR" />
                         <input class="bg-gray-100 p-2 rounded-lg text-center w-1/5" type="number"
                             id="physical_logical_ratio" v-model="model.physicalLogicalQubitsRatio"
-                            :disabled="lockPLQR"/>
+                            :disabled="lockPLQR" />
                         <div
                             class="bg-gray-100 p-2 rounded-lg text-center w-1/3 flex  items-center justify-center relative">
                             <input class="w-[6ch] bg-transparent  text-center" type="number" min="-90" step="1"
-                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" @input="checkLimits" 
-                                :disabled="lockPLQR"/>
+                                id="ratio_improvement_rate" v-model="model.ratioImprovementRate" @input="checkLimits"
+                                :disabled="lockPLQR" />
                             <span class="text-xs text-gray-600 text-left">
                                 % change per year
                             </span>
-
                         </div>
                     </div>
-
                 </div>
-
-
-
             </div>
         </div>
+
 
 
     </div>
@@ -802,14 +972,14 @@ function updateFunctions(updatedValues) {
 
 <style lang="css" scoped>
 .custom-multiselect :deep(.multiselect__tags) .multiselect__tag {
-    background-color: #002D9D;
+    background-color: #a32035;
     z-index: 999 !important;
 
 }
 
 .custom-multiselect :deep(.multiselect__option) {
     background-color: white;
-    color: #002D9D;
+    color: #a32035;
     border-radius: 4px;
     padding: 0.25rem;
     margin: 0.25rem;
@@ -831,7 +1001,7 @@ function updateFunctions(updatedValues) {
 }
 
 .custom-multiselect :deep(.multiselect__option)--highlight {
-    background-color: #002D9D;
+    background-color: #a32035;
     color: white;
     border-radius: 4px;
     padding: 0.25rem;

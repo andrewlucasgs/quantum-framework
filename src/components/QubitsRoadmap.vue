@@ -34,7 +34,7 @@ const chartOptions = {
     tooltip: {
         useHTML: true,
         formatter: function () {
-            return `Qubits: ${parseInt(10 ** this.y)}<br>Year: ${this.x}`;
+            return `Qubits: ${utils.toBase10HTML(this.y)}<br>Year: ${this.x}`;
         }
     },
     legend: {
@@ -77,7 +77,7 @@ const chartOptions = {
         {
             data: physicalQubits.value,
             type: 'line',
-            color: '#002D9D55',
+            color: '#a3203555',
             enableMouseTracking: false,
             // hide on legend 
             showInLegend: false,
@@ -93,8 +93,9 @@ const chartOptions = {
             },
             dataLabels: {
                 enabled: true,
+                useHTML: true,
                 formatter: function () {
-                    return parseInt(10 ** this.y);
+                    return utils.toBase10HTML(this.y);
                 },
                 style: {
                     fontSize: '9px',
@@ -114,8 +115,9 @@ const chartOptions = {
             },
             dataLabels: {
                 enabled: true,
+                useHTML: true,
                 formatter: function () {
-                    return parseInt(10 ** this.y);
+                    return utils.toBase10HTML(this.y);
                 },
                 style: {
                     fontSize: '9px',

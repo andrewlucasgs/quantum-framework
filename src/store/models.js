@@ -9,7 +9,7 @@ const modelTemplate = {
     quantumRuntimeInput: "n^(2) * log(n, e)",
     quantumWork: "n^(2) * log(n, e) * q",
     penaltyInput: "sqrt(q)",
-    qubitToProblemSize: "{q}",
+    qubitToProblemSize: "q",
     hardwareName: 'IBM (Superconducting)',
     roadmap: {
         2020: 27,
@@ -31,6 +31,7 @@ const modelTemplate = {
     ratioImprovementRate: -23,
     costImprovementRate: -10,
     processors: 5,
+    maxComputeTimeLog: null,
     advancedSlowdown: {
         gateTime: 12,
         cpuGHz: 5,
